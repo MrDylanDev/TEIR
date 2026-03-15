@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'admin/css/admin.css' %}">
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+</head>
+<body>
+
+<div class="dashboard">
+
+<aside class="sidebar">
+  <h2>ADMIN</h2>
+  <ul>
+    <li onclick="showSection('usersSection', this)" class="active">Usuarios</li>
+    <li onclick="showSection('projectsSection', this)">Proyectos</li>
+    <li onclick="showSection('messagesSection', this)">Mensajes</li>
+  </ul>
+</aside>
+
+<main class="content">
+
+  <!-- USUARIOS -->
+  <section id="usersSection" class="section active">
+    <div class="header">
+      <h1>Gestión de Usuarios</h1>
+      <button onclick="openModal()">+ Nuevo Usuario</button>
+    </div>
+
+    <div class="filters">
+      <input type="text" id="searchInput"
+        placeholder="Buscar por nombre, cédula, email o fecha..."
+        onkeyup="filterUsers()">
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="userTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PROYECTOS -->
+  <section id="projectsSection" class="section">
+    <h1>Gestión de Proyectos</h1>
+
+    <div class="projects-container">
+
+      <!-- Proyecto 1 -->
+      <div class="project-card">
+        <h3>Sistema de Inventario</h3>
+        <p><strong>Descripción:</strong> Aplicación web para control de stock.</p>
+        
+        <div class="assignment">
+          <label>Desarrollador asignado:</label>
+          <select>
+            <option>Juan Pérez</option>
+            <option selected>Alejandro Gómez</option>
+            <option>Laura Martínez</option>
+          </select>
+        </div>
+
+        <button class="btn-update">Guardar cambios</button>
+      </div>
+
+      <!-- Proyecto 2 -->
+      <div class="project-card">
+        <h3>App de Gestión Académica</h3>
+        <p><strong>Descripción:</strong> Plataforma para control estudiantil.</p>
+        
+        <div class="assignment">
+          <label>Desarrollador asignado:</label>
+          <select>
+            <option selected>Laura Martínez</option>
+            <option>Juan Pérez</option>
+            <option>Alejandro Gómez</option>
+          </select>
+        </div>
+
+        <button class="btn-update">Guardar cambios</button>
+      </div>
+
+      <div class="project-card">
+        <h3>Pagina web Supermercado</h3>
+        <p><strong>Descripción:</strong> Sitio web para un supermercado local.</p>
+
+        <div class="assignment">
+          <label>Desarrollador asignado:</label>
+          <select>
+            <option>Juan Pérez</option>
+            <option>Alejandro Gómez</option>
+            <option selected>Laura Martínez</option>
+          </select>
+        </div>
+  
+        <button class="btn-update">Guardar cambios</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENSAJES -->
+  <section id="messagesSection" class="section">
+    <h1>Mensajes</h1>
+    <p>Aquí se mostrarán los mensajes entre empresas y developers.</p>
+  </section>
+
+</main>
+
+</div>
+
+<!-- Modal -->
+<div class="modal" id="userModal">
+  <div class="modal-content">
+    <h2>Nuevo Usuario</h2>
+
+    <input type="text" id="name" placeholder="Nombre">
+    <input type="text" id="cedula" placeholder="Cédula">
+    <input type="email" id="email" placeholder="Email">
+    
+    <!-- Campo de contraseña -->
+    <input type="password" id="password" placeholder="Contraseña" value="temporal123">
+    <small style="color: #999; display: block; margin-top: -5px; margin-bottom: 10px;">Contraseña por defecto: temporal123</small>
+
+    <select id="role">
+      <option value="empresa">Empresa</option>
+      <option value="desarrollador">Desarrollador</option>
+      <option value="administrador">Administrador</option>
+    </select>
+
+    <div class="modal-buttons">
+      <button onclick="addUser()">Guardar</button>
+      <button onclick="closeModal()" class="cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'admin/script/admin.js' %}"></script>
+</body>
+</html>

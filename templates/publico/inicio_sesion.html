@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Login</title>
+  <link rel="stylesheet" href="{% static 'publico/css/stylesform.css' %}">
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+</head>
+<body>
+  <div class="left-side">
+    <canvas id="matrix-canvas"></canvas>
+    <div class="content-left">
+      <h1>Plataforma de gestión y desarrollo<br>empresarial</h1>
+      <p>Selecciona tu rol para continuar</p>
+      <div class="logo">TEM</div>
+    </div>
+  </div>
+
+  <div class="right-side">
+    <div class="form-container">
+      <div class="login-box">
+        <h2>Login</h2>
+        
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-error">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+          {% csrf_token %}
+          
+          <!-- Campo oculto para el rol seleccionado -->
+          <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="administrador">
+
+          <div class="user-box">
+            <input required type="text" id="username" name="username" value="{{ request.POST.username }}">
+            <label>Usuario</label>
+          </div>
+          
+          <div class="user-box password-container">
+            <input required type="password" id="password" name="password">
+            <label>Contraseña</label>
+            <button type="button" id="togglePass" class="toggle-btn">👁️</button>
+          </div>
+          
+          <button type="submit" class="submit-btn">Aceptar</button>
+        </form>
+        
+        <div class="links">
+          ¿No te has registrado? <a href="{% url 'registro' %}">Registrarse</a><br>
+          ¿Olvidaste tu contraseña? <a href="{% url 'recuperar' %}">Recuperar</a>
+        </div>
+      </div>
+
+      <!-- Botones de rol -->
+      <div class="role-buttons">
+        <button type="button" class="role-btn" data-role="desarrollador">Desarrollador</button>
+        <button type="button" class="role-btn active" data-role="administrador">Administrador</button>
+        <button type="button" class="role-btn" data-role="empresa">Empresa</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Botones de rol
+    const roleButtons = document.querySelectorAll('.role-btn');
+    const rolInput = document.getElementById('rol_seleccionado');
+
+    roleButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        roleButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        rolInput.value = this.dataset.role;
+      });
+    });
+
+    // Animación Matrix
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resizeCanvas();
+    const dotSize = 3;
+    const spacing = 20;
+    let columns = Math.floor(canvas.width / spacing);
+    let drops = [];
+    function initDrops() {
+      columns = Math.floor(canvas.width / spacing);
+      drops = [];
+      for (let i = 0; i < columns; i++) {
+        drops[i] = Math.random() * -100;
+      }
+    }
+    initDrops();
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < drops.length; i++) {
+        const opacity = Math.max(0.3, 1 - (drops[i] * spacing / canvas.height));
+        const gradient = ctx.createRadialGradient(
+          i * spacing, drops[i] * spacing, 0,
+          i * spacing, drops[i] * spacing, dotSize
+        );
+        gradient.addColorStop(0, `rgba(100, 180, 255, ${opacity})`);
+        gradient.addColorStop(0.5, `rgba(50, 140, 255, ${opacity * 0.8})`);
+        gradient.addColorStop(1, `rgba(0, 100, 200, ${opacity * 0.4})`);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(i * spacing, drops[i] * spacing, dotSize, 0, Math.PI * 2);
+        ctx.fill();
+        if (drops[i] * spacing > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 50);
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      initDrops();
+    });
+
+    // Mostrar/ocultar contraseña
+    const togglePass = document.getElementById('togglePass');
+    const passwordInput = document.getElementById('password');
+    togglePass.addEventListener('click', function() {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePass.textContent = '🙈';
+      } else {
+        passwordInput.type = 'password';
+        togglePass.textContent = '👁️';
+      }
+    });
+  </script>
+</body>
+</html>

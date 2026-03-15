@@ -1,0 +1,198 @@
+/* =========================================================
+   CONFIGURACIÓN GENERAL
+   ========================================================= */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #121212;
+  color: #fff;
+}
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1f1f1f;
+  padding: 1rem 3rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #6b5bff;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #fff;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #6b5bff;
+}
+
+/* =========================================================
+   PERFIL DEL DESARROLLADOR
+   ========================================================= */
+.perfil {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  padding: 3rem 2rem;
+  background: linear-gradient(to bottom, #181818, #121212);
+}
+
+.foto-perfil {
+  text-align: center;
+}
+
+.foto-perfil img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 3px solid #6b5bff;
+  object-fit: cover;
+}
+
+.foto-perfil button {
+  margin-top: 10px;
+  background-color: #6b5bff;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.foto-perfil button:hover {
+  background-color: #5848e8;
+}
+
+.info-perfil {
+  max-width: 600px;
+}
+
+.info-perfil h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.estrellas {
+  color: gold;
+  margin: 10px 0;
+}
+
+.habilidades span {
+  background-color: #2a2a2a;
+  margin: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+/* =========================================================
+   PROYECTOS
+   ========================================================= */
+.proyectos {
+  padding: 2rem 3rem;
+}
+
+.proyectos h3 {
+  color: #6b5bff;
+}
+
+.contenedor-proyectos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.tarjeta {
+  background-color: #1f1f1f;
+  border-radius: 15px;
+  padding: 20px;
+  width: 280px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.tarjeta:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(107,91,255,0.3);
+}
+
+.editar-btn {
+  background-color: #6b5bff;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.subir-proyecto {
+  margin-top: 2rem;
+}
+
+/* =========================================================
+   ENLACES
+   ========================================================= */
+.enlaces {
+  padding: 2rem 3rem;
+}
+
+.enlaces a {
+  color: #6b5bff;
+  text-decoration: none;
+}
+
+.agregar-enlace input {
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+}
+
+.agregar-enlace button {
+  margin-left: 8px;
+  padding: 8px 12px;
+  border: none;
+  background-color: #6b5bff;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* =========================================================
+   PROYECTOS COMPLETADOS
+   ========================================================= */
+.completados {
+  padding: 2rem 3rem;
+}
+
+.completado {
+  border-left: 4px solid #6b5bff;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+footer {
+  background-color: #1f1f1f;
+  text-align: center;
+  padding: 1rem;
+  color: #bbb;
+}

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil del Desarrollador</title>
+  <link rel="stylesheet" href="/estilos/perfil.css"> <!-- Enlace al archivo CSS -->
+</head>
+<body>
+
+  <!-- =========================================================
+       BARRA DE NAVEGACIÓN SUPERIOR
+       ========================================================= -->
+  <nav class="navbar">
+    <div class="logo">TEM</div> <!-- Nombre o logo del sitio -->
+    <ul class="nav-links">
+      <li><a href="#perfil">Mi Perfil</a></li>
+      <li><a href="#proyectos">Proyectos</a></li>
+      <li><a href="#enlaces">Enlaces</a></li>
+      <li><a href="#completados">Proyectos Completados</a></li>
+    </ul>
+  </nav>
+
+  <!-- =========================================================
+       SECCIÓN PERFIL DEL DESARROLLADOR
+       ========================================================= -->
+  <section id="perfil" class="perfil">
+    <div class="foto-perfil">
+      <img src="/IMG/avatar.jpg" alt="Foto de perfil" id="foto">
+      <button id="cambiar-foto">Cambiar foto</button>
+      <input type="file" id="input-foto" accept="image/*" hidden>
+    </div>
+
+    <div class="info-perfil">
+      <h2>Alejandro Torres</h2>
+      <div class="estrellas">★★★★★</div>
+      <p>Desarrollador fullstack apasionado por crear soluciones modernas y funcionales.</p>
+
+      <!-- Habilidades principales -->
+      <div class="habilidades">
+        <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span><span>Python</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SECCIÓN PROYECTOS ACTIVOS
+       ========================================================= -->
+  <section id="proyectos" class="proyectos">
+    <h3>Proyectos Activos</h3>
+
+    <div class="contenedor-proyectos">
+      <!-- Tarjeta de proyecto -->
+      <div class="tarjeta">
+        <h4>Landing Page para empresa local</h4>
+        <p>Diseño responsive con HTML, CSS y JS.</p>
+        <button class="editar-btn">Editar proyecto</button>
+      </div>
+
+      <div class="tarjeta">
+        <h4>Aplicación de gestión</h4>
+        <p>Proyecto backend con Node.js y PostgreSQL.</p>
+        <button class="editar-btn">Editar proyecto</button>
+      </div>
+    </div>
+
+    <!-- Subir nuevo proyecto -->
+    <div class="subir-proyecto">
+      <label for="archivo-proyecto">Subir nuevo proyecto (.zip):</label>
+      <input type="file" id="archivo-proyecto" accept=".zip">
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SECCIÓN ENLACES PERSONALES
+       ========================================================= -->
+  <section id="enlaces" class="enlaces">
+    <h3>Mis Enlaces</h3>
+    <ul id="lista-enlaces">
+      <li><a href="https://github.com" target="_blank">GitHub</a></li>
+      <li><a href="https://linkedin.com" target="_blank">LinkedIn</a></li>
+    </ul>
+
+    <!-- Campo para agregar nuevos enlaces -->
+    <div class="agregar-enlace">
+      <input type="url" id="nuevo-enlace" placeholder="https://tuperfil.com">
+      <button id="agregar-enlace">Agregar</button>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SECCIÓN PROYECTOS COMPLETADOS
+       ========================================================= -->
+  <section id="completados" class="completados">
+    <h3>Proyectos Completados</h3>
+    <div class="contenedor-proyectos">
+      <div class="tarjeta completado">
+        <h4>App de Clima</h4>
+        <p>Aplicación que muestra el clima usando una API externa.</p>
+      </div>
+
+      <div class="tarjeta completado">
+        <h4>Portafolio Personal</h4>
+        <p>Diseño profesional para mostrar trabajos y habilidades.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PIE DE PÁGINA
+       ========================================================= -->
+  <footer>
+    <p>© 2025 TEM. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="/scrips/perfil.js"></script> <!-- Enlace al archivo JavaScript -->
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Empresa</title>
+<link rel="stylesheet" href="/empresa/css/empresa.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <h2 class="logo">TEM</h2>
+        <nav>
+            <ul>
+                <li data-vista="inicio" class="activo">Inicio</li>
+                <li data-vista="proyectos">Proyectos</li>
+                <li data-vista="postulaciones">Postulaciones</li>
+                <li data-vista="contrataciones">Contrataciones</li>
+                <li data-vista="mensajes">Mensajes</li>
+                <li data-vista="perfil">Perfil</li>
+ </ul>
+        </nav>
+    </aside>
+
+    <main class="contenido">
+
+        <!-- INICIO -->
+<section id="inicio" class="vista activa">
+
+  <h1 class="titulo-seccion">Dashboard</h1>
+
+  <div class="cards-dashboard">
+
+    <div class="card-metrica">
+      <h3>Proyectos Publicados</h3>
+      <p id="totalProyectos">0</p>
+    </div>
+
+    <div class="card-metrica">
+      <h3>Proyectos Activos</h3>
+      <p id="proyectosActivos">0</p>
+    </div>
+
+    <div class="card-metrica">
+      <h3>Postulaciones Recibidas</h3>
+      <p id="totalPostulaciones">0</p>
+    </div>
+
+    <div class="card-metrica">
+      <h3>Desarrolladores Contratados</h3>
+      <p id="totalContratados">0</p>
+    </div>
+
+  </div>
+
+  <div class="actividad-reciente">
+    <h2>Actividad Reciente</h2>
+    <ul id="listaActividad">
+      <!-- JS inserta aquí -->
+    </ul>
+  </div>
+
+  <div class="notificaciones">
+    <h2>Notificaciones</h2>
+    <ul id="listaNotificaciones">
+      <!-- JS inserta aquí -->
+    </ul>
+  </div>
+
+</section>
+
+        <!-- PROYECTOS -->
+       <section id="proyectos" class="vista">
+
+  <div class="header-proyectos">
+    <h1>Proyectos Publicados</h1>
+    <button class="btn-primary" onclick="abrirModal()">+ Publicar Proyecto</button>
+  </div>
+
+  <div id="listaProyectos" class="grid-proyectos">
+    <!-- JS renderiza aquí -->
+  </div>
+
+</section>
+
+        <!-- POSTULACIONES -->
+        <section id="postulaciones" class="vista">
+            <h1>Postulaciones</h1>
+            <div class="card">
+                No hay postulaciones recibidas.
+            </div>
+        </section>
+
+        <!-- CONTRATACIONES -->
+        <section id="contrataciones" class="vista">
+            <h1>Contrataciones</h1>
+            <div class="card">
+                No hay contrataciones activas.
+            </div>
+        </section>
+
+        <!-- MENSAJES -->
+        <section id="mensajes" class="vista">
+            <h1>Mensajes</h1>
+            <div class="card">
+                No tienes mensajes nuevos.
+            </div>
+        </section>
+
+        <!-- PERFIL -->
+        <section id="perfil" class="vista">
+            <h1>Perfil</h1>
+            <div class="card">
+                Configura la información de tu empresa.
+            </div>
+        </section>
+
+    </main>
+</div>
+<div id="modalProyecto" class="modal">
+  <div class="modal-contenido">
+    <h2>Nuevo Proyecto</h2>
+
+    <input type="text" id="tituloProyecto" placeholder="Título del proyecto">
+    <textarea id="descripcionProyecto" placeholder="Descripción"></textarea>
+
+    <select id="estadoProyecto">
+      <option value="publicado">Publicado</option>
+      <option value="activo">En proceso</option>
+      <option value="finalizado">Finalizado</option>
+    </select>
+
+    <div class="acciones-modal">
+      <button onclick="cerrarModal()" class="btn-secundario">Cancelar</button>
+      <button onclick="guardarProyecto()" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+<script src="/empresa/js/empresa.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,184 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEM | Inicio</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'publico/css/styles.css' %}">
+<link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+</head>
+<body>
+
+    <!-- INTRO ANIMADA -->
+<div id="intro">
+    <h1 class="intro-text">TEM</h1>
+</div>
+
+<header class="nav">
+  <div class="logo">TEM</div>
+
+  <nav>
+    <a href="#inicio">Inicio</a>
+    <a href="#nosotros">Nosotros</a>
+    <a href="#contacto">Contacto</a>
+  </nav>
+
+  <div class="nav-buttons">
+    <a href="{% url 'login' %}" class="btn">Login</a>
+  </div>
+</header>
+
+<!-- HERO CON VANTA -->
+<section id="inicio" class="hero">
+
+  <div class="hero-text">
+    <h1>Quiénes Somos</h1>
+    <p>Somos una agencia tecnológica enfocada en crear soluciones digitales inteligentes <br> que impulsan el crecimiento, optimizan procesos y transforman negocios en toda Latinoamérica.</p>
+    <a href="#contacto" class="cta">Ver mas</a>
+  </div>
+
+  <div class="mockup">
+    <video autoplay muted loop playsinline>
+      <source src="{% static 'IMG/demo4.mp4' %}" type="video/mp4">
+    </video>
+  </div>
+
+</section>
+
+<!-- NOSOTROS -->
+<section id="nosotros" class="section grid">
+  <div>
+    <h2>Quiénes Somos</h2>
+    <p>
+Somos TEM, una agencia tecnológica con sede en Medellín especializada en el desarrollo de software a medida, inteligencia artificial y estrategias digitales orientadas a resultados. Diseñamos soluciones innovadoras que optimizan procesos, automatizan operaciones y potencian el crecimiento sostenible de las empresas.
+
+Combinamos tecnología de punta, análisis estratégico y creatividad para transformar ideas en productos digitales escalables. Nuestro enfoque está centrado en generar impacto real, ayudando a negocios en Latinoamérica a evolucionar, competir y liderar en un entorno cada vez más digital.
+    </p>
+
+    <div class="stats">
+      <div>
+        <h3 data-num="2">0</h3>
+        <span>Años experiencia</span>
+      </div>
+
+      <div>
+        <h3 data-num="100">0</h3>
+        <span>Proyectos</span>
+      </div>
+
+      <div>
+        <h3 data-num="4">0</h3>
+        <span>Países</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card" id="vision">
+    <h2>Nuestra Visión</h2>
+    <p>
+  convertirnos en la agencia tecnológica referente en Latinoamérica, liderando la transformación digital de empresas a través de soluciones innovadoras, escalables y de alto impacto.
+  Aspiramos a construir un ecosistema donde la tecnología no solo optimice procesos, sino que impulse nuevas oportunidades, acelere el crecimiento empresarial y redefina la manera en que las organizaciones compiten en el mundo digital.
+    </p>
+  </div>
+</section>
+
+<!-- LOGOS -->
+<section class="logos">
+  <h2>Casos de éxito con métricas</h2>
+
+  <div class="logo-row">
+    <div>Google</div>
+    <div>Analytics</div>
+    <div>Metricool</div>
+    <div>ClickUp</div>
+    <div>Ahrefs</div>
+    <div>Elementor</div>
+  </div>
+</section>
+
+<!-- GALERIA -->
+<section id="casos" class="gallery">
+  <div class="card"><img src="{% static 'IMG/website.png' %}" alt="Paginas Web"></div>
+  <div class="card"><img src="{% static 'IMG/ia.png' %}" alt="Inteigencia artificial"></div>
+  <div class="card"><img src="{% static 'IMG/automatizacion.png' %}" alt="automatizacion"></div>
+  <div class="card"><img src="{% static 'IMG/Personalizado.png' %}" alt="Personalizado"></div>
+
+</section>
+
+<footer id="contacto">
+
+  <div class="footer-container">
+
+    <!-- Columna 1 -->
+    <div class="footer-col">
+      <h3 class="footer-title">TEM Agency</h3>
+      <p class="footer-location">Medellín — Colombia</p>
+
+      <div class="social-icons">
+        <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733585.png"></a>
+        <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png"></a>
+        <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/732/732200.png"></a>
+      </div>
+    </div>
+
+    <!-- Columna 2 -->
+    <div class="footer-col">
+      <h4>Servicios</h4>
+      <ul>
+        <li><a href="#">Creación de páginas web</a></li>
+        <li><a href="#">Inteligencia Artificial</a></li>
+        <li><a href="#">Automatización</a></li>
+        <li><a href="#">Software personalizado</a></li>
+      </ul>
+    </div>
+
+    <!-- Columna 3 -->
+    <div class="footer-col">
+      <h4>Empresa</h4>
+      <ul>
+        <li><a href="#nosotros">Sobre nosotros</a></li>
+      </ul>
+    </div>
+
+    <!-- Columna 4 -->
+    <div class="footer-col logo-side">
+      <div class="logo">TEM</div>
+      <p class="footer-copy">
+        © 2026 TEM Agency. <br>
+        Todos los derechos reservados.
+      </p>
+    </div>
+
+  </div>
+
+</footer>
+<script src="{% static 'publico/script/script.js' %}"></script>
+
+<!-- THREE JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+
+<!-- VANTA.NET -->
+<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+
+<script>
+VANTA.NET({
+  el: "#inicio",
+  mouseControls: true,
+  touchControls: true,
+  gyroControls: false,
+  minHeight: 200.00,
+  minWidth: 200.00,
+  scale: 1.00,
+  scaleMobile: 1.00,
+  color: 0xffffff,
+  backgroundColor: 0x000000,
+  points: 12.00,
+  maxDistance: 20.00,
+  spacing: 18.00
+});
+</script>
+
+</body>
+</html>
