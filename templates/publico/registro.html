@@ -189,6 +189,21 @@
         {% endif %}
       </div>
 
+      <!-- Campo Fecha de Nacimiento -->
+      <div class="form-group {% if form.fecha_nacimiento.errors %}error{% endif %}">
+        <label>Fecha de Nacimiento</label>
+        <input type="date" name="fecha_nacimiento" value="{{ form.fecha_nacimiento.value|default:'' }}" required>
+        {% if form.fecha_nacimiento.errors %}
+          <ul class="errorlist">
+            {% for error in form.fecha_nacimiento.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <small>Debes ser mayor de 18 años.</small>
+        {% endif %}
+      </div>
+
       <!-- Campo Rol -->
       <div class="form-group {% if form.rol.errors %}error{% endif %}">
         <label>Selecciona tu rol</label>

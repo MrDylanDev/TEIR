@@ -1,10 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Empresa</title>
-<link rel="stylesheet" href="/empresa/css/empresa.css">
+<link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
 </head>
 <body>
 
@@ -20,7 +21,8 @@
                 <li data-vista="contrataciones">Contrataciones</li>
                 <li data-vista="mensajes">Mensajes</li>
                 <li data-vista="perfil">Perfil</li>
- </ul>
+                <li><a href="{% url 'logout' %}" style="color: white; text-decoration: none;">Cerrar Sesión</a></li>
+            </ul>
         </nav>
     </aside>
 
@@ -30,42 +32,60 @@
 <section id="inicio" class="vista activa">
 
   <h1 class="titulo-seccion">Dashboard</h1>
+  
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <div class="cards-dashboard">
 
     <div class="card-metrica">
       <h3>Proyectos Publicados</h3>
-      <p id="totalProyectos">0</p>
+      <p id="totalProyectos">{{ total_proyectos }}</p>
     </div>
 
     <div class="card-metrica">
       <h3>Proyectos Activos</h3>
-      <p id="proyectosActivos">0</p>
+      <p id="proyectosActivos">{{ proyectos_activos }}</p>
     </div>
 
     <div class="card-metrica">
       <h3>Postulaciones Recibidas</h3>
-      <p id="totalPostulaciones">0</p>
+      <p id="totalPostulaciones">{{ total_postulaciones }}</p>
     </div>
 
     <div class="card-metrica">
       <h3>Desarrolladores Contratados</h3>
-      <p id="totalContratados">0</p>
+      <p id="totalContratados">{{ total_contratados }}</p>
     </div>
 
   </div>
 
   <div class="actividad-reciente">
-    <h2>Actividad Reciente</h2>
+    <h2>Tus Proyectos Recientes</h2>
     <ul id="listaActividad">
-      <!-- JS inserta aquí -->
+      {% for proyecto in mis_proyectos %}
+        <li>{{ proyecto.titulo }} - <strong>{{ proyecto.get_estado_display }}</strong></li>
+      {% empty %}
+        <li>No has publicado proyectos aún.</li>
+      {% endfor %}
     </ul>
   </div>
 
   <div class="notificaciones">
     <h2>Notificaciones</h2>
     <ul id="listaNotificaciones">
-      <!-- JS inserta aquí -->
+      {% for notif in notificaciones %}
+        <li style="{% if not notif.leida %}font-weight: bold;{% endif %}">
+            {{ notif.mensaje }} <small>({{ notif.fecha|date:"d/m/Y H:i" }})</small>
+        </li>
+      {% empty %}
+        <li>No tienes notificaciones.</li>
+      {% endfor %}
     </ul>
   </div>
 
@@ -80,7 +100,37 @@
   </div>
 
   <div id="listaProyectos" class="grid-proyectos">
-    <!-- JS renderiza aquí -->
+    {% for proyecto in mis_proyectos %}
+    <div class="card-proyecto">
+      <h3>{{ proyecto.titulo }}</h3>
+      <p>{{ proyecto.descripcion|truncatewords:20 }}</p>
+      <span class="estado {{ proyecto.estado }}">
+        {{ proyecto.get_estado_display|upper }}
+      </span>
+      <br><br>
+      {% if proyecto.estado == 'publicado' %}
+        <a href="{% url 'ver_postulaciones_empresa' proyecto.id %}" class="btn-secundario" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; display: inline-block;">
+            Ver Postulaciones
+        </a>
+        <a href="{% url 'desactivar_proyecto' proyecto.id %}" class="btn-secundario" style="text-decoration: none; padding: 5px 10px; border: 1px solid #f44336; border-radius: 4px; display: inline-block; color: #f44336; margin-left: 5px;" onclick="return confirm('¿Seguro que quieres retirar esta oferta?')">
+            Retirar Oferta
+        </a>
+      {% elif proyecto.estado == 'en_desarrollo' or proyecto.estado == 'en_revision' %}
+        <a href="{% url 'ver_avances' proyecto.id %}" class="btn-secundario" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; display: inline-block; background: #4CAF50; color: white; border: none;">
+            Ver Avances
+        </a>
+        <a href="{% url 'finalizar_proyecto' proyecto.id %}" class="btn-secundario" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; display: inline-block; background: #2196F3; color: white; border: none; margin-left: 5px;">
+            Finalizar
+        </a>
+      {% elif proyecto.estado == 'finalizado' %}
+        <a href="{% url 'ver_avances' proyecto.id %}" class="btn-secundario" style="text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; display: inline-block; background: #333; color: white; border: none;">
+            Ver Historial
+        </a>
+      {% endif %}
+    </div>
+    {% empty %}
+      <p>No hay proyectos publicados.</p>
+    {% endfor %}
   </div>
 
 </section>
@@ -89,7 +139,7 @@
         <section id="postulaciones" class="vista">
             <h1>Postulaciones</h1>
             <div class="card">
-                No hay postulaciones recibidas.
+                Selecciona un proyecto en la pestaña "Proyectos" para gestionar sus postulantes.
             </div>
         </section>
 
@@ -97,48 +147,79 @@
         <section id="contrataciones" class="vista">
             <h1>Contrataciones</h1>
             <div class="card">
-                No hay contrataciones activas.
+                Las contrataciones se gestionan automáticamente al aceptar una postulación.
             </div>
         </section>
 
         <!-- MENSAJES -->
         <section id="mensajes" class="vista">
-            <h1>Mensajes</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1>Mensajería Interna</h1>
+                <a href="{% url 'mensajeria_inbox' %}" class="btn-primary" style="text-decoration: none; padding: 10px 20px;">Abrir Bandeja Completa</a>
+            </div>
             <div class="card">
-                No tienes mensajes nuevos.
+                <p>Haz clic en el botón superior para ver todos tus mensajes recibidos y enviados.</p>
             </div>
         </section>
 
         <!-- PERFIL -->
         <section id="perfil" class="vista">
-            <h1>Perfil</h1>
-            <div class="card">
-                Configura la información de tu empresa.
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1>Perfil de Empresa</h1>
+                <a href="{% url 'editar_perfil' %}" class="btn-primary" style="text-decoration: none; padding: 10px 20px;">Editar Perfil</a>
+            </div>
+            <div class="card" style="background: #111; padding: 30px; border-radius: 12px; border: 1px solid #222;">
+                <h2 style="font-weight: 300; margin-bottom: 10px;">{{ perfil.nombre_empresa|default:request.user.username }}</h2>
+                <p><strong>NIT:</strong> {{ perfil.nit|default:"No registrado" }}</p>
+                <p><strong>Sector:</strong> {{ perfil.sector|default:"No registrado" }}</p>
+                <p><strong>Ciudad:</strong> {{ perfil.ciudad|default:"No registrado" }}</p>
+                <p><strong>Teléfono:</strong> {{ perfil.telefono|default:"No registrado" }}</p>
+                <hr style="border: 0; border-top: 1px solid #222; margin: 20px 0;">
+                <p><strong>Descripción:</strong></p>
+                <p>{{ perfil.descripcion|default:"Sin descripción." }}</p>
             </div>
         </section>
 
     </main>
 </div>
+
+<!-- Modal para crear proyecto -->
 <div id="modalProyecto" class="modal">
   <div class="modal-contenido">
     <h2>Nuevo Proyecto</h2>
+    <form method="post" action="{% url 'crear_proyecto' %}">
+        {% csrf_token %}
+        <input type="text" name="titulo" id="tituloProyecto" placeholder="Título del proyecto" required>
+        <textarea name="descripcion" id="descripcionProyecto" placeholder="Descripción" required></textarea>
 
-    <input type="text" id="tituloProyecto" placeholder="Título del proyecto">
-    <textarea id="descripcionProyecto" placeholder="Descripción"></textarea>
+        <select name="tipo_solucion" required>
+            <option value="sitio_web">Sitio Web</option>
+            <option value="aplicacion_movil">Aplicación Móvil</option>
+            <option value="automatizacion">Automatización</option>
+            <option value="sistema_escritorio">Sistema de Escritorio</option>
+            <option value="otro">Otro</option>
+        </select>
+        
+        <select name="prioridad">
+            <option value="baja">Prioridad Baja</option>
+            <option value="media" selected>Prioridad Media</option>
+            <option value="alta">Prioridad Alta</option>
+        </select>
 
-    <select id="estadoProyecto">
-      <option value="publicado">Publicado</option>
-      <option value="activo">En proceso</option>
-      <option value="finalizado">Finalizado</option>
-    </select>
+        <div style="margin-top: 15px;">
+            <label for="vacantes" style="display: block; font-size: 14px; margin-bottom: 5px;">Número de Desarrolladores requeridos:</label>
+            <input type="number" name="vacantes" id="vacantes" value="1" min="1" max="10" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #333; background: #000; color: white;">
+        </div>
 
-    <div class="acciones-modal">
-      <button onclick="cerrarModal()" class="btn-secundario">Cancelar</button>
-      <button onclick="guardarProyecto()" class="btn-primary">Guardar</button>
-    </div>
+        <div class="acciones-modal">
+          <button type="button" onclick="cerrarModal()" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primary">Enviar a Revisión</button>
+        </div>
+    </form>
   </div>
 </div>
-<script src="/empresa/js/empresa.js"></script>
+
+<script src="{% static 'empresa/script/empresa.js' %}"></script>
 
 </body>
 </html>

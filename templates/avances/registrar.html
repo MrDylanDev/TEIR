@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registrar Avance | TEM</title>
+  <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
+</head>
+<body style="background: #000; color: white; display: block; padding: 40px;">
+
+  <div style="max-width: 600px; margin: 0 auto; background: #0a0a0a; padding: 30px; border-radius: 12px; border: 1px solid #222;">
+    <h1 style="font-weight: 300;">Registrar Avance</h1>
+    <p style="opacity: 0.7; margin-bottom: 20px;">Proyecto: <strong>{{ proyecto.titulo }}</strong></p>
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px;">Descripción del progreso</label>
+          <textarea name="descripcion" required placeholder="¿Qué has hecho hoy?" style="width: 100%; min-height: 120px; background: #111; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;"></textarea>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px;">Porcentaje de avance acumulado (%)</label>
+          <input type="number" name="porcentaje" min="0" max="100" required value="0" style="width: 100%; background: #111; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;">
+          <small style="opacity: 0.5;">Ejemplo: Si el proyecto va por la mitad, pon 50.</small>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px;">URL de evidencia (Opcional)</label>
+          <input type="url" name="archivo_url" placeholder="https://github.com/... o Google Drive" style="width: 100%; background: #111; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;">
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-top: 30px;">
+          <button type="submit" style="background: white; color: black; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer;">Guardar Avance</button>
+          <a href="{% url 'dashboard_desarrollador' %}" style="background: #222; color: white; border: 1px solid #333; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; text-align: center;">Cancelar</a>
+      </div>
+    </form>
+  </div>
+
+</body>
+</html>

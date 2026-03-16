@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Postularse al Proyecto | TEM</title>
+  <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
+</head>
+<body style="background: #000; color: white; display: block; padding: 40px;">
+
+  <div style="max-width: 700px; margin: 0 auto; background: #0a0a0a; padding: 35px; border-radius: 12px; border: 1px solid #222;">
+    <h1 style="font-weight: 300; margin-bottom: 20px;">Postularse al Proyecto</h1>
+    
+    <div style="background: #111; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #4CAF50;">
+        <h2 style="font-weight: 300; font-size: 22px; margin-bottom: 10px;">{{ proyecto.titulo }}</h2>
+        <p style="opacity: 0.7; font-size: 15px; line-height: 1.6;">{{ proyecto.descripcion }}</p>
+        <div style="margin-top: 15px; display: flex; gap: 15px; font-size: 13px;">
+            <span style="background: #222; padding: 4px 10px; border-radius: 5px;">📍 {{ proyecto.get_tipo_solucion_display }}</span>
+            <span style="background: #222; padding: 4px 10px; border-radius: 5px;">💼 {{ proyecto.empresa.username }}</span>
+        </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <div style="margin-bottom: 25px;">
+          <label style="display: block; margin-bottom: 10px; font-size: 16px;">Mensaje de presentación</label>
+          <textarea name="mensaje" required placeholder="Cuéntale a la empresa por qué eres el mejor candidato para este proyecto..." style="width: 100%; min-height: 150px; background: #000; color: white; border: 1px solid #333; padding: 15px; border-radius: 8px; line-height: 1.6;"></textarea>
+          <small style="opacity: 0.5; display: block; margin-top: 8px;">Menciona tus habilidades relevantes y disponibilidad.</small>
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-top: 40px;">
+          <button type="submit" style="background: white; color: black; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;">Enviar Postulación</button>
+          <a href="{% url 'listar_proyectos' %}" style="background: #222; color: white; border: 1px solid #333; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; text-align: center; font-size: 16px;">Cancelar</a>
+      </div>
+    </form>
+  </div>
+
+</body>
+</html>

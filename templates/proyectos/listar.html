@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Proyectos Disponibles | TEM</title>
+  <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
+</head>
+<body style="background: #000; color: white; display: block; padding: 40px;">
+
+  <div style="max-width: 1000px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="font-weight: 300;">Catálogo de Proyectos</h1>
+        <a href="{% url 'dashboard_desarrollador' %}" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Volver al Dashboard</a>
+    </div>
+
+    <!-- Filtros -->
+    <div style="background: #111; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #222;">
+        <form method="get" style="display: flex; gap: 15px; align-items: flex-end;">
+            <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 8px; font-size: 14px; opacity: 0.7;">Tipo de Solución</label>
+                <select name="tipo" style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;">
+                    <option value="">Todos</option>
+                    <option value="sitio_web">Sitio Web</option>
+                    <option value="aplicacion_movil">Aplicación Móvil</option>
+                    <option value="automatizacion">Automatización</option>
+                    <option value="sistema_escritorio">Sistema de Escritorio</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 8px; font-size: 14px; opacity: 0.7;">Prioridad</label>
+                <select name="prioridad" style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;">
+                    <option value="">Todas</option>
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
+                </select>
+            </div>
+            <button type="submit" style="background: #333; color: white; border: 1px solid #444; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Filtrar</button>
+        </form>
+    </div>
+
+    <!-- Lista de Proyectos -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
+        {% for proyecto in proyectos %}
+          <div style="background: #0a0a0a; padding: 25px; border-radius: 12px; border: 1px solid #222; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                      <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #4CAF50;">{{ proyecto.get_tipo_solucion_display }}</span>
+                      <div style="display: flex; gap: 8px; align-items: center;">
+                          <a href="{% url 'toggle_favorito' proyecto.id %}" style="text-decoration: none; font-size: 18px;">
+                              {% if proyecto.id in favoritos_ids %}❤️{% else %}🤍{% endif %}
+                          </a>
+                          <span style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: {% if proyecto.prioridad == 'alta' %}#f44336{% elif proyecto.prioridad == 'media' %}#ff9800{% else %}#2196F3{% endif %}; color: white;">{{ proyecto.get_prioridad_display|upper }}</span>
+                      </div>
+                  </div>
+                  <h3 style="margin-bottom: 10px; font-weight: 300;">{{ proyecto.titulo }}</h3>
+                  <p style="font-size: 14px; opacity: 0.7; line-height: 1.5; margin-bottom: 20px;">{{ proyecto.descripcion|truncatewords:20 }}</p>
+              </div>
+              
+              <div style="border-top: 1px solid #222; padding-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 13px; opacity: 0.5;">Empresa: {{ proyecto.empresa.username }}</span>
+                  <a href="{% url 'postularse_a_proyecto' proyecto.id %}" style="background: white; color: black; border: none; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">Postularse</a>
+              </div>
+          </div>
+        {% empty %}
+          <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: #0a0a0a; border-radius: 12px; border: 1px dashed #333;">
+              <p style="opacity: 0.5;">No hay proyectos disponibles con los filtros seleccionados.</p>
+          </div>
+        {% endfor %}
+    </div>
+  </div>
+
+</body>
+</html>

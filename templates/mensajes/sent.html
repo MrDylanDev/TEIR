@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mensajes Enviados | TEM</title>
+  <link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
+</head>
+<body style="background: #0f0f0f; color: white; display: block; padding: 40px;">
+
+  <div style="max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="font-weight: 300;">Mensajes Enviados</h1>
+        <div>
+            <a href="{% url 'enviar_mensaje' %}" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 10px;">+ Redactar</a>
+            <a href="{% url 'mensajeria_inbox' %}" style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 10px;">Bandeja de Entrada</a>
+            <a href="{% if user.rol == 'empresa' %}{% url 'dashboard_empresa' %}{% elif user.rol == 'desarrollador' %}{% url 'dashboard_desarrollador' %}{% else %}{% url 'dashboard_admin' %}{% endif %}" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Cerrar</a>
+        </div>
+    </div>
+
+    <div class="table-container" style="background: #111; border-radius: 12px; overflow: hidden; border: 1px solid #222;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #1a1a1a;">
+                <tr>
+                    <th style="padding: 15px; text-align: left; color: #aaa;">Para</th>
+                    <th style="padding: 15px; text-align: left; color: #aaa;">Asunto</th>
+                    <th style="padding: 15px; text-align: left; color: #aaa;">Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for msg in mensajes %}
+                <tr style="border-top: 1px solid #222; cursor: pointer;" onclick="window.location='{% url 'ver_mensaje' msg.id %}'">
+                    <td style="padding: 15px;">{{ msg.receptor.username }}</td>
+                    <td style="padding: 15px;">{{ msg.asunto|default:"(Sin asunto)" }}</td>
+                    <td style="padding: 15px; font-size: 13px; opacity: 0.7;">{{ msg.fecha_envio|date:"d M, H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="padding: 50px; text-align: center; opacity: 0.5;">No has enviado mensajes aún.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Finalizar Proyecto | TEM</title>
+  <link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
+  <style>
+      .rating {
+          display: flex;
+          flex-direction: row-reverse;
+          justify-content: center;
+          gap: 10px;
+          margin: 20px 0;
+      }
+      .rating input { display: none; }
+      .rating label {
+          cursor: pointer;
+          width: 40px;
+          height: 40px;
+          background: #222;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          font-size: 20px;
+          transition: 0.3s;
+      }
+      .rating label:hover,
+      .rating label:hover ~ label,
+      .rating input:checked ~ label {
+          background: #ffcc00;
+          color: black;
+      }
+  </style>
+</head>
+<body style="background: #0f0f0f; color: white; display: block; padding: 40px;">
+
+  <div style="max-width: 600px; margin: 0 auto; background: #111; padding: 35px; border-radius: 12px; border: 1px solid #222;">
+    <h1 style="font-weight: 300; margin-bottom: 20px;">Finalizar Proyecto</h1>
+    
+    <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #4CAF50;">
+        <h2 style="font-weight: 300; font-size: 22px; margin-bottom: 10px;">{{ proyecto.titulo }}</h2>
+        <p style="opacity: 0.7;">Desarrollador: <strong>{{ desarrollador.username }}</strong></p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <p style="text-align: center; margin-bottom: 10px;">Califica el desempeño del desarrollador:</p>
+      <div class="rating">
+          <input type="radio" name="puntuacion" value="5" id="5" required><label for="5">5</label>
+          <input type="radio" name="puntuacion" value="4" id="4"><label for="4">4</label>
+          <input type="radio" name="puntuacion" value="3" id="3"><label for="3">3</label>
+          <input type="radio" name="puntuacion" value="2" id="2"><label for="2">2</label>
+          <input type="radio" name="puntuacion" value="1" id="1"><label for="1">1</label>
+      </div>
+
+      <div style="margin-bottom: 25px;">
+          <label style="display: block; margin-bottom: 10px;">Comentarios adicionales (Opcional)</label>
+          <textarea name="comentario" placeholder="Describe tu experiencia trabajando con este desarrollador..." style="width: 100%; min-height: 120px; background: #000; color: white; border: 1px solid #333; padding: 15px; border-radius: 8px;"></textarea>
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-top: 30px;">
+          <button type="submit" style="background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1;">Finalizar Proyecto y Calificar</button>
+          <a href="{% url 'dashboard_empresa' %}" style="background: #222; color: white; border: 1px solid #333; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; text-align: center;">Cancelar</a>
+      </div>
+    </form>
+  </div>
+
+</body>
+</html>

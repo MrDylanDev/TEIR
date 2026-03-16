@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Redactar Mensaje | TEM</title>
+  <link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
+</head>
+<body style="background: #0f0f0f; color: white; display: block; padding: 40px;">
+
+  <div style="max-width: 700px; margin: 0 auto; background: #111; padding: 35px; border-radius: 12px; border: 1px solid #222;">
+    <h1 style="font-weight: 300; margin-bottom: 25px;">Nuevo Mensaje</h1>
+    
+    <form method="post">
+      {% csrf_token %}
+      
+      <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; opacity: 0.7;">Para:</label>
+          <select name="receptor" required style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px;">
+              <option value="">Selecciona un usuario...</option>
+              {% for u in usuarios %}
+                <option value="{{ u.id }}" {% if para_id == u.id %}selected{% endif %}>{{ u.username }} ({{ u.get_rol_display }})</option>
+              {% endfor %}
+          </select>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; opacity: 0.7;">Proyecto relacionado (Opcional):</label>
+          <select name="proyecto" style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px;">
+              <option value="">Ninguno</option>
+              {% for p in proyectos %}
+                <option value="{{ p.id }}" {% if proyecto_pre == p.id %}selected{% endif %}>{{ p.titulo }}</option>
+              {% endfor %}
+          </select>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; opacity: 0.7;">Asunto:</label>
+          <input type="text" name="asunto" required placeholder="Escribe el asunto del mensaje" style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px;">
+      </div>
+
+      <div style="margin-bottom: 25px;">
+          <label style="display: block; margin-bottom: 8px; opacity: 0.7;">Mensaje:</label>
+          <textarea name="cuerpo" required placeholder="Escribe tu mensaje aquí..." style="width: 100%; min-height: 200px; background: #000; color: white; border: 1px solid #333; padding: 15px; border-radius: 8px; line-height: 1.6;"></textarea>
+      </div>
+
+      <div style="display: flex; gap: 15px; margin-top: 30px;">
+          <button type="submit" style="background: white; color: black; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1;">Enviar Mensaje</button>
+          <a href="{% url 'mensajeria_inbox' %}" style="background: #222; color: white; border: 1px solid #333; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; text-align: center;">Cancelar</a>
+      </div>
+    </form>
+  </div>
+
+</body>
+</html>
