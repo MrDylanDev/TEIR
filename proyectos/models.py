@@ -39,8 +39,8 @@ class Proyecto(models.Model):
     def __str__(self):
         return f"{self.titulo} ({self.get_estado_display()})"
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+    class Meta:
+        db_table = 'proyectos'
 
 class Valoracion(models.Model):
     proyecto = models.OneToOneField(Proyecto, on_delete=models.CASCADE, related_name='valoracion')
@@ -51,6 +51,7 @@ class Valoracion(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = 'valoraciones'
         verbose_name_plural = "Valoraciones"
 
 class HistorialEstadoProyecto(models.Model):
@@ -61,4 +62,5 @@ class HistorialEstadoProyecto(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = 'historial_estado_proyecto'
         verbose_name_plural = "Historiales de Estados"

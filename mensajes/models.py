@@ -12,5 +12,8 @@ class Mensaje(models.Model):
     archivado = models.BooleanField(default=False)
     fecha_envio = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'mensajes'
+
     def __str__(self):
         return f"De: {self.remitente.username} Para: {self.receptor.username}"

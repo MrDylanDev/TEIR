@@ -10,6 +10,7 @@ class LogAuditoria(models.Model):
     fecha_hora = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = 'logs_auditoria'
         verbose_name_plural = "Logs de Auditoría"
 
     def __str__(self):
@@ -28,6 +29,7 @@ class CopiaSeguridad(models.Model):
     estado = models.CharField(max_length=15, choices=ESTADO, default='pendiente')
 
     class Meta:
+        db_table = 'copias_seguridad'
         verbose_name_plural = "Copias de Seguridad"
 
     def __str__(self):

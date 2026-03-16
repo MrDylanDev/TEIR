@@ -8,6 +8,7 @@ class Favorito(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = 'favoritos'
         unique_together = ('desarrollador', 'proyecto')
 
     def __str__(self):

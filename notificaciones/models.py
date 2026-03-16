@@ -16,5 +16,8 @@ class Notificacion(models.Model):
     leida = models.BooleanField(default=False)
     fecha = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'notificaciones'
+
     def __str__(self):
         return f"{self.tipo} - {self.usuario.username}"

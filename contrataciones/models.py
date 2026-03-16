@@ -16,5 +16,8 @@ class Contratacion(models.Model):
     fecha_fin_estimada = models.DateField(null=True, blank=True)
     estado = models.CharField(max_length=10, choices=ESTADO, default='activa')
 
+    class Meta:
+        db_table = 'contrataciones'
+
     def __str__(self):
         return f"Contrato: {self.proyecto.titulo}"

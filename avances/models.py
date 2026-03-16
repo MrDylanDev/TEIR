@@ -10,6 +10,9 @@ class Avance(models.Model):
     porcentaje = models.PositiveSmallIntegerField(default=0)
     fecha_hora = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'avances'
+
     def __str__(self):
         return f"Avance {self.porcentaje}% - {self.proyecto.titulo}"
 

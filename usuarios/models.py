@@ -2,8 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class Usuario(AbstractUser):
+    nombre = models.CharField(max_length=150, null=True, blank=True)
     cedula = models.CharField(max_length=20, unique=True, null=True, blank=True)
     fecha_nacimiento = models.DateField(null=True, blank=True)
+    ultimo_acceso = models.DateTimeField(null=True, blank=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
     rol = models.CharField(
         max_length=20,
         choices=[
@@ -32,6 +35,9 @@ class Usuario(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.get_rol_display()})"
 
+    class Meta:
+        db_table = 'usuarios'
+
 class PerfilEmpresa(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, primary_key=True, related_name='perfil_empresa')
     nombre_empresa = models.CharField(max_length=200, blank=True, null=True)
@@ -44,6 +50,9 @@ class PerfilEmpresa(models.Model):
     def __str__(self):
         return self.nombre_empresa or f"Empresa {self.usuario.username}"
 
+    class Meta:
+        db_table = 'perfil_empresa'
+
 class PerfilDesarrollador(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, primary_key=True, related_name='perfil_desarrollador')
     programa_formacion = models.CharField(max_length=200, blank=True, null=True)
@@ -54,3 +63,6 @@ class PerfilDesarrollador(models.Model):
 
     def __str__(self):
         return f"Desarrollador {self.usuario.username}"
+
+    class Meta:
+        db_table = 'perfil_desarrollador'

@@ -15,6 +15,7 @@ class Postulacion(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = 'postulaciones'
         unique_together = ('proyecto', 'desarrollador')
 
     def __str__(self):
