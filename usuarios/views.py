@@ -8,7 +8,6 @@ from django.contrib.auth.hashers import make_password
 from .forms import RegistroUsuarioForm, PerfilEmpresaForm, PerfilDesarrolladorForm
 from .models import Usuario, PerfilEmpresa, PerfilDesarrollador
 from proyectos.models import Proyecto
-# Estos se importarán solo si existen, de lo contrario daremos placeholders
 try:
     from postulaciones.models import Postulacion
     from contrataciones.models import Contratacion
@@ -20,7 +19,6 @@ except ImportError:
 
 import json
 
-# ===== PÁGINAS PÚBLICAS =====
 def inicio(request):
     casos_exito = Proyecto.objects.filter(estado='finalizado').order_by('-fecha_aprobacion')[:4]
     return render(request, 'publico/index.html', {'casos_exito': casos_exito})
@@ -79,8 +77,6 @@ def logout_view(request):
     logout(request)
     messages.info(request, "Has cerrado sesión correctamente.")
     return redirect('inicio')
-
-# ===== DASHBOARDS =====
 
 @login_required
 def dashboard_empresa(request):
@@ -153,8 +149,6 @@ def editar_perfil(request):
         return redirect(redirect_to)
     
     return render(request, 'usuarios/editar_perfil.html', {'form': form})
-
-# ===== API ADMIN (Solo para Administradores) =====
 
 @login_required
 def api_usuarios(request):

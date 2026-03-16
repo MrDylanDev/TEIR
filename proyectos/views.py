@@ -11,11 +11,8 @@ from favoritos.models import Favorito
 
 @login_required
 def listar_proyectos(request):
-    """CU 3: Consultar proyectos disponibles (para Desarrolladores)"""
-    # Solo proyectos publicados
     proyectos = Proyecto.objects.filter(estado='publicado').order_by('-fecha_publicacion')
     
-    # Aplicar filtros (RN 36)
     tipo = request.GET.get('tipo')
     prioridad = request.GET.get('prioridad')
     if tipo:
@@ -23,7 +20,6 @@ def listar_proyectos(request):
     if prioridad:
         proyectos = proyectos.filter(prioridad=prioridad)
     
-    # Identificar cuáles son favoritos del usuario actual
     favoritos_ids = []
     if request.user.rol == 'desarrollador':
         favoritos_ids = Favorito.objects.filter(desarrollador=request.user).values_list('proyecto_id', flat=True)
@@ -35,7 +31,6 @@ def listar_proyectos(request):
 
 @login_required
 def crear_proyecto(request):
-    """CU 3: Publicar una necesidad tecnológica (para Empresas)"""
     if request.user.rol != 'empresa':
         messages.error(request, "Solo las empresas pueden publicar proyectos.")
         return redirect('dashboard_empresa')
@@ -61,7 +56,6 @@ def crear_proyecto(request):
 
 @login_required
 def validar_proyectos_admin(request):
-    """CU 3 Admin: Validar proyectos publicados"""
     if request.user.rol != 'administrador':
         return redirect('inicio')
         
@@ -95,7 +89,6 @@ def rechazar_proyecto(request, proyecto_id):
 
 @login_required
 def finalizar_proyecto(request, proyecto_id):
-    """CU 6: Finalizar proyecto y valorar desarrollador (Empresa)"""
     if request.user.rol != 'empresa':
         messages.error(request, "Acceso denegado.")
         return redirect('inicio')
@@ -107,7 +100,6 @@ def finalizar_proyecto(request, proyecto_id):
         messages.error(request, "Este proyecto no puede ser finalizado en su estado actual.")
         return redirect('dashboard_empresa')
     
-    # Obtener el contrato activo para saber quién es el desarrollador
     contratacion = get_object_or_404(Contratacion, proyecto=proyecto, estado='activa')
     desarrollador = contratacion.desarrollador
 
@@ -117,7 +109,6 @@ def finalizar_proyecto(request, proyecto_id):
             comentario = request.POST.get('comentario')
             
             with transaction.atomic():
-                # 1. Crear valoración
                 Valoracion.objects.create(
                     proyecto=proyecto,
                     empresa=request.user,
@@ -126,23 +117,18 @@ def finalizar_proyecto(request, proyecto_id):
                     comentario=comentario
                 )
                 
-                # 2. Actualizar estado del proyecto
                 proyecto.estado = 'finalizado'
                 proyecto.save()
                 
-                # 3. Finalizar contratación
                 contratacion.estado = 'finalizada'
                 contratacion.save()
                 
-                # 4. Actualizar estadísticas del desarrollador
                 perfil_dev = PerfilDesarrollador.objects.get(usuario=desarrollador)
-                # Recalcular promedio
                 promedio = Valoracion.objects.filter(desarrollador=desarrollador).aggregate(Avg('puntuacion'))['puntuacion__avg']
                 perfil_dev.calificacion_promedio = promedio
                 perfil_dev.num_proyectos_completados += 1
                 perfil_dev.save()
                 
-                # 5. Notificar al desarrollador
                 Notificacion.objects.create(
                     usuario=desarrollador,
                     tipo='aprobacion',
@@ -158,7 +144,6 @@ def finalizar_proyecto(request, proyecto_id):
 
 @login_required
 def desactivar_proyecto(request, proyecto_id):
-    """Permitir que la empresa retire la oferta manualmente"""
     if request.user.rol != 'empresa':
         return redirect('inicio')
     

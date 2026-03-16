@@ -8,18 +8,15 @@ import os
 from pathlib import Path
 import pymysql
 
-# Configuración necesaria para compatibilidad con MySQL 8.0+ y Django 6
 pymysql.version_info = (2, 2, 1, "final", 0)
 pymysql.install_as_MySQLdb()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SEGURIDAD
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-7m_gsgijs4$xffuvqf6=3ybx(4$68n+p%r2(h)&kgpx*d*uat*')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
-# Aplicaciones instaladas
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -68,7 +65,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Base de Datos
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -80,32 +76,26 @@ DATABASES = {
     }
 }
 
-# Validadores de Contraseña (Personalizados de la versión mejorada)
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'usuarios.validators.ComplexPasswordValidator'},
 ]
 
-# Localización (Corregido a es-co)
 LANGUAGE_CODE = 'es-co'
 TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 USE_TZ = True
 
-# Archivos Estáticos
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Modelo de Usuario Personalizado
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-# RN 5: Sesiones inactivas (60 minutos)
 SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://0.0.0.0:8000']
 
-# Mensajes
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
     messages.DEBUG: 'secondary',

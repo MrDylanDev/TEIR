@@ -8,7 +8,6 @@ from notificaciones.models import Notificacion
 
 @login_required
 def registrar_avance(request, proyecto_id):
-    """CU 5: Montar avances o actualizaciones del proyecto (Desarrollador)"""
     if request.user.rol != 'desarrollador':
         messages.error(request, "Acceso denegado.")
         return redirect('inicio')
@@ -34,7 +33,7 @@ def registrar_avance(request, proyecto_id):
                 archivo_url=archivo_url,
                 porcentaje=porcentaje
             )
-            avance.save() # Ejecuta validación de un avance por día (RN 19)
+            avance.save()
             
             # Crear notificación para la empresa (Paso previo a Signals)
             Notificacion.objects.create(
@@ -52,7 +51,6 @@ def registrar_avance(request, proyecto_id):
 
 @login_required
 def ver_avances(request, proyecto_id):
-    """CU 5: Revisar avances del proyecto (Empresa / Admin)"""
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     
     # Solo la empresa dueña o el admin pueden ver avances

@@ -9,7 +9,6 @@ from django.utils import timezone
 
 @login_required
 def postularse_a_proyecto(request, proyecto_id):
-    """CU 4: Postularse a un proyecto disponible"""
     if request.user.rol != 'desarrollador':
         messages.error(request, "Solo los desarrolladores pueden postularse.")
         return redirect('dashboard_desarrollador')
@@ -38,7 +37,6 @@ def postularse_a_proyecto(request, proyecto_id):
 
 @login_required
 def ver_postulaciones_empresa(request, proyecto_id):
-    """CU 4: Ver postulaciones recibidas para seleccionar desarrollador"""
     if request.user.rol != 'empresa':
         return redirect('inicio')
         
@@ -48,7 +46,6 @@ def ver_postulaciones_empresa(request, proyecto_id):
 
 @login_required
 def aceptar_postulacion(request, postulacion_id):
-    """CU 4: Seleccionar desarrollador / equipo (Empresa)"""
     if request.user.rol != 'empresa':
         messages.error(request, "Acceso denegado.")
         return redirect('inicio')
@@ -62,11 +59,9 @@ def aceptar_postulacion(request, postulacion_id):
 
     try:
         with transaction.atomic():
-            # 1. Aceptar esta postulación
             postulacion.estado = 'aceptada'
             postulacion.save()
 
-            # 2. Crear la contratación
             Contratacion.objects.create(
                 proyecto=proyecto,
                 desarrollador=postulacion.desarrollador,
@@ -75,7 +70,6 @@ def aceptar_postulacion(request, postulacion_id):
                 estado='activa'
             )
 
-            # 3. Verificar si se agotaron las vacantes
             contrataciones_actuales = Contratacion.objects.filter(proyecto=proyecto, estado='activa').count()
             if contrataciones_actuales >= proyecto.vacantes:
                 # 3.1 Cambiar estado del proyecto a 'en_desarrollo'

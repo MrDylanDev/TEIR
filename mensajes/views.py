@@ -14,7 +14,6 @@ def mensajeria_inbox(request):
 
 @login_required
 def mensajeria_sent(request):
-    """Ver mensajes enviados"""
     mensajes_enviados = Mensaje.objects.filter(remitente=request.user).order_by('-fecha_envio')
     return render(request, 'mensajes/sent.html', {'mensajes': mensajes_enviados})
 
@@ -40,7 +39,7 @@ def enviar_mensaje(request):
     # Para el formulario, necesitamos saber a quién podemos escribir
     # Por ahora permitiremos escribir a cualquier usuario, pero se podría filtrar por proyectos
     usuarios = Usuario.objects.exclude(id=request.user.id)
-    proyectos = Proyecto.objects.all() # Opcional: solo proyectos relacionados
+    proyectos = Proyecto.objects.all()
     
     if request.method == 'POST':
         receptor_id = request.POST.get('receptor')
