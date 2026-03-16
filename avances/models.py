@@ -12,3 +12,6 @@ class Avance(models.Model):
 
     def __str__(self):
         return f"Avance {self.porcentaje}% - {self.proyecto.titulo}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)

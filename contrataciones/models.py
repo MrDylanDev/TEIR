@@ -8,7 +8,7 @@ class Contratacion(models.Model):
         ('finalizada', 'Finalizada'),
         ('cancelada', 'Cancelada'),
     ]
-    proyecto = models.OneToOneField(Proyecto, on_delete=models.CASCADE)
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='contrataciones')
     desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='contrataciones_dev')
     empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='contrataciones_emp')
     asignado_por = models.ForeignKey(Usuario, null=True, blank=True, on_delete=models.SET_NULL)

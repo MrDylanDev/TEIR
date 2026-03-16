@@ -29,11 +29,36 @@ class Proyecto(models.Model):
     descripcion = models.TextField()
     tipo_solucion = models.CharField(max_length=30, choices=TIPO_SOLUCION)
     prioridad = models.CharField(max_length=10, choices=PRIORIDAD, default='media')
-    estado = models.CharField(max_length=25, choices=ESTADO, default='pendiente_aprobacion')
+    vacantes = models.PositiveIntegerField(default=1)
+    estado = models.CharField(max_length=25, choices=ESTADO, default='publicado')
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
     fecha_limite = models.DateField(null=True, blank=True)
     aprobado_por = models.ForeignKey(Usuario, null=True, blank=True, on_delete=models.SET_NULL, related_name='proyectos_aprobados')
     fecha_aprobacion = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return self.titulo
+        return f"{self.titulo} ({self.get_estado_display()})"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+class Valoracion(models.Model):
+    proyecto = models.OneToOneField(Proyecto, on_delete=models.CASCADE, related_name='valoracion')
+    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_realizadas')
+    desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_recibidas')
+    puntuacion = models.PositiveSmallIntegerField()
+    comentario = models.TextField(blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Valoraciones"
+
+class HistorialEstadoProyecto(models.Model):
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='historial_estados')
+    estado_anterior = models.CharField(max_length=50)
+    estado_nuevo = models.CharField(max_length=50)
+    cambiado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Historiales de Estados"
