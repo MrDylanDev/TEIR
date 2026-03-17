@@ -20,24 +20,18 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Virtual Environment
+# Entorno Virtual
 venv/
 ENV/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 
 # Database
 db.sqlite3
 *.mysql
+# Tem_bd.sql está incluido intencionalmente para la clonación rápida
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Project specific
-staticfiles/
-media/
-logs/
-*.log
-.env
