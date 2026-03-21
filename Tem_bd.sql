@@ -4,6 +4,9 @@
 -- ------------------------------------------------------
 -- Server version	8.0.45-0ubuntu0.24.04.1
 
+CREATE DATABASE IF NOT EXISTS tem_dbv2;
+USE tem_dbv2;
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -23,7 +26,7 @@ DROP TABLE IF EXISTS `auth_group`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_group` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
@@ -48,8 +51,8 @@ DROP TABLE IF EXISTS `auth_group_permissions`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_group_permissions` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `group_id` int NOT NULL,
-  `permission_id` int NOT NULL,
+  `group_id` bigint NOT NULL,
+  `permission_id` bigint NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_group_permissions_group_id_permission_id_0cd325b0_uniq` (`group_id`,`permission_id`),
   KEY `auth_group_permissio_permission_id_84c5c92e_fk_auth_perm` (`permission_id`),
@@ -75,9 +78,9 @@ DROP TABLE IF EXISTS `auth_permission`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `auth_permission` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `content_type_id` int NOT NULL,
+  `content_type_id` bigint NOT NULL,
   `codename` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
@@ -103,9 +106,9 @@ DROP TABLE IF EXISTS `avances`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `avances` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `proyecto_id` int NOT NULL,
-  `desarrollador_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `proyecto_id` bigint NOT NULL,
+  `desarrollador_id` bigint NOT NULL,
   `descripcion` text NOT NULL,
   `archivo_url` varchar(500) DEFAULT NULL,
   `porcentaje` tinyint DEFAULT '0',
@@ -226,24 +229,24 @@ DROP TABLE IF EXISTS `contrataciones`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `contrataciones` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `proyecto_id` int NOT NULL,
-  `desarrollador_id` int NOT NULL,
-  `empresa_id` int NOT NULL,
-  `asignado_por` int DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `proyecto_id` bigint NOT NULL,
+  `desarrollador_id` bigint NOT NULL,
+  `empresa_id` bigint NOT NULL,
+  `asignado_por_id` bigint DEFAULT NULL,
   `fecha_inicio` date DEFAULT NULL,
   `fecha_fin_estimada` date DEFAULT NULL,
-  `estado` enum('activa','finalizada','cancelada') DEFAULT 'activa',
+  `estado` varchar(10) NOT NULL DEFAULT 'activa',
   PRIMARY KEY (`id`),
   UNIQUE KEY `proyecto_id` (`proyecto_id`),
-  KEY `asignado_por` (`asignado_por`),
+  KEY `asignado_por_id` (`asignado_por_id`),
   KEY `idx_desarrollador` (`desarrollador_id`),
   KEY `idx_empresa` (`empresa_id`),
   KEY `idx_estado` (`estado`),
   CONSTRAINT `contrataciones_ibfk_1` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`),
   CONSTRAINT `contrataciones_ibfk_2` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `contrataciones_ibfk_3` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`),
-  CONSTRAINT `contrataciones_ibfk_4` FOREIGN KEY (`asignado_por`) REFERENCES `usuarios` (`id`)
+  CONSTRAINT `contrataciones_ibfk_4` FOREIGN KEY (`asignado_por_id`) REFERENCES `usuarios` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -301,8 +304,8 @@ DROP TABLE IF EXISTS `copias_seguridad`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `copias_seguridad` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `ejecutado_por` int DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `ejecutado_por` bigint DEFAULT NULL,
   `archivo_url` varchar(500) DEFAULT NULL,
   `tamano_mb` decimal(10,2) DEFAULT NULL,
   `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -333,13 +336,13 @@ DROP TABLE IF EXISTS `django_admin_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `django_admin_log` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `action_time` datetime(6) NOT NULL,
   `object_id` longtext,
   `object_repr` varchar(200) NOT NULL,
   `action_flag` smallint unsigned NOT NULL,
   `change_message` longtext NOT NULL,
-  `content_type_id` int DEFAULT NULL,
+  `content_type_id` bigint DEFAULT NULL,
   `user_id` bigint NOT NULL,
   PRIMARY KEY (`id`),
   KEY `django_admin_log_content_type_id_c4bce8eb_fk_django_co` (`content_type_id`),
@@ -367,7 +370,7 @@ DROP TABLE IF EXISTS `django_content_type`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `django_content_type` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `app_label` varchar(100) NOT NULL,
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
@@ -407,7 +410,7 @@ CREATE TABLE `django_migrations` (
 
 LOCK TABLES `django_migrations` WRITE;
 /*!40000 ALTER TABLE `django_migrations` DISABLE KEYS */;
-INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2026-03-16 19:48:07.938564'),(2,'contenttypes','0002_remove_content_type_name','2026-03-16 19:48:08.037721'),(3,'auth','0001_initial','2026-03-16 19:48:09.266060'),(4,'auth','0002_alter_permission_name_max_length','2026-03-16 19:48:09.333581'),(5,'auth','0003_alter_user_email_max_length','2026-03-16 19:48:09.345672'),(6,'auth','0004_alter_user_username_opts','2026-03-16 19:48:09.357093'),(7,'auth','0005_alter_user_last_login_null','2026-03-16 19:48:09.368923'),(8,'auth','0006_require_contenttypes_0002','2026-03-16 19:48:09.372384'),(9,'auth','0007_alter_validators_add_error_messages','2026-03-16 19:48:09.384225'),(10,'auth','0008_alter_user_username_max_length','2026-03-16 19:48:09.400825'),(11,'auth','0009_alter_user_last_name_max_length','2026-03-16 19:48:09.412949'),(12,'auth','0010_alter_group_name_max_length','2026-03-16 19:48:09.440721'),(13,'auth','0011_update_proxy_permissions','2026-03-16 19:48:09.455446'),(14,'auth','0012_alter_user_first_name_max_length','2026-03-16 19:48:09.468210'),(15,'usuarios','0001_initial','2026-03-16 19:48:10.949857'),(16,'admin','0001_initial','2026-03-16 19:48:11.120348'),(17,'admin','0002_logentry_remove_auto_add','2026-03-16 19:48:11.139332'),(18,'admin','0003_logentry_add_action_flag_choices','2026-03-16 19:48:11.160507'),(19,'sessions','0001_initial','2026-03-16 19:48:12.259892'),(20,'usuarios','0002_usuario_fecha_nacimiento_and_more','2026-03-16 19:48:13.415276'),(21,'proyectos','0001_initial','2026-03-16 19:48:14.596694'),(22,'proyectos','0002_proyecto_vacantes_alter_proyecto_estado_and_more','2026-03-16 19:48:15.110304'),(23,'avances','0001_initial','2026-03-16 19:48:16.384068'),(24,'contrataciones','0001_initial','2026-03-16 19:48:16.737282'),(25,'contrataciones','0002_alter_contratacion_proyecto','2026-03-16 19:48:16.955475'),(26,'favoritos','0001_initial','2026-03-16 19:48:17.165221'),(27,'logs','0001_initial','2026-03-16 19:48:17.430937'),(28,'mensajes','0001_initial','2026-03-16 19:48:17.734636'),(29,'notificaciones','0001_initial','2026-03-16 19:48:17.878104'),(30,'postulaciones','0001_initial','2026-03-16 19:48:18.136088');
+INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2026-03-16 19:48:07.938564'),(2,'contenttypes','0002_remove_content_type_name','2026-03-16 19:48:08.037721'),(3,'auth','0001_initial','2026-03-16 19:48:09.266060'),(4,'auth','0002_alter_permission_name_max_length','2026-03-16 19:48:09.333581'),(5,'auth','0003_alter_user_email_max_length','2026-03-16 19:48:09.345672'),(6,'auth','0004_alter_user_username_opts','2026-03-16 19:48:09.357093'),(7,'auth','0005_alter_user_last_login_null','2026-03-16 19:48:09.368923'),(8,'auth','0006_require_contenttypes_0002','2026-03-16 19:48:09.372384'),(9,'auth','0007_alter_validators_add_error_messages','2026-03-16 19:48:09.384225'),(10,'auth','0008_alter_user_username_max_length','2026-03-16 19:48:09.400825'),(11,'auth','0009_alter_user_last_name_max_length','2026-03-16 19:48:09.412949'),(12,'auth','0010_alter_group_name_max_length','2026-03-16 19:48:09.440721'),(13,'auth','0011_update_proxy_permissions','2026-03-16 19:48:09.455446'),(14,'auth','0012_alter_user_first_name_max_length','2026-03-16 19:48:09.468210'),(15,'usuarios','0001_initial','2026-03-16 19:48:10.949857'),(16,'admin','0001_initial','2026-03-16 19:48:11.120348'),(17,'admin','0002_logentry_remove_auto_add','2026-03-16 19:48:11.139332'),(18,'admin','0003_logentry_add_action_flag_choices','2026-03-16 19:48:11.160507'),(19,'sessions','0001_initial','2026-03-16 19:48:12.259892'),(20,'usuarios','0002_usuario_fecha_nacimiento_and_more','2026-03-16 19:48:13.415276'),(21,'proyectos','0001_initial','2026-03-16 19:48:14.596694'),(22,'proyectos','0002_proyecto_vacantes_alter_proyecto_estado_and_more','2026-03-16 19:48:15.110304'),(23,'avances','0001_initial','2026-03-16 19:48:16.384068'),(24,'contrataciones','0001_initial','2026-03-16 19:48:16.737282'),(25,'contrataciones','0002_alter_contratacion_proyecto','2026-03-16 19:48:16.955475'),(26,'favoritos','0001_initial','2026-03-16 19:48:17.165221'),(27,'logs','0001_initial','2026-03-16 19:48:17.430937'),(28,'mensajes','0001_initial','2026-03-16 19:48:17.734636'),(29,'notificaciones','0001_initial','2026-03-16 19:48:17.878104'),(30,'postulaciones','0001_initial','2026-03-16 19:48:18.136088'),(31,'avances','0002_alter_avance_table','2026-03-20 23:15:00.000000'),(32,'contrataciones','0003_alter_contratacion_table','2026-03-20 23:15:01.000000'),(33,'favoritos','0002_alter_favorito_table','2026-03-20 23:15:02.000000'),(34,'logs','0002_alter_copiaseguridad_table_alter_logauditoria_table','2026-03-20 23:15:03.000000'),(35,'mensajes','0002_alter_mensaje_table','2026-03-20 23:15:04.000000'),(36,'notificaciones','0002_alter_notificacion_table','2026-03-20 23:15:05.000000'),(37,'postulaciones','0002_alter_postulacion_table','2026-03-20 23:15:06.000000'),(38,'proyectos','0003_alter_historialestadoproyecto_table_and_more','2026-03-20 23:15:07.000000'),(39,'usuarios','0003_alter_usuario_options_usuario_nombre_and_more','2026-03-20 23:15:08.000000');
 /*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -444,9 +447,9 @@ DROP TABLE IF EXISTS `favoritos`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `favoritos` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `desarrollador_id` int NOT NULL,
-  `proyecto_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `desarrollador_id` bigint NOT NULL,
+  `proyecto_id` bigint NOT NULL,
   `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unico_favorito` (`desarrollador_id`,`proyecto_id`),
@@ -503,11 +506,11 @@ DROP TABLE IF EXISTS `historial_estado_proyecto`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `historial_estado_proyecto` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `proyecto_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `proyecto_id` bigint NOT NULL,
   `estado_anterior` varchar(50) DEFAULT NULL,
   `estado_nuevo` varchar(50) DEFAULT NULL,
-  `cambiado_por` int DEFAULT NULL,
+  `cambiado_por` bigint DEFAULT NULL,
   `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `proyecto_id` (`proyecto_id`),
@@ -534,11 +537,11 @@ DROP TABLE IF EXISTS `logs_auditoria`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `logs_auditoria` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `usuario_id` int DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `usuario_id` bigint DEFAULT NULL,
   `accion` varchar(300) NOT NULL,
   `tabla_afectada` varchar(100) DEFAULT NULL,
-  `registro_id` int DEFAULT NULL,
+  `registro_id` bigint DEFAULT NULL,
   `ip_address` varchar(45) DEFAULT NULL,
   `fecha_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -598,7 +601,7 @@ CREATE TABLE `logs_logauditoria` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `accion` varchar(300) NOT NULL,
   `tabla_afectada` varchar(100) DEFAULT NULL,
-  `registro_id` int DEFAULT NULL,
+  `registro_id` bigint DEFAULT NULL,
   `ip_address` char(39) DEFAULT NULL,
   `fecha_hora` datetime(6) NOT NULL,
   `usuario_id` bigint DEFAULT NULL,
@@ -625,10 +628,10 @@ DROP TABLE IF EXISTS `mensajes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `mensajes` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `remitente_id` int NOT NULL,
-  `receptor_id` int NOT NULL,
-  `proyecto_id` int DEFAULT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `remitente_id` bigint NOT NULL,
+  `receptor_id` bigint NOT NULL,
+  `proyecto_id` bigint DEFAULT NULL,
   `asunto` varchar(200) DEFAULT NULL,
   `cuerpo` text NOT NULL,
   `leido` tinyint(1) DEFAULT '0',
@@ -698,8 +701,8 @@ DROP TABLE IF EXISTS `notificaciones`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `notificaciones` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `usuario_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `usuario_id` bigint NOT NULL,
   `tipo` enum('postulacion','avance','aprobacion','mensaje','alerta','otro') DEFAULT 'otro',
   `mensaje` text NOT NULL,
   `leida` tinyint(1) DEFAULT '0',
@@ -758,8 +761,8 @@ DROP TABLE IF EXISTS `perfil_desarrollador`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `perfil_desarrollador` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `usuario_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `usuario_id` bigint NOT NULL,
   `programa_formacion` varchar(200) DEFAULT NULL,
   `ficha` varchar(50) DEFAULT NULL,
   `habilidades` text,
@@ -789,8 +792,8 @@ DROP TABLE IF EXISTS `perfil_empresa`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `perfil_empresa` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `usuario_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `usuario_id` bigint NOT NULL,
   `nombre_empresa` varchar(200) DEFAULT NULL,
   `nit` varchar(30) DEFAULT NULL,
   `sector` varchar(100) DEFAULT NULL,
@@ -822,9 +825,9 @@ DROP TABLE IF EXISTS `postulaciones`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `postulaciones` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `proyecto_id` int NOT NULL,
-  `desarrollador_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `proyecto_id` bigint NOT NULL,
+  `desarrollador_id` bigint NOT NULL,
   `mensaje` text,
   `estado` enum('pendiente','aceptada','rechazada') DEFAULT 'pendiente',
   `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -951,19 +954,20 @@ DROP TABLE IF EXISTS `proyectos`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `proyectos` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `empresa_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `empresa_id` bigint NOT NULL,
   `titulo` varchar(200) NOT NULL,
   `descripcion` text NOT NULL,
-  `tipo_solucion` enum('sitio_web','aplicacion_movil','automatizacion','sistema_escritorio','otro') NOT NULL,
-  `prioridad` enum('alta','media','baja') DEFAULT 'media',
-  `estado` enum('pendiente_aprobacion','publicado','en_desarrollo','en_revision','finalizado','rechazado','inactivo') DEFAULT 'pendiente_aprobacion',
-  `fecha_publicacion` datetime DEFAULT CURRENT_TIMESTAMP,
+  `tipo_solucion` varchar(30) NOT NULL,
+  `prioridad` varchar(10) NOT NULL DEFAULT 'media',
+  `vacantes` int unsigned NOT NULL DEFAULT '1',
+  `estado` varchar(25) NOT NULL DEFAULT 'publicado',
+  `fecha_publicacion` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `fecha_limite` date DEFAULT NULL,
-  `aprobado_por` int DEFAULT NULL,
+  `aprobado_por_id` bigint DEFAULT NULL,
   `fecha_aprobacion` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `aprobado_por` (`aprobado_por`),
+  KEY `aprobado_por_id` (`aprobado_por_id`),
   KEY `idx_empresa_id` (`empresa_id`),
   KEY `idx_estado` (`estado`),
   KEY `idx_tipo_solucion` (`tipo_solucion`),
@@ -971,7 +975,7 @@ CREATE TABLE `proyectos` (
   KEY `idx_fecha_publicacion` (`fecha_publicacion`),
   KEY `idx_estado_fecha` (`estado`,`fecha_publicacion`),
   CONSTRAINT `proyectos_ibfk_1` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`),
-  CONSTRAINT `proyectos_ibfk_2` FOREIGN KEY (`aprobado_por`) REFERENCES `usuarios` (`id`)
+  CONSTRAINT `proyectos_ibfk_2` FOREIGN KEY (`aprobado_por_id`) REFERENCES `usuarios` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1117,7 +1121,7 @@ DROP TABLE IF EXISTS `usuarios`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuarios` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `username` varchar(150) NOT NULL,
   `nombre` varchar(150) NOT NULL,
   `cedula` varchar(20) DEFAULT NULL,
@@ -1314,7 +1318,7 @@ DROP TABLE IF EXISTS `usuarios_usuario_groups`;
 CREATE TABLE `usuarios_usuario_groups` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `usuario_id` bigint NOT NULL,
-  `group_id` int NOT NULL,
+  `group_id` bigint NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `usuarios_usuario_groups_usuario_id_group_id_4ed5b09e_uniq` (`usuario_id`,`group_id`),
   KEY `usuarios_usuario_groups_group_id_e77f6dcf_fk_auth_group_id` (`group_id`),
@@ -1342,7 +1346,7 @@ DROP TABLE IF EXISTS `usuarios_usuario_user_permissions`;
 CREATE TABLE `usuarios_usuario_user_permissions` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `usuario_id` bigint NOT NULL,
-  `permission_id` int NOT NULL,
+  `permission_id` bigint NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `usuarios_usuario_user_pe_usuario_id_permission_id_217cadcd_uniq` (`usuario_id`,`permission_id`),
   KEY `usuarios_usuario_use_permission_id_4e5c0f2f_fk_auth_perm` (`permission_id`),
@@ -1604,10 +1608,10 @@ DROP TABLE IF EXISTS `valoraciones`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `valoraciones` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `proyecto_id` int NOT NULL,
-  `empresa_id` int NOT NULL,
-  `desarrollador_id` int NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `proyecto_id` bigint NOT NULL,
+  `empresa_id` bigint NOT NULL,
+  `desarrollador_id` bigint NOT NULL,
   `puntuacion` tinyint NOT NULL,
   `comentario` text,
   `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
