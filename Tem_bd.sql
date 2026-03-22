@@ -1000,7 +1000,7 @@ DELIMITER ;;
   IF OLD.estado <> NEW.estado THEN
     INSERT INTO historial_estado_proyecto
       (proyecto_id, estado_anterior, estado_nuevo, cambiado_por)
-    VALUES (NEW.id, OLD.estado, NEW.estado, NEW.aprobado_por);  
+    VALUES (NEW.id, OLD.estado, NEW.estado, NEW.aprobado_por_id);  
   END IF;
 END */;;
 DELIMITER ;

@@ -289,3 +289,19 @@
     color: #000000 !important;
     text-decoration: none !important;
 }
+
+/* Estilos para mensajes de alerta y errores */
+.alert {
+    padding: 12px;
+    margin-bottom: 25px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+    width: 100%;
+}
+
+.alert-error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
