@@ -32,6 +32,8 @@ class Usuario(AbstractUser):
     intentos_fallidos = models.PositiveSmallIntegerField(default=0)
     bloqueado_hasta = models.DateTimeField(null=True, blank=True)
 
+    REQUIRED_FIELDS = ['email', 'nombre', 'rol']
+
     def __str__(self):
         return f"{self.username} ({self.get_rol_display()})"
 

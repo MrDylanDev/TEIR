@@ -168,7 +168,7 @@ def api_crear_usuario(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            user = Usuario.objects.create_user(username=data['username'], email=data['email'], password=data.get('password', 'Sena1234'), cedula=data.get('cedula', ''))
+            user = Usuario.objects.create_user(username=data['username'], email=data['email'], password=data.get('password', 'Sena1234'), cedula=data.get('cedula', ''), nombre=data.get('nombre', data['username']))
             user.rol = data['rol']
             user.save()
             return JsonResponse({'success': True, 'id': user.id})
@@ -184,6 +184,7 @@ def api_actualizar_usuario(request, usuario_id):
             usuario = Usuario.objects.get(id=usuario_id)
             data = json.loads(request.body)
             usuario.username = data.get('username', usuario.username)
+            usuario.nombre = data.get('nombre', data.get('username', usuario.nombre))
             usuario.email = data.get('email', usuario.email)
             usuario.rol = data.get('rol', usuario.rol)
             if 'password' in data and data['password']: usuario.password = make_password(data['password'])
