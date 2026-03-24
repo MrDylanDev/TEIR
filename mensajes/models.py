@@ -5,7 +5,7 @@ from proyectos.models import Proyecto
 class Mensaje(models.Model):
     remitente = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='mensajes_enviados')
     receptor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='mensajes_recibidos')
-    proyecto = models.ForeignKey(Proyecto, null=True, blank=True, on_delete=models.CASCADE)
+    proyecto = models.ForeignKey(Proyecto, null=True, blank=True, on_delete=models.SET_NULL)
     asunto = models.CharField(max_length=200, blank=True, null=True)
     cuerpo = models.TextField()
     leido = models.BooleanField(default=False)

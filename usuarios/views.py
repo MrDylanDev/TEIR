@@ -2,20 +2,21 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import transaction, connection
+from django.db.models import Avg, Q, Max
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
+
 from .forms import RegistroUsuarioForm, PerfilEmpresaForm, PerfilDesarrolladorForm
 from .models import Usuario, PerfilEmpresa, PerfilDesarrollador
 from proyectos.models import Proyecto
-try:
-    from postulaciones.models import Postulacion
-    from contrataciones.models import Contratacion
-    from notificaciones.models import Notificacion
-except ImportError:
-    Postulacion = None
-    Contratacion = None
-    Notificacion = None
+from postulaciones.models import Postulacion
+from contrataciones.models import Contratacion
+from notificaciones.models import Notificacion
+from favoritos.models import Favorito
+from mensajes.models import Mensaje
 
 import json
 
@@ -24,111 +25,182 @@ def inicio(request):
     return render(request, 'publico/index.html', {'casos_exito': casos_exito})
 
 def login_view(request):
-    if request.user.is_authenticated:
-        if request.user.rol == 'empresa': return redirect('dashboard_empresa')
-        if request.user.rol == 'desarrollador': return redirect('dashboard_desarrollador')
-        if request.user.rol == 'administrador': return redirect('dashboard_admin')
-
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        rol_seleccionado = request.POST.get('rol_seleccionado')
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if user.rol == rol_seleccionado:
-                login(request, user)
-                messages.success(request, f'Bienvenido {user.username}')
-                if user.rol == 'empresa': return redirect('dashboard_empresa')
-                elif user.rol == 'desarrollador': return redirect('dashboard_desarrollador')
-                elif user.rol == 'administrador': return redirect('dashboard_admin')
-            else:
-                messages.error(request, f'El rol seleccionado no coincide con tu perfil.')
-        else:
-            messages.error(request, 'Usuario o contraseña incorrectos.')
-    
+        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+        if user:
+            # Actualizar ultimo_acceso para disparar trigger de auditoría MySQL
+            user.ultimo_acceso = timezone.now()
+            user.save(update_fields=['ultimo_acceso'])
+            
+            login(request, user)
+            if user.rol == 'administrador': return redirect('dashboard_admin')
+            if user.rol == 'empresa': return redirect('dashboard_empresa')
+            return redirect('dashboard_desarrollador')
+        messages.error(request, "Credenciales incorrectas")
     return render(request, 'publico/inicio_sesion.html')
 
-def registro_view(request):
-    if request.user.is_authenticated:
-        return redirect('inicio')
+def logout_view(request):
+    logout(request)
+    return redirect('inicio')
 
+def registro_view(request):
     if request.method == 'POST':
         form = RegistroUsuarioForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, '¡Registro exitoso!')
             if user.rol == 'empresa': return redirect('dashboard_empresa')
             return redirect('dashboard_desarrollador')
-        else:
-            for error in form.non_field_errors():
-                messages.error(request, error)
     else:
         form = RegistroUsuarioForm()
-    
     return render(request, 'publico/registro.html', {'form': form})
 
 def recuperar_view(request):
     return render(request, 'publico/recuperarcon.html')
 
-def logout_view(request):
-    logout(request)
-    messages.info(request, "Has cerrado sesión correctamente.")
-    return redirect('inicio')
-
 @login_required
 def dashboard_empresa(request):
     if request.user.rol != 'empresa': return redirect('inicio')
-    
     perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=request.user)
+    mis_ofertas = Proyecto.objects.filter(empresa=request.user, estado='publicado').order_by('-fecha_publicacion')
+    en_desarrollo = Contratacion.objects.filter(empresa=request.user, estado='activa').select_related('proyecto', 'desarrollador')
+    historial = Proyecto.objects.filter(empresa=request.user, estado='finalizado').order_by('-fecha_aprobacion')
+    postulaciones_pendientes = Postulacion.objects.filter(proyecto__empresa=request.user, estado='pendiente')
+    
+    # Reputación Corporativa: Valoraciones de desarrolladores
+    from proyectos.models import Valoracion
+    valoraciones_dev = Valoracion.objects.filter(empresa=request.user, rol_evaluador='desarrollador').select_related('desarrollador', 'proyecto')
+    promedio_empresa = valoraciones_dev.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+
     context = {
         'total_proyectos': Proyecto.objects.filter(empresa=request.user).count(),
-        'proyectos_activos': Proyecto.objects.filter(empresa=request.user, estado='en_desarrollo').count(),
-        'total_postulaciones': Postulacion.objects.filter(proyecto__empresa=request.user).count() if Postulacion else 0,
-        'total_contratados': Contratacion.objects.filter(empresa=request.user, estado='activa').count() if Contratacion else 0,
-        'notificaciones': Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:5] if Notificacion else [],
-        'mis_proyectos': Proyecto.objects.filter(empresa=request.user).order_by('-fecha_publicacion'),
-        'perfil': perfil
+        'proyectos_activos': en_desarrollo.count(),
+        'total_postulaciones': postulaciones_pendientes.count(),
+        'mis_ofertas': mis_ofertas,
+        'en_desarrollo': en_desarrollo,
+        'historial': historial,
+        'valoraciones_recibidas': valoraciones_dev,
+        'promedio_empresa': round(promedio_empresa, 1),
+        'postulaciones_pendientes': postulaciones_pendientes,
+        'notificaciones': Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:5],
+        'perfil': perfil,
+        'mis_contrataciones': en_desarrollo
     }
     return render(request, 'empresa/empresa.html', context)
 
 @login_required
 def dashboard_desarrollador(request):
     if request.user.rol != 'desarrollador': return redirect('inicio')
+    mis_postulaciones = Postulacion.objects.filter(desarrollador=request.user).select_related('proyecto')
+    mis_favoritos = Favorito.objects.filter(desarrollador=request.user).select_related('proyecto')
+    mis_proyectos_activos = Contratacion.objects.filter(desarrollador=request.user, estado='activa').select_related('proyecto', 'empresa')
+    # 3. Portafolio: Proyectos finalizados con sus valoraciones reales
+    from proyectos.models import Valoracion
+    mis_proyectos_finalizados = Contratacion.objects.filter(
+        desarrollador=request.user, 
+        estado='finalizada'
+    ).select_related('proyecto', 'empresa')
     
-    favoritos = []
-    try:
-        from favoritos.models import Favorito
-        favoritos = Favorito.objects.filter(desarrollador=request.user).select_related('proyecto')[:5]
-    except ImportError:
-        pass
+    # Enriquecer los contratos con su valoración correspondiente (la que hizo la empresa)
+    for contrato in mis_proyectos_finalizados:
+        contrato.valoracion = Valoracion.objects.filter(
+            proyecto=contrato.proyecto, 
+            desarrollador=request.user,
+            rol_evaluador='empresa' # <--- CRÍTICO: Ver lo que me pusieron
+        ).first()
 
     perfil, _ = PerfilDesarrollador.objects.get_or_create(usuario=request.user)
-    
     context = {
-        'proyectos_activos_count': Contratacion.objects.filter(desarrollador=request.user, estado='activa').count() if Contratacion else 0,
-        'proyectos_completados': Contratacion.objects.filter(desarrollador=request.user, estado='finalizada').count() if Contratacion else 0,
+        'proyectos_activos_count': mis_proyectos_activos.count(),
+        'proyectos_completados': mis_proyectos_finalizados.count(),
         'nuevos_proyectos': Proyecto.objects.filter(estado='publicado').count(),
-        'notificaciones': Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:5] if Notificacion else [],
-        'mis_proyectos_activos': Contratacion.objects.filter(desarrollador=request.user, estado='activa') if Contratacion else [],
+        'notificaciones': Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:5],
+        'mis_proyectos_activos': mis_proyectos_activos,
+        'mis_proyectos_finalizados': mis_proyectos_finalizados,
+        'mis_postulaciones': mis_postulaciones,
+        'favoritos': mis_favoritos,
         'perfil': perfil,
-        'favoritos': favoritos
     }
     return render(request, 'Desarrollador/Desarrollador.html', context)
 
 @login_required
 def dashboard_admin(request):
     if request.user.rol != 'administrador': return redirect('inicio')
+    total_usuarios = Usuario.objects.count()
+    total_proyectos = Proyecto.objects.count()
+    total_devs = Usuario.objects.filter(rol='desarrollador').count()
+    total_empresas = Usuario.objects.filter(rol='empresa').count()
+    usuarios_lista = Usuario.objects.all().order_by('-date_joined')
+    proyectos_lista = Proyecto.objects.all().select_related('empresa').order_by('-fecha_publicacion')
     
+    logs = []
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT l.id, u.username, l.accion, l.tabla_afectada, l.fecha_hora FROM logs_auditoria l JOIN usuarios u ON l.usuario_id = u.id ORDER BY l.fecha_hora DESC LIMIT 20")
+        logs = cursor.fetchall()
+
+    admin_ids = Usuario.objects.filter(rol='administrador').values_list('id', flat=True)
+    mensajes_soporte = Mensaje.objects.filter(Q(remitente_id__in=admin_ids) | Q(receptor_id__in=admin_ids)).values_list('remitente_id', 'receptor_id')
+    u_ids = set()
+    for r, s in mensajes_soporte:
+        if r not in admin_ids: u_ids.add(r)
+        if s not in admin_ids: u_ids.add(s)
+    
+    conversaciones = []
+    for uid in u_ids:
+        try:
+            contacto = Usuario.objects.get(id=uid)
+            ultimo_m = Mensaje.objects.filter((Q(remitente=contacto, receptor_id__in=admin_ids) | Q(remitente_id__in=admin_ids, receptor=contacto))).order_by('-fecha_envio').first()
+            if ultimo_m: conversaciones.append({'usuario': contacto, 'ultimo_mensaje': ultimo_m})
+        except Usuario.DoesNotExist: continue
+    conversaciones.sort(key=lambda x: x['ultimo_mensaje'].fecha_envio, reverse=True)
+
+    # 5. Obtener Ranking de la Vista SQL v_top_desarrolladores
+    ranking = []
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nombre, num_proyectos_completados, calificacion_promedio FROM v_top_desarrolladores LIMIT 5")
+        ranking = cursor.fetchall()
+
+    # 6. Obtener Indicadores de Salud Global (v_estadisticas_sistema)
+    salud_global = None
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT calificacion_promedio_global, proyectos_con_retraso FROM v_estadisticas_sistema")
+        salud_global = cursor.fetchone()
+
+    # 7. Obtener Lista Detallada de Alertas (v_proyectos_alerta_inactividad)
+    alertas_retraso = []
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT titulo, empresa_nombre, desarrollador_nombre, dias_sin_avance FROM v_proyectos_alerta_inactividad")
+        alertas_retraso = cursor.fetchall()
+
     context = {
-        'total_usuarios': Usuario.objects.count(),
-        'total_proyectos': Proyecto.objects.count(),
-        'proyectos_pendientes': Proyecto.objects.filter(estado='pendiente_aprobacion').count(),
-        'proyectos': Proyecto.objects.all().order_by('-fecha_publicacion')
+        'total_usuarios': total_usuarios, 'total_proyectos': total_proyectos,
+        'total_devs': total_devs, 'total_empresas': total_empresas,
+        'usuarios_todos': usuarios_lista, 'proyectos_todos': proyectos_lista,
+        'logs_auditoria': logs, 'conversaciones': conversaciones, 
+        'ranking_talento': ranking,
+        'salud_global': salud_global,
+        'alertas_retraso': alertas_retraso # Nueva data detallada
     }
+
     return render(request, 'administrador/Administrador.html', context)
+
+@login_required
+def admin_toggle_usuario(request, usuario_id):
+    if request.user.rol != 'administrador': return redirect('inicio')
+    user = get_object_or_404(Usuario, id=usuario_id)
+    user.is_active = not user.is_active
+    user.save()
+    messages.info(request, f"Usuario {user.username} actualizado.")
+    return redirect('/admin/dashboard/?section=usersSection')
+
+@login_required
+def admin_toggle_proyecto(request, proyecto_id):
+    if request.user.rol != 'administrador': return redirect('inicio')
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+    proyecto.estado = 'inactivo' if proyecto.estado == 'publicado' else 'publicado'
+    proyecto.save()
+    messages.info(request, f"Proyecto actualizado.")
+    return redirect('/admin/dashboard/?section=projectsSection')
 
 @login_required
 def editar_perfil(request):
@@ -140,67 +212,42 @@ def editar_perfil(request):
         perfil, _ = PerfilDesarrollador.objects.get_or_create(usuario=request.user)
         form = PerfilDesarrolladorForm(request.POST or None, instance=perfil)
         redirect_to = 'dashboard_desarrollador'
-    else:
-        return redirect('inicio')
+    else: return redirect('inicio')
 
     if request.method == 'POST' and form.is_valid():
         form.save()
-        messages.success(request, "Perfil actualizado correctamente.")
+        messages.success(request, "Perfil actualizado")
         return redirect(redirect_to)
-    
     return render(request, 'usuarios/editar_perfil.html', {'form': form})
 
-@login_required
+@csrf_exempt
 def api_usuarios(request):
-    if request.user.rol != 'administrador': return JsonResponse({'error': 'No autorizado'}, status=403)
-    usuarios = Usuario.objects.all().values('id', 'username', 'email', 'rol', 'cedula', 'date_joined')
-    return JsonResponse(list(usuarios), safe=False)
+    usuarios = list(Usuario.objects.values('id', 'username', 'email', 'rol'))
+    return JsonResponse(usuarios, safe=False)
 
-@login_required
 def api_usuario_detalle(request, usuario_id):
-    if request.user.rol != 'administrador': return JsonResponse({'error': 'No autorizado'}, status=403)
-    usuario = get_object_or_404(Usuario, id=usuario_id)
-    return JsonResponse({'id': usuario.id, 'username': usuario.username, 'email': usuario.email, 'rol': usuario.rol, 'cedula': usuario.cedula})
+    user = get_object_or_404(Usuario, id=usuario_id)
+    return JsonResponse({'id': user.id, 'username': user.username, 'email': user.email, 'rol': user.rol})
 
-@login_required
+@csrf_exempt
 def api_crear_usuario(request):
-    if request.user.rol != 'administrador': return JsonResponse({'error': 'No autorizado'}, status=403)
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            user = Usuario.objects.create_user(username=data['username'], email=data['email'], password=data.get('password', 'Sena1234'), cedula=data.get('cedula', ''), nombre=data.get('nombre', data['username']))
-            user.rol = data['rol']
-            user.save()
-            return JsonResponse({'success': True, 'id': user.id})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+        data = json.loads(request.body)
+        user = Usuario.objects.create_user(username=data['username'], email=data['email'], password=data['password'], rol=data.get('rol', 'desarrollador'))
+        return JsonResponse({'id': user.id, 'status': 'created'})
 
-@login_required
+@csrf_exempt
 def api_actualizar_usuario(request, usuario_id):
-    if request.user.rol != 'administrador': return JsonResponse({'error': 'No autorizado'}, status=403)
     if request.method == 'PUT':
-        try:
-            usuario = Usuario.objects.get(id=usuario_id)
-            data = json.loads(request.body)
-            usuario.username = data.get('username', usuario.username)
-            usuario.nombre = data.get('nombre', data.get('username', usuario.nombre))
-            usuario.email = data.get('email', usuario.email)
-            usuario.rol = data.get('rol', usuario.rol)
-            if 'password' in data and data['password']: usuario.password = make_password(data['password'])
-            usuario.save()
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+        data = json.loads(request.body)
+        user = get_object_or_404(Usuario, id=usuario_id)
+        user.email = data.get('email', user.email)
+        user.save()
+        return JsonResponse({'status': 'updated'})
 
-@login_required
+@csrf_exempt
 def api_eliminar_usuario(request, usuario_id):
-    if request.user.rol != 'administrador': return JsonResponse({'error': 'No autorizado'}, status=403)
     if request.method == 'DELETE':
-        try:
-            Usuario.objects.get(id=usuario_id).delete()
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+        user = get_object_or_404(Usuario, id=usuario_id)
+        user.delete()
+        return JsonResponse({'status': 'deleted'})

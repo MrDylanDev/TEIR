@@ -12,7 +12,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
         <h1 style="font-weight: 300;">Mensajes Enviados</h1>
         <div>
-            <a href="{% url 'enviar_mensaje' %}" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 10px;">+ Redactar</a>
+            <a href="{% url 'sala_chat_general' 1 %}" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 10px;">💬 Chat con Soporte</a>
             <a href="{% url 'mensajeria_inbox' %}" style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 10px;">Bandeja de Entrada</a>
             <a href="{% if user.rol == 'empresa' %}{% url 'dashboard_empresa' %}{% elif user.rol == 'desarrollador' %}{% url 'dashboard_desarrollador' %}{% else %}{% url 'dashboard_admin' %}{% endif %}" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Cerrar</a>
         </div>

@@ -20,6 +20,3 @@ class Postulacion(models.Model):
 
     def __str__(self):
         return f"{self.desarrollador.username} - {self.proyecto.titulo}"
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)

@@ -20,7 +20,7 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
         window.location.href = "../administrador/Administrador.html";
     }
     if (tipo === "Desarrollador") {
-        window.location.href = "../Desarollador/Desarollador.html";
+        window.location.href = "../Desarrollador/Desarrollador.html";
     }
     if (tipo === "Empresa") {
         window.location.href = "../empresa/empresa.html";

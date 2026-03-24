@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Calificar Empresa | TEM</title>
+  <style>
+      body { background: #000; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; }
+      .card { background: #0a0a0a; padding: 40px; border-radius: 20px; border: 1px solid #222; max-width: 500px; width: 100%; }
+      .rating { display: flex; flex-direction: row-reverse; gap: 10px; margin: 20px 0; }
+      .rating input { display: none; }
+      .rating label { cursor: pointer; font-size: 30px; color: #222; transition: 0.3s; }
+      .rating label:hover, .rating label:hover ~ label, .rating input:checked ~ label { color: #FFD700; }
+      textarea { width: 100%; min-height: 100px; background: #111; border: 1px solid #333; color: white; padding: 15px; border-radius: 10px; box-sizing: border-box; }
+      .btn { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
+      .btn-submit { background: #4CAF50; color: white; }
+      .btn-cancel { background: transparent; color: #666; text-decoration: none; display: block; text-align: center; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 style="font-weight: 300;">Calificar Empresa</h1>
+    <p style="opacity: 0.6;">Tu feedback ayuda a otros desarrolladores a conocer cómo es trabajar con <strong>{{ proyecto.empresa.username }}</strong>.</p>
+    
+    <form method="post">
+      {% csrf_token %}
+      <div class="rating">
+          <input type="radio" name="puntuacion" value="5" id="5" required><label for="5">★</label>
+          <input type="radio" name="puntuacion" value="4" id="4"><label for="4">★</label>
+          <input type="radio" name="puntuacion" value="3" id="3"><label for="3">★</label>
+          <input type="radio" name="puntuacion" value="2" id="2"><label for="2">★</label>
+          <input type="radio" name="puntuacion" value="1" id="1"><label for="1">★</label>
+      </div>
+      <textarea name="comentario" placeholder="¿Cómo fue tu experiencia en este proyecto?"></textarea>
+      <button type="submit" class="btn btn-submit">Enviar Calificación</button>
+      <a href="{% url 'dashboard_desarrollador' %}" class="btn-cancel">Omitir por ahora</a>
+    </form>
+  </div>
+</body>
+</html>

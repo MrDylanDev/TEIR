@@ -2,11 +2,12 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class Usuario(AbstractUser):
-    nombre = models.CharField(max_length=150, null=True, blank=True)
+    # Campos base de MySQL (Sincronizados)
+    nombre = models.CharField(max_length=150)
     cedula = models.CharField(max_length=20, unique=True, null=True, blank=True)
     fecha_nacimiento = models.DateField(null=True, blank=True)
-    ultimo_acceso = models.DateTimeField(null=True, blank=True)
-    fecha_registro = models.DateTimeField(auto_now_add=True)
+    email = models.EmailField(max_length=150, unique=True)
+    
     rol = models.CharField(
         max_length=20,
         choices=[
@@ -25,8 +26,11 @@ class Usuario(AbstractUser):
         ],
         default='activo'
     )
+    
     fecha_registro = models.DateTimeField(auto_now_add=True)
     ultimo_acceso = models.DateTimeField(null=True, blank=True)
+    
+    # Campos técnicos para recuperación y seguridad
     token_recuperacion = models.CharField(max_length=255, null=True, blank=True)
     token_expiracion = models.DateTimeField(null=True, blank=True)
     intentos_fallidos = models.PositiveSmallIntegerField(default=0)

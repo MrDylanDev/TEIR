@@ -37,6 +37,8 @@ class RegistroUsuarioForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         user.rol = self.cleaned_data['rol']
         user.fecha_nacimiento = self.cleaned_data['fecha_nacimiento']
+        if not user.nombre:
+            user.nombre = user.username
         
         if commit:
             user.save()

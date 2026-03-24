@@ -21,7 +21,17 @@ def listar_proyectos(request):
         proyectos = proyectos.filter(prioridad=prioridad)
     
     favoritos_ids = []
+    
     if request.user.rol == 'desarrollador':
+        from favoritos.models import Favorito
+        from postulaciones.models import Postulacion
+        
+        # Obtener IDs de proyectos donde el usuario ya tiene una postulación
+        postulaciones_ids = Postulacion.objects.filter(desarrollador=request.user).values_list('proyecto_id', flat=True)
+        
+        # Excluir esos proyectos de la lista principal
+        proyectos = proyectos.exclude(id__in=postulaciones_ids)
+        
         favoritos_ids = Favorito.objects.filter(desarrollador=request.user).values_list('proyecto_id', flat=True)
         
     return render(request, 'proyectos/listar.html', {
@@ -44,48 +54,16 @@ def crear_proyecto(request):
                 tipo_solucion=request.POST.get('tipo_solucion'),
                 prioridad=request.POST.get('prioridad', 'media'),
                 vacantes=int(request.POST.get('vacantes', 1)),
-                fecha_limite=request.POST.get('fecha_limite') or None
+                fecha_limite=request.POST.get('fecha_limite') or None,
+                estado='publicado' # Publicación directa
             )
             proyecto.save()
-            messages.success(request, "Proyecto enviado a revisión exitosamente.")
+            messages.success(request, f"¡Proyecto '{proyecto.titulo}' publicado exitosamente!")
             return redirect('dashboard_empresa')
         except Exception as e:
             messages.error(request, f"Error: {e}")
             
     return render(request, 'proyectos/crear.html')
-
-@login_required
-def validar_proyectos_admin(request):
-    if request.user.rol != 'administrador':
-        return redirect('inicio')
-        
-    pendientes = Proyecto.objects.filter(estado='pendiente_aprobacion')
-    return render(request, 'proyectos/validar_admin.html', {'proyectos': pendientes})
-
-@login_required
-def aprobar_proyecto(request, proyecto_id):
-    if request.user.rol != 'administrador':
-        return redirect('inicio')
-        
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-    proyecto.estado = 'publicado'
-    proyecto.aprobado_por = request.user
-    from django.utils import timezone
-    proyecto.fecha_aprobacion = timezone.now()
-    proyecto.save()
-    messages.success(request, f"Proyecto '{proyecto.titulo}' aprobado y publicado.")
-    return redirect('dashboard_admin')
-
-@login_required
-def rechazar_proyecto(request, proyecto_id):
-    if request.user.rol != 'administrador':
-        return redirect('inicio')
-        
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-    proyecto.estado = 'rechazado'
-    proyecto.save()
-    messages.warning(request, f"Proyecto '{proyecto.titulo}' rechazado.")
-    return redirect('dashboard_admin')
 
 @login_required
 def finalizar_proyecto(request, proyecto_id):
@@ -95,52 +73,77 @@ def finalizar_proyecto(request, proyecto_id):
     
     proyecto = get_object_or_404(Proyecto, id=proyecto_id, empresa=request.user)
     
-    # Solo se puede finalizar si está en desarrollo o en revisión
-    if proyecto.estado not in ['en_desarrollo', 'en_revision']:
-        messages.error(request, "Este proyecto no puede ser finalizado en su estado actual.")
+    # Buscar la contratación activa para este proyecto
+    contratacion = Contratacion.objects.filter(proyecto=proyecto, estado='activa').first()
+    
+    if not contratacion:
+        messages.error(request, "No puedes finalizar un proyecto que no tiene un desarrollador contratado.")
         return redirect('dashboard_empresa')
     
-    contratacion = get_object_or_404(Contratacion, proyecto=proyecto, estado='activa')
     desarrollador = contratacion.desarrollador
 
     if request.method == 'POST':
         try:
             puntuacion = int(request.POST.get('puntuacion'))
             comentario = request.POST.get('comentario')
-            
-            with transaction.atomic():
-                Valoracion.objects.create(
-                    proyecto=proyecto,
-                    empresa=request.user,
-                    desarrollador=desarrollador,
-                    puntuacion=puntuacion,
-                    comentario=comentario
-                )
-                
-                proyecto.estado = 'finalizado'
-                proyecto.save()
-                
-                contratacion.estado = 'finalizada'
-                contratacion.save()
-                
-                perfil_dev = PerfilDesarrollador.objects.get(usuario=desarrollador)
-                promedio = Valoracion.objects.filter(desarrollador=desarrollador).aggregate(Avg('puntuacion'))['puntuacion__avg']
-                perfil_dev.calificacion_promedio = promedio
-                perfil_dev.num_proyectos_completados += 1
-                perfil_dev.save()
-                
-                Notificacion.objects.create(
-                    usuario=desarrollador,
-                    tipo='aprobacion',
-                    mensaje=f"¡Felicidades! La empresa ha finalizado el proyecto '{proyecto.titulo}' y te ha calificado con {puntuacion} estrellas."
-                )
-                
-            messages.success(request, f"Proyecto '{proyecto.titulo}' finalizado y desarrollador calificado.")
+
+            # Al crear la valoración, el trigger MySQL trg_nueva_valoracion
+            # actualizará automáticamente:
+            # 1. El promedio del desarrollador.
+            # 2. El número de proyectos completados.
+            # 3. El estado del proyecto a 'finalizado'.
+            Valoracion.objects.create(
+                proyecto=proyecto,
+                empresa=request.user,
+                desarrollador=desarrollador,
+                puntuacion=puntuacion,
+                comentario=comentario
+            )
+
+            # Sincronizamos la contratación por si acaso (aunque MySQL lo hace, es bueno para el ORM)
+            contratacion.estado = 'finalizada'
+            contratacion.save()
+
+            Notificacion.objects.create(
+                usuario=desarrollador,
+                tipo='aprobacion',
+                mensaje=f"¡Felicidades! La empresa ha finalizado el proyecto '{proyecto.titulo}' y te ha calificado con {puntuacion} estrellas."
+            )
+
+            messages.success(request, f"Proyecto '{proyecto.titulo}' finalizado exitosamente.")
             return redirect('dashboard_empresa')
+
         except Exception as e:
             messages.error(request, f"Error al finalizar proyecto: {e}")
 
     return render(request, 'proyectos/finalizar.html', {'proyecto': proyecto, 'desarrollador': desarrollador})
+
+@login_required
+def calificar_empresa(request, proyecto_id):
+    """Permite al desarrollador calificar a la empresa tras finalizar un proyecto"""
+    if request.user.rol != 'desarrollador':
+        return redirect('inicio')
+    
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id, estado='finalizado')
+    contratacion = get_object_or_404(Contratacion, proyecto=proyecto, desarrollador=request.user)
+    
+    if request.method == 'POST':
+        try:
+            puntuacion = int(request.POST.get('puntuacion'))
+            comentario = request.POST.get('comentario')
+            
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.execute("CALL sp_calificar_empresa(%s, %s, %s, %s, %s)", 
+                               [proyecto.id, request.user.id, proyecto.empresa.id, puntuacion, comentario])
+                
+            messages.success(request, "¡Gracias! Tu calificación ha sido registrada.")
+            return redirect('dashboard_desarrollador')
+        except Exception as e:
+            error_msg = str(e).split(",")[1].replace("'", "").strip() if "," in str(e) else str(e)
+            messages.error(request, f"Error: {error_msg}")
+            
+    return render(request, 'proyectos/calificar_empresa.html', {'proyecto': proyecto})
 
 @login_required
 def desactivar_proyecto(request, proyecto_id):

@@ -5,7 +5,7 @@ class LogAuditoria(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
     accion = models.CharField(max_length=300)
     tabla_afectada = models.CharField(max_length=100, blank=True, null=True)
-    registro_id = models.IntegerField(blank=True, null=True)
+    registro_id = models.BigIntegerField(blank=True, null=True) # Sincronizado con BIGINT
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)
 

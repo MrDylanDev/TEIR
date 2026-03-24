@@ -2,8 +2,9 @@ import csv
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from proyectos.models import Proyecto
-from usuarios.models import Usuario, PerfilDesarrollador
+from django.db.models import Avg
+from proyectos.models import Proyecto, Valoracion
+from usuarios.models import Usuario, PerfilDesarrollador, PerfilEmpresa
 
 @login_required
 def reporte_proyectos_csv(request):
@@ -27,37 +28,35 @@ def reporte_proyectos_csv(request):
             p.get_estado_display(), 
             p.fecha_publicacion.strftime('%d/%m/%Y %H:%M')
         ])
-
     return response
 
 @login_required
 def reporte_aprendices_csv(request):
-    """Generar reporte de desempeño de aprendices en CSV (Excel)"""
+    """Generar reporte de desempeño de aprendices en CSV"""
     if request.user.rol != 'administrador':
         return redirect('inicio')
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="reporte_desempeno_aprendices.csv"'
+    response['Content-Disposition'] = 'attachment; filename="reporte_aprendices_tem.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['Usuario', 'Cédula', 'Programa', 'Ficha', 'Proyectos Completados', 'Calificación Promedio'])
+    writer.writerow(['Usuario', 'Nombre', 'Programa', 'Ficha', 'Promedio', 'Proyectos'])
 
-    aprendices = PerfilDesarrollador.objects.all().select_related('usuario')
+    aprendices = PerfilDesarrollador.objects.select_related('usuario').all()
     for a in aprendices:
         writer.writerow([
             a.usuario.username,
-            a.usuario.cedula or 'N/A',
-            a.programa_formacion or 'N/A',
-            a.ficha or 'N/A',
-            a.num_proyectos_completados,
-            a.calificacion_promedio
+            a.usuario.nombre,
+            a.programa_formacion or '-',
+            a.ficha or '-',
+            a.calificacion_promedio,
+            a.num_proyectos_completados
         ])
-
     return response
 
 @login_required
 def reporte_vista_impresion(request):
-    """Vista HTML diseñada para ser impresa como PDF (Reporte General)"""
+    """Vista optimizada para imprimir reportes generales"""
     if request.user.rol != 'administrador':
         return redirect('inicio')
     
@@ -68,3 +67,34 @@ def reporte_vista_impresion(request):
         'total_proyectos': Proyecto.objects.count(),
     }
     return render(request, 'logs/reporte_impresion.html', context)
+
+@login_required
+def reporte_empresas_csv(request):
+    """Generar reporte de todas las empresas en CSV (Excel)"""
+    if request.user.rol != 'administrador':
+        return redirect('inicio')
+        
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="reporte_empresas_tem.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Empresa', 'NIT', 'Sector', 'Ciudad', 'Telefono', 'Email', 'Proyectos Publicados', 'Reputación (★)'])
+    
+    empresas = PerfilEmpresa.objects.select_related('usuario').all()
+    for e in empresas:
+        proyectos_count = Proyecto.objects.filter(empresa=e.usuario).count()
+        # Calcular promedio de reputación recibida de desarrolladores
+        promedio = Valoracion.objects.filter(empresa=e.usuario, rol_evaluador='desarrollador').aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+        
+        writer.writerow([
+            e.nombre_empresa or e.usuario.username,
+            e.nit or '-',
+            e.sector or '-',
+            e.ciudad or '-',
+            e.telefono or '-',
+            e.usuario.email,
+            proyectos_count,
+            round(promedio, 2)
+        ])
+        
+    return response

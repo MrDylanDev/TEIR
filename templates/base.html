@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TEM | Plataforma{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+    <!-- Estilos comunes -->
+    <link rel="stylesheet" href="{% static 'publico/css/estilos.css' %}"> 
+    <style>
+        body { background: #000; color: white; margin: 0; font-family: 'Inter', sans-serif; }
+        .sidebar { background: #000; border-right: 1px solid #222; }
+        .btn-nav { cursor: pointer; transition: 0.3s; }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

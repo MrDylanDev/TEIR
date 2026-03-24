@@ -43,15 +43,21 @@ class Proyecto(models.Model):
         db_table = 'proyectos'
 
 class Valoracion(models.Model):
-    proyecto = models.OneToOneField(Proyecto, on_delete=models.CASCADE, related_name='valoracion')
-    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_realizadas')
-    desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_recibidas')
+    ROL_EVALUADOR = [
+        ('empresa', 'Empresa'),
+        ('desarrollador', 'Desarrollador'),
+    ]
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='valoraciones')
+    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_como_empresa')
+    desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_como_dev')
+    rol_evaluador = models.CharField(max_length=20, choices=ROL_EVALUADOR, default='empresa')
     puntuacion = models.PositiveSmallIntegerField()
     comentario = models.TextField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'valoraciones'
+        unique_together = ('proyecto', 'rol_evaluador')
         verbose_name_plural = "Valoraciones"
 
 class HistorialEstadoProyecto(models.Model):

@@ -6,21 +6,24 @@ from proyectos.models import Proyecto
 
 @login_required
 def toggle_favorito(request, proyecto_id):
-    """Añadir o quitar un proyecto de favoritos"""
+    """Añadir o quitar un proyecto de favoritos usando SP de MySQL"""
     if request.user.rol != 'desarrollador':
         return redirect('inicio')
         
+    from django.db import connection
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-    favorito_qs = Favorito.objects.filter(desarrollador=request.user, proyecto=proyecto)
     
-    if favorito_qs.exists():
-        favorito_qs.delete()
-        messages.info(request, f"Proyecto '{proyecto.titulo}' quitado de favoritos.")
-    else:
-        Favorito.objects.create(desarrollador=request.user, proyecto=proyecto)
-        messages.success(request, f"Proyecto '{proyecto.titulo}' añadido a favoritos ❤️")
+    try:
+        # Llamamos al procedimiento almacenado de MySQL
+        with connection.cursor() as cursor:
+            cursor.execute("CALL sp_toggle_favorito(%s, %s)", [request.user.id, proyecto_id])
+            result = cursor.fetchone()
+            mensaje = result[0] if result else "Acción realizada"
+            
+        messages.success(request, mensaje)
+    except Exception as e:
+        messages.error(request, f"Error al procesar favorito: {e}")
         
-    # Redirigir a donde venía el usuario
     return redirect(request.META.get('HTTP_REFERER', 'listar_proyectos'))
 
 @login_required

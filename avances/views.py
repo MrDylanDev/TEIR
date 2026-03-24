@@ -26,6 +26,9 @@ def registrar_avance(request, proyecto_id):
             archivo_url = request.POST.get('archivo_url')
             porcentaje = int(request.POST.get('porcentaje', 0))
             
+            # MySQL trigger trg_nuevo_avance se encargará de:
+            # 1. Notificar a la empresa y al admin.
+            # 2. Cambiar estado a 'en_revision' si el porcentaje es 100%.
             avance = Avance(
                 proyecto=proyecto,
                 desarrollador=request.user,
@@ -34,13 +37,6 @@ def registrar_avance(request, proyecto_id):
                 porcentaje=porcentaje
             )
             avance.save()
-            
-            # Crear notificación para la empresa (Paso previo a Signals)
-            Notificacion.objects.create(
-                usuario=proyecto.empresa,
-                tipo='avance',
-                mensaje=f"El desarrollador {request.user.username} ha registrado un nuevo avance ({porcentaje}%) en el proyecto '{proyecto.titulo}'."
-            )
             
             messages.success(request, "Avance registrado correctamente.")
             return redirect('dashboard_desarrollador')

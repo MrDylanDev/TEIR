@@ -7,136 +7,222 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TEM - Desarrollador</title>
   <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}" />
+  <style>
+      .seccion-v { display: none; }
+      .seccion-v.activa { display: block; }
+      .btn-nav { width: 100%; text-align: left; background: none; border: none; color: white; padding: 12px 20px; cursor: pointer; transition: 0.3s; border-radius: 8px; margin-bottom: 5px; font-size: 14px; }
+      .btn-nav:hover { background: #111; }
+      .btn-nav.active { background: #4CAF50; font-weight: bold; }
+      .card-p { background: #0a0a0a; padding: 20px; border-radius: 12px; border: 1px solid #222; transition: 0.3s; }
+      .card-p:hover { border-color: #4CAF50; }
+      .badge { font-size: 10px; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; font-weight: bold; }
+      .badge-pendiente { background: #ff9800; color: white; }
+      .badge-aceptada { background: #4CAF50; color: white; }
+      .badge-rechazada { background: #f44336; color: white; }
+  </style>
 </head>
 <body>
-  <!-- =====================================
-       BARRA LATERAL
-  ====================================== -->
+
   <aside class="sidebar">
     <div class="logo">
-      <img src="{% static 'IMG/Logo.jpg' %}" alt="Logo TEM" style="width: 80px; border-radius: 50%;">
-      <h3 style="margin-top: 10px;">TechnoEmprende</h3>
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="Logo TEM" style="width: 60px; border-radius: 50%;">
+      <h3 style="margin-top: 10px; font-size: 16px;">TechnoEmprende</h3>
     </div>
 
-    <nav class="menu">
-      <div class="menu-item">
-        <a href="{% url 'mensajeria_inbox' %}" class="menu-btn" style="text-decoration: none; display: block; padding: 10px 20px; color: white;">Mensajes</a>
-      </div>
+    <nav class="menu" style="margin-top: 30px;">
+      <button class="btn-nav active" onclick="verSeccion('inicio', this)">🏠 Inicio</button>
+      <button class="btn-nav" onclick="verSeccion('centro-chat', this)" style="color: #4CAF50;">💬 Chat</button>
+      
+      <div style="margin: 20px 0 10px 20px; font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;">Proyectos</div>
+      <a href="{% url 'listar_proyectos' %}" style="text-decoration: none;"><button class="btn-nav">🔍 Explorar Proyectos</button></a>
+      <button class="btn-nav" onclick="verSeccion('postulaciones', this)">📝 Mis Postulaciones</button>
+      <button class="btn-nav" onclick="verSeccion('activos', this)">🚀 Trabajo Actual</button>
+      <button class="btn-nav" onclick="verSeccion('completados', this)">🏆 Mi Portafolio</button>
+      <button class="btn-nav" onclick="verSeccion('favoritos', this)">❤️ Favoritos</button>
 
-      <div class="menu-item">
-        <button class="menu-btn"> Proyectos</button>
-        <div class="submenu">
-          <a href="#" style="color: white; text-decoration: none; display: block; padding: 5px 20px;">Activos</a>
-          <a href="#" style="color: white; text-decoration: none; display: block; padding: 5px 20px;">Completados</a>
-          <a href="{% url 'listar_proyectos' %}" style="color: white; text-decoration: none; display: block; padding: 5px 20px;">Nuevos</a>
-        </div>
-      </div>
-
-      <div class="menu-item">
-        <a href="{% url 'editar_perfil' %}" class="menu-btn" style="text-decoration: none; display: block; padding: 10px 20px; color: white;">Mi Perfil</a>
-      </div>
-
-      <div class="menu-item">
-        <a href="{% url 'logout' %}" class="menu-btn" style="text-decoration: none; display: block; padding: 10px 20px; color: #ff5555;">Cerrar Sesión</a>
-      </div>
+      <div style="margin: 20px 0 10px 20px; font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;">Cuenta</div>
+      <a href="{% url 'editar_perfil' %}" style="text-decoration: none;"><button class="btn-nav">👤 Mi Perfil (Editar)</button></a>
+      <a href="{% url 'logout' %}" style="text-decoration: none;"><button class="btn-nav" style="color: #ff5555;">🚪 Cerrar Sesión</button></a>
     </nav>
   </aside>
 
-  <!-- =====================================
-       CONTENIDO PRINCIPAL
-  ====================================== -->
   <main>
     <section class="contenido">
-      <h1>Panel de Desarrollador</h1>
-      <p style="opacity: 0.7; margin-bottom: 30px;">Bienvenido, {{ request.user.username }}. Aquí tienes un resumen de tu actividad.</p>
+      
+      <!-- SECCION: INICIO -->
+      <div id="inicio" class="seccion-v activa">
+          <h1>Resumen de Actividad</h1>
+          <p style="opacity: 0.7;">Bienvenido de nuevo, {{ request.user.nombre|default:request.user.username }}.</p>
 
-      {% if messages %}
-        <div class="messages" style="margin-bottom: 20px;">
-          {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" style="padding: 10px; background: #222; border-radius: 5px; margin-bottom: 5px;">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
+          <div class="stats" style="margin-top: 30px;">
+            <div class="card"><h3>Proyectos Activos</h3><p>{{ proyectos_activos_count }}</p></div>
+            <div class="card"><h3>Completados</h3><p>{{ proyectos_completados }}</p></div>
+            <div class="card"><h3>Disponibles</h3><p>{{ nuevos_proyectos }}</p></div>
+          </div>
 
-      <div class="stats">
-        <div class="card">
-          <h3>Proyectos Activos</h3>
-          <p>{{ proyectos_activos_count }}</p>
-        </div>
-        <div class="card">
-          <h3>Completados</h3>
-          <p>{{ proyectos_completados }}</p>
-        </div>
-        <div class="card">
-          <h3>Nuevos Proyectos</h3>
-          <p>{{ nuevos_proyectos }}</p>
-        </div>
+          <div style="margin-top: 40px; max-width: 600px;">
+              <div class="perfil-bloque" style="background: #0a0a0a;">
+                  <h3>🔔 Notificaciones Recientes</h3>
+                  <ul style="list-style: none; padding: 0;">
+                      {% for notif in notificaciones %}
+                        <li style="padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; opacity: 0.8;">{{ notif.mensaje }}</li>
+                      {% empty %}
+                        <li style="opacity: 0.4; font-size: 13px;">Sin avisos nuevos.</li>
+                      {% endfor %}
+                  </ul>
+              </div>
+          </div>
       </div>
 
-      <div style="margin-top: 40px;">
-          <h2 style="font-weight: 300; margin-bottom: 20px;">Mis Proyectos Activos</h2>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+
+      <!-- SECCION: CHAT -->
+      <div id="centro-chat" class="seccion-v">
+          <h1>Centro de Mensajes</h1>
+          <p style="opacity: 0.7; margin-bottom: 30px;">Conversaciones con empresas y soporte.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+              <div class="card-p" style="border-color: #4CAF50;">
+                  <h3 style="margin-bottom: 5px;">Soporte TEM</h3>
+                  <p style="font-size: 13px; opacity: 0.6; margin-bottom: 20px;">Ayuda técnica y administrativa.</p>
+                  <a href="{% url 'sala_chat_general' 1 %}" style="display: block; background: #4CAF50; color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Chatear con Admin</a>
+              </div>
               {% for contratacion in mis_proyectos_activos %}
-                <div style="background: #0a0a0a; padding: 20px; border-radius: 10px; border: 1px solid #222;">
-                    <h3 style="margin-bottom: 10px; font-weight: 300;">{{ contratacion.proyecto.titulo }}</h3>
-                    <p style="font-size: 14px; opacity: 0.7; margin-bottom: 15px;">{{ contratacion.proyecto.descripcion|truncatewords:15 }}</p>
-                    <div style="display: flex; gap: 10px;">
-                        <a href="{% url 'registrar_avance' contratacion.proyecto.id %}" style="background: white; color: black; padding: 8px 12px; border-radius: 5px; text-decoration: none; font-size: 13px; font-weight: bold;">Registrar Avance</a>
-                        <a href="{% url 'ver_avances' contratacion.proyecto.id %}" style="background: #111; color: white; border: 1px solid #333; padding: 8px 12px; border-radius: 5px; text-decoration: none; font-size: 13px;">Historial</a>
-                    </div>
+                <div class="card-p">
+                    <h3 style="margin-bottom: 5px;">{{ contratacion.empresa.username }}</h3>
+                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 15px;">Proyecto: {{ contratacion.proyecto.titulo }}</p>
+                    <a href="{% url 'sala_chat' contratacion.empresa.id contratacion.proyecto.id %}" style="display: block; background: white; color: black; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Hablar con Empresa</a>
                 </div>
-              {% empty %}
-                <p style="opacity: 0.5;">No tienes proyectos activos en este momento.</p>
               {% endfor %}
           </div>
       </div>
 
-      <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
-          <!-- Notificaciones -->
-          <div class="perfil-bloque" style="background: #0a0a0a;">
-              <h3>Notificaciones</h3>
-              <ul style="list-style: none; font-size: 13px;">
-                  {% for notif in notificaciones %}
-                    <li style="padding: 10px 0; border-bottom: 1px solid #222;">
-                        {{ notif.mensaje|truncatechars:50 }}
-                    </li>
-                  {% empty %}
-                    <li style="opacity: 0.5;">Sin avisos.</li>
-                  {% endfor %}
-              </ul>
-          </div>
-
-          <!-- Favoritos -->
-          <div class="perfil-bloque" style="background: #0a0a0a;">
-              <h3>Mis Favoritos ❤️</h3>
-              <ul style="list-style: none; font-size: 13px;">
-                  {% for fav in favoritos %}
-                    <li style="padding: 10px 0; border-bottom: 1px solid #222;">
-                        <a href="{% url 'listar_proyectos' %}" style="color: white; text-decoration: none;">{{ fav.proyecto.titulo }}</a>
-                    </li>
-                  {% empty %}
-                    <li style="opacity: 0.5;">Aún no tienes favoritos.</li>
-                  {% endfor %}
-              </ul>
-              {% if favoritos %}
-                <a href="{% url 'listar_favoritos' %}" style="display: block; margin-top: 15px; font-size: 12px; color: #4CAF50; text-decoration: none;">Ver todos</a>
-              {% endif %}
-          </div>
-
-          <!-- Perfil Corto -->
-          <div class="perfil-bloque" style="background: #0a0a0a;">
-              <h3>Mi Perfil</h3>
-              <div style="font-size: 13px; margin-bottom: 15px;">
-                  <p><strong>Ficha:</strong> {{ perfil.ficha|default:"-" }}</p>
-                  <p><strong>Promedio:</strong> {{ perfil.calificacion_promedio }} ⭐</p>
-              </div>
-              <a href="{% url 'editar_perfil' %}" style="display: block; background: white; color: black; padding: 10px; text-decoration: none; border-radius: 6px; text-align: center; font-weight: bold; font-size: 12px;">Editar</a>
+      <!-- SECCION: POSTULACIONES -->
+      <div id="postulaciones" class="seccion-v">
+          <h1>Mis Postulaciones</h1>
+          <p style="opacity: 0.7; margin-bottom: 30px;">Seguimiento de las solicitudes enviadas.</p>
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+              {% for post in mis_postulaciones %}
+                <div class="card-p" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0;">{{ post.proyecto.titulo }}</h3>
+                        <p style="font-size: 13px; opacity: 0.5; margin-top: 5px;">Enviada el: {{ post.fecha|date:"d/m/Y" }}</p>
+                    </div>
+                    <span class="badge badge-{{ post.estado }}">{{ post.get_estado_display }}</span>
+                </div>
+              {% empty %}
+                <p style="opacity: 0.5; text-align: center; padding: 50px;">Aún no te has postulado a ningún proyecto.</p>
+              {% endfor %}
           </div>
       </div>
+
+      <!-- SECCION: TRABAJO ACTUAL -->
+      <div id="activos" class="seccion-v">
+          <h1>Proyectos en Desarrollo</h1>
+          <p style="opacity: 0.7; margin-bottom: 30px;">Registra tus avances y gestiona tus entregas.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+              {% for contratacion in mis_proyectos_activos %}
+                <div class="card-p">
+                    <h3 style="margin-bottom: 10px; color: #4CAF50;">{{ contratacion.proyecto.titulo }}</h3>
+                    <p style="font-size: 14px; opacity: 0.7; margin-bottom: 20px; line-height: 1.5;">{{ contratacion.proyecto.descripcion|truncatewords:20 }}</p>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{% url 'registrar_avance' contratacion.proyecto.id %}" style="flex: 1; background: white; color: black; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">Registrar Avance</a>
+                        <a href="{% url 'ver_avances' contratacion.proyecto.id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;">Historial</a>
+                    </div>
+                </div>
+              {% empty %}
+                <p style="opacity: 0.5; text-align: center; padding: 50px; grid-column: 1/-1;">No tienes proyectos activos.</p>
+              {% endfor %}
+          </div>
+      </div>
+
+      <!-- SECCION: PORTAFOLIO -->
+      <div id="completados" class="seccion-v">
+          <h1>Mi Portafolio</h1>
+          <p style="opacity: 0.7; margin-bottom: 30px;">Historial de proyectos finalizados y testimonios de empresas.</p>
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+              {% for contratacion in mis_proyectos_finalizados %}
+                <div class="card-p">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0;">{{ contratacion.proyecto.titulo }}</h3>
+                        <div style="color: #FFD700; font-size: 18px;">
+                            {% if contratacion.valoracion %}
+                                {% with ''|center:contratacion.valoracion.puntuacion as range %}
+                                    {% for _ in range %}★{% endfor %}
+                                {% endwith %}
+                            {% else %}
+                                Sin calificación
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p style="font-size: 14px; opacity: 0.6; margin-top: 10px;">Empresa: {{ contratacion.empresa.username }}</p>
+                    <div style="margin-top: 15px; padding: 15px; background: #111; border-radius: 8px; font-style: italic; font-size: 13px; border-left: 3px solid #4CAF50;">
+                        {% if contratacion.valoracion %}
+                            "{{ contratacion.valoracion.comentario|default:"El cliente no dejó un comentario." }}"
+                        {% else %}
+                            "Proyecto finalizado satisfactoriamente."
+                        {% endif %}
+                    </div>
+                    <div style="margin-top: 10px; text-align: right;">
+                        <a href="{% url 'calificar_empresa' contratacion.proyecto.id %}" style="color: #4CAF50; font-size: 12px; text-decoration: none; font-weight: bold;">⭐ Calificar a la Empresa</a>
+                    </div>
+                </div>
+              {% empty %}
+                <p style="opacity: 0.5; text-align: center; padding: 50px;">Aún no has finalizado proyectos.</p>
+              {% endfor %}
+          </div>
+      </div>
+
+      <!-- SECCION: FAVORITOS -->
+      <div id="favoritos" class="seccion-v">
+          <h1>Mis Proyectos Favoritos</h1>
+          <p style="opacity: 0.7; margin-bottom: 30px;">Proyectos que te interesaron. ¡Postúlate antes de que se agoten las vacantes!</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+              {% for fav in favoritos %}
+                <div class="card-p">
+                    <h3>{{ fav.proyecto.titulo }}</h3>
+                    <p style="font-size: 13px; opacity: 0.6; margin: 10px 0;">{{ fav.proyecto.get_tipo_solucion_display }}</p>
+                    <a href="{% url 'postularse_a_proyecto' fav.proyecto.id %}" style="display: block; background: #4CAF50; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; color: white; font-weight: bold; font-size: 13px;">Postularme ahora</a>
+                </div>
+              {% empty %}
+                <p style="opacity: 0.5; text-align: center; padding: 50px;">No tienes favoritos guardados.</p>
+              {% endfor %}
+          </div>
+      </div>
+
     </section>
   </main>
 
-  <!-- 👇 OJO: El script debe ir al FINAL del body -->
-  <script src="{% static 'Desarrollador/script/menu.js' %}"></script>
+  <script>
+    function verSeccion(id, btn) {
+        // Ocultar todas
+        document.querySelectorAll('.seccion-v').forEach(s => s.classList.remove('activa'));
+        // Quitar active de botones
+        document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+        
+        // Mostrar seleccionada
+        const target = document.getElementById(id);
+        if (target) {
+            target.classList.add('activa');
+            if (btn) btn.classList.add('active');
+            else {
+                // Si no hay botón (carga inicial), buscar el que tenga el onclick correspondiente
+                const menuBtns = document.querySelectorAll('.btn-nav');
+                menuBtns.forEach(b => {
+                    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(id)) {
+                        b.classList.add('active');
+                    }
+                });
+            }
+        }
+    }
+
+    // Al cargar la página, revisar si hay una sección en la URL
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section');
+        if (section) {
+            verSeccion(section);
+        }
+    };
+  </script>
 </body>
 </html>

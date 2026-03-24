@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat con {{ receptor.username }} | TEM</title>
+    <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
+    <style>
+        body { background: #000; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
+        .chat-header { background: #111; padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .mensaje { max-width: 70%; padding: 12px 18px; border-radius: 15px; font-size: 15px; line-height: 1.4; position: relative; }
+        .enviado { align-self: flex-end; background: #4CAF50; color: white; border-bottom-right-radius: 2px; }
+        .recibido { align-self: flex-start; background: #222; color: white; border-bottom-left-radius: 2px; border: 1px solid #333; }
+        .meta { display: block; font-size: 10px; margin-top: 5px; opacity: 0.6; text-align: right; }
+        .chat-input { background: #111; padding: 20px; border-top: 1px solid #222; }
+        .input-group { display: flex; gap: 15px; max-width: 1000px; margin: 0 auto; }
+        input[type="text"] { flex: 1; background: #000; border: 1px solid #333; color: white; padding: 12px 18px; border-radius: 25px; outline: none; transition: border 0.3s; }
+        input[type="text"]:focus { border-color: #4CAF50; }
+        .btn-enviar { background: #4CAF50; color: white; border: none; padding: 10px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-header">
+        <div>
+            <h2 style="margin:0; font-weight: 300;">{{ receptor.username }} <small style="font-size: 12px; opacity:0.5;">({{ receptor.get_rol_display }})</small></h2>
+            {% if proyecto %}
+                <p style="margin:5px 0 0; font-size:13px; color: #4CAF50;">Proyecto: {{ proyecto.titulo }}</p>
+            {% endif %}
+        </div>
+        <a href="javascript:history.back()" style="background: #222; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver</a>
+    </div>
+
+    <div class="chat-container" id="chat-container">
+        {% for msg in mensajes_chat %}
+            <div class="mensaje {% if msg.remitente == request.user %}enviado{% else %}recibido{% endif %}">
+                {{ msg.cuerpo }}
+                <span class="meta">{{ msg.fecha_envio|date:"H:i" }}</span>
+            </div>
+        {% empty %}
+            <div style="text-align: center; margin-top: 50px; opacity: 0.4;">
+                <p>No hay mensajes previos en este chat. ¡Di hola!</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="chat-input">
+        <form method="post" class="input-group">
+            {% csrf_token %}
+            <input type="text" name="cuerpo" placeholder="Escribe un mensaje..." required autocomplete="off">
+            <button type="submit" class="btn-enviar">Enviar</button>
+        </form>
+    </div>
+
+    <script>
+        // Auto-scroll al final del chat
+        const container = document.getElementById('chat-container');
+        container.scrollTop = container.scrollHeight;
+    </script>
+
+</body>
+</html>
