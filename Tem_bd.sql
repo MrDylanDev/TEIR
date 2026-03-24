@@ -1614,9 +1614,10 @@ CREATE TABLE `valoraciones` (
   `desarrollador_id` bigint NOT NULL,
   `puntuacion` tinyint NOT NULL,
   `comentario` text,
+  `rol_evaluador` enum('empresa','desarrollador') NOT NULL DEFAULT 'empresa',
   `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unica_valoracion` (`proyecto_id`),
+  UNIQUE KEY `unica_valoracion_compuesta` (`proyecto_id`,`rol_evaluador`),
   KEY `empresa_id` (`empresa_id`),
   KEY `desarrollador_id` (`desarrollador_id`),
   CONSTRAINT `valoraciones_ibfk_1` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE,
@@ -1644,28 +1645,30 @@ UNLOCK TABLES;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_nueva_valoracion` AFTER INSERT ON `valoraciones` FOR EACH ROW BEGIN
-  UPDATE perfil_desarrollador
-  SET
-    calificacion_promedio = (
-      SELECT AVG(puntuacion)
-      FROM valoraciones
-      WHERE desarrollador_id = NEW.desarrollador_id
-    ),
-    num_proyectos_completados = (
-      SELECT COUNT(*)
-      FROM valoraciones
-      WHERE desarrollador_id = NEW.desarrollador_id
-    )
-  WHERE usuario_id = NEW.desarrollador_id;
+  IF NEW.rol_evaluador = 'empresa' THEN
+    UPDATE perfil_desarrollador
+    SET
+      calificacion_promedio = (
+        SELECT AVG(puntuacion)
+        FROM valoraciones
+        WHERE desarrollador_id = NEW.desarrollador_id AND rol_evaluador = 'empresa'
+      ),
+      num_proyectos_completados = (
+        SELECT COUNT(*)
+        FROM valoraciones
+        WHERE desarrollador_id = NEW.desarrollador_id AND rol_evaluador = 'empresa'
+      )
+    WHERE usuario_id = NEW.desarrollador_id;
 
-  UPDATE proyectos SET estado = 'finalizado' WHERE id = NEW.proyecto_id;
+    UPDATE proyectos SET estado = 'finalizado' WHERE id = NEW.proyecto_id;
 
-  INSERT INTO notificaciones (usuario_id, tipo, mensaje)
-  VALUES (
-    NEW.desarrollador_id,
-    'avance',
-    CONCAT('Recibiste una calificación de ', NEW.puntuacion, '/5 estrellas.')
-  );
+    INSERT INTO notificaciones (usuario_id, tipo, mensaje)
+    VALUES (
+      NEW.desarrollador_id,
+      'aprobacion',
+      CONCAT('Recibiste una calificación de ', NEW.puntuacion, '/5 estrellas.')
+    );
+  END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1676,6 +1679,26 @@ DELIMITER ;
 --
 -- Dumping routines for database 'tem_dbv2'
 --
+/*!50003 DROP PROCEDURE IF EXISTS `sp_calificar_empresa` */;
+DELIMITER ;;
+CREATE PROCEDURE sp_calificar_empresa(
+  IN p_proyecto_id INT,
+  IN p_desarrollador_id INT,
+  IN p_empresa_id INT,
+  IN p_puntuacion TINYINT,
+  IN p_comentario TEXT
+)
+BEGIN
+  IF EXISTS (SELECT 1 FROM valoraciones WHERE proyecto_id = p_proyecto_id AND rol_evaluador = 'desarrollador') THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ya calificaste a esta empresa por este proyecto';
+  END IF;
+
+  INSERT INTO valoraciones (proyecto_id, empresa_id, desarrollador_id, puntuacion, comentario, rol_evaluador)
+  VALUES (p_proyecto_id, p_empresa_id, p_desarrollador_id, p_puntuacion, p_comentario, 'desarrollador');
+  
+  SELECT 'Calificación a la empresa registrada correctamente' AS mensaje, TRUE AS success;
+END ;;
+DELIMITER ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_actualizar_perfil_desarrollador` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
