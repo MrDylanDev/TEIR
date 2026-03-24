@@ -13,7 +13,7 @@ class Notificacion(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='mis_notificaciones')
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='otro')
     mensaje = models.TextField()
-    leida = models.BooleanField(default=False) # Sincronizado con MySQL 'leida'
+    leida = models.BooleanField(default=False) 
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:

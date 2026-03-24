@@ -10,6 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # La tabla 'notificaciones' ya existe en la BD con este nombre.
-        # No-op para sincronizar sin modificar la BD.
+        
     ]

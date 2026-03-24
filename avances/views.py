@@ -4,7 +4,6 @@ from django.contrib import messages
 from .models import Avance
 from proyectos.models import Proyecto
 from contrataciones.models import Contratacion
-from notificaciones.models import Notificacion
 
 @login_required
 def registrar_avance(request, proyecto_id):
@@ -26,22 +25,30 @@ def registrar_avance(request, proyecto_id):
             archivo_url = request.POST.get('archivo_url')
             porcentaje = int(request.POST.get('porcentaje', 0))
             
-            # MySQL trigger trg_nuevo_avance se encargará de:
-            # 1. Notificar a la empresa y al admin.
-            # 2. Cambiar estado a 'en_revision' si el porcentaje es 100%.
-            avance = Avance(
-                proyecto=proyecto,
-                desarrollador=request.user,
-                descripcion=descripcion,
-                archivo_url=archivo_url,
-                porcentaje=porcentaje
-            )
-            avance.save()
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.callproc('sp_subir_avance', [
+                    proyecto.id, 
+                    request.user.id, 
+                    descripcion, 
+                    archivo_url, 
+                    porcentaje
+                ])
+                # Capturamos el resultado del SP
+                row = cursor.fetchone()
+                if row and len(row) > 1:
+                    messages.success(request, row[1]) # 'Avance registrado correctamente'
+                else:
+                    messages.success(request, "Avance registrado correctamente.")
             
-            messages.success(request, "Avance registrado correctamente.")
             return redirect('dashboard_desarrollador')
         except Exception as e:
-            messages.error(request, f"Error al registrar avance: {e}")
+            # Capturar errores personalizados del SP (SIGNAL SQLSTATE '45000')
+            error_msg = str(e)
+            if 'Solo puedes registrar un avance' in error_msg:
+                messages.warning(request, "Límite alcanzado: Solo puedes registrar un avance por día en este proyecto.")
+            else:
+                messages.error(request, f"Error al registrar avance: {e}")
 
     return render(request, 'avances/registrar.html', {'proyecto': proyecto})
 

@@ -13,7 +13,7 @@ def sala_chat(request, receptor_id, proyecto_id=None):
 
     from django.db.models import Q
 
-    # Lógica de Soporte: Si uno de los dos es ADMIN, el chat es con "Soporte"
+    
     admin_ids = Usuario.objects.filter(rol='administrador').values_list('id', flat=True)
 
     if request.user.rol == 'administrador' or receptor.rol == 'administrador':

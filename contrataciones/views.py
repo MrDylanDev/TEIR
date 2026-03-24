@@ -19,7 +19,7 @@ def ver_detalle_contrato(request, contratacion_id):
     """Ver detalles técnicos de un contrato específico"""
     contrato = get_object_or_404(Contratacion, id=contratacion_id)
     
-    # Seguridad: Solo las partes involucradas o el admin pueden ver
+    # Seguridad
     if request.user != contrato.empresa and request.user != contrato.desarrollador and request.user.rol != 'administrador':
         return redirect('inicio')
         
@@ -50,13 +50,6 @@ def cancelar_contratacion(request, contratacion_id):
             msg_estado = "El proyecto vuelve a estar disponible en el catálogo."
         else:
             msg_estado = "El proyecto permanece en desarrollo con las vacantes restantes."
-        
-        # 4. Notificar al desarrollador
-        Notificacion.objects.create(
-            usuario=contrato.desarrollador,
-            tipo='alerta',
-            mensaje=f"Tu contrato para el proyecto '{proyecto.titulo}' ha sido cancelado por la empresa."
-        )
         
         messages.warning(request, f"Contrato con {contrato.desarrollador.username} cancelado. {msg_estado}")
     else:

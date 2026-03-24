@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
+import json
 
 from .forms import RegistroUsuarioForm, PerfilEmpresaForm, PerfilDesarrolladorForm
 from .models import Usuario, PerfilEmpresa, PerfilDesarrollador
@@ -17,8 +18,6 @@ from contrataciones.models import Contratacion
 from notificaciones.models import Notificacion
 from favoritos.models import Favorito
 from mensajes.models import Mensaje
-
-import json
 
 def inicio(request):
     casos_exito = Proyecto.objects.filter(estado='finalizado').order_by('-fecha_aprobacion')[:4]
@@ -106,7 +105,7 @@ def dashboard_desarrollador(request):
         contrato.valoracion = Valoracion.objects.filter(
             proyecto=contrato.proyecto, 
             desarrollador=request.user,
-            rol_evaluador='empresa' # <--- CRÍTICO: Ver lo que me pusieron
+            rol_evaluador='empresa' 
         ).first()
 
     perfil, _ = PerfilDesarrollador.objects.get_or_create(usuario=request.user)
@@ -179,7 +178,7 @@ def dashboard_admin(request):
         'logs_auditoria': logs, 'conversaciones': conversaciones, 
         'ranking_talento': ranking,
         'salud_global': salud_global,
-        'alertas_retraso': alertas_retraso # Nueva data detallada
+        'alertas_retraso': alertas_retraso 
     }
 
     return render(request, 'administrador/Administrador.html', context)
@@ -188,9 +187,17 @@ def dashboard_admin(request):
 def admin_toggle_usuario(request, usuario_id):
     if request.user.rol != 'administrador': return redirect('inicio')
     user = get_object_or_404(Usuario, id=usuario_id)
-    user.is_active = not user.is_active
+    
+    # trigger.
+    if user.estado == 'activo':
+        user.estado = 'inactivo'
+        user.is_active = False
+    else:
+        user.estado = 'activo'
+        user.is_active = True
+        
     user.save()
-    messages.info(request, f"Usuario {user.username} actualizado.")
+    messages.info(request, f"Estado del usuario {user.username} actualizado a {user.estado}.")
     return redirect('/admin/dashboard/?section=usersSection')
 
 @login_required
@@ -232,18 +239,29 @@ def api_usuario_detalle(request, usuario_id):
 @csrf_exempt
 def api_crear_usuario(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        user = Usuario.objects.create_user(username=data['username'], email=data['email'], password=data['password'], rol=data.get('rol', 'desarrollador'))
-        return JsonResponse({'id': user.id, 'status': 'created'})
+        try:
+            data = json.loads(request.body)
+            user = Usuario.objects.create_user(
+                username=data['username'], 
+                email=data['email'], 
+                password=data['password'], 
+                rol=data.get('rol', 'desarrollador')
+            )
+            return JsonResponse({'id': user.id, 'status': 'created'}, status=201)
+        except (json.JSONDecodeError, KeyError) as e:
+            return JsonResponse({'error': f'Invalid JSON or missing fields: {str(e)}'}, status=400)
 
 @csrf_exempt
 def api_actualizar_usuario(request, usuario_id):
     if request.method == 'PUT':
-        data = json.loads(request.body)
-        user = get_object_or_404(Usuario, id=usuario_id)
-        user.email = data.get('email', user.email)
-        user.save()
-        return JsonResponse({'status': 'updated'})
+        try:
+            data = json.loads(request.body)
+            user = get_object_or_404(Usuario, id=usuario_id)
+            user.email = data.get('email', user.email)
+            user.save()
+            return JsonResponse({'status': 'updated'})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
 
 @csrf_exempt
 def api_eliminar_usuario(request, usuario_id):

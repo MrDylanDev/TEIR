@@ -2,11 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Avg
 from .models import Proyecto, Valoracion
-from usuarios.models import Usuario, PerfilDesarrollador
+from usuarios.models import Usuario
 from contrataciones.models import Contratacion
-from notificaciones.models import Notificacion
 from favoritos.models import Favorito
 
 @login_required
@@ -87,27 +85,13 @@ def finalizar_proyecto(request, proyecto_id):
             puntuacion = int(request.POST.get('puntuacion'))
             comentario = request.POST.get('comentario')
 
-            # Al crear la valoración, el trigger MySQL trg_nueva_valoracion
-            # actualizará automáticamente:
-            # 1. El promedio del desarrollador.
-            # 2. El número de proyectos completados.
-            # 3. El estado del proyecto a 'finalizado'.
+            # El trigger 
             Valoracion.objects.create(
                 proyecto=proyecto,
                 empresa=request.user,
                 desarrollador=desarrollador,
                 puntuacion=puntuacion,
                 comentario=comentario
-            )
-
-            # Sincronizamos la contratación por si acaso (aunque MySQL lo hace, es bueno para el ORM)
-            contratacion.estado = 'finalizada'
-            contratacion.save()
-
-            Notificacion.objects.create(
-                usuario=desarrollador,
-                tipo='aprobacion',
-                mensaje=f"¡Felicidades! La empresa ha finalizado el proyecto '{proyecto.titulo}' y te ha calificado con {puntuacion} estrellas."
             )
 
             messages.success(request, f"Proyecto '{proyecto.titulo}' finalizado exitosamente.")

@@ -9,7 +9,7 @@ urlpatterns = [
     path('', views.inicio, name='inicio'),
     
     # Módulos de Aplicación (Modularizados)
-    path('', include('usuarios.urls')), # <--- Ahora usuarios tiene su propio urls.py
+    path('', include('usuarios.urls')), 
     path('proyectos/', include('proyectos.urls')),
     path('postulaciones/', include('postulaciones.urls')),
     path('contrataciones/', include('contrataciones.urls')),

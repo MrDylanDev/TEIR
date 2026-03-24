@@ -10,7 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Las tablas 'historial_estado_proyecto', 'proyectos' y 'valoraciones'
-        # ya existen en la BD con estos nombres.
-        # No-op para sincronizar sin modificar la BD.
+        
     ]
