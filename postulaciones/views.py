@@ -13,7 +13,7 @@ def ver_postulaciones_empresa(request, proyecto_id):
     return render(request, 'postulaciones/lista_empresa.html', {'proyecto': proyecto, 'postulaciones': postulaciones})
 
 @login_required
-def postularse(request, proyecto_id):
+def postularse_a_proyecto(request, proyecto_id):
     if request.user.rol != 'desarrollador':
         return redirect('inicio')
     
