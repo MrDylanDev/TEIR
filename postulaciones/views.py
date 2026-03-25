@@ -10,7 +10,7 @@ from django.utils import timezone
 def ver_postulaciones_empresa(request, proyecto_id):
     proyecto = get_object_or_404(Proyecto, id=proyecto_id, empresa=request.user)
     postulaciones = Postulacion.objects.filter(proyecto=proyecto).select_related('desarrollador').order_by('-fecha')
-    return render(request, 'postulaciones/lista_empresa.html', {'proyecto': proyecto, 'postulaciones': postulaciones})
+    return render(request, 'postulaciones/lista_recibidas.html', {'proyecto': proyecto, 'postulaciones': postulaciones})
 
 @login_required
 def postularse_a_proyecto(request, proyecto_id):
@@ -27,16 +27,21 @@ def postularse_a_proyecto(request, proyecto_id):
                 cursor.callproc('sp_postularse', [proyecto.id, request.user.id, mensaje])
                 
             messages.success(request, f"¡Te has postulado exitosamente al proyecto '{proyecto.titulo}'!")
+            return redirect('dashboard_desarrollador')
         except Exception as e:
-            error_msg = str(e)
-            if 'No puedes tener más de 3' in error_msg:
-                messages.error(request, "Límite alcanzado: Tienes 3 proyectos activos/postulaciones. Finaliza o cancela para aplicar a nuevos.")
-            elif 'Ya te postulaste' in error_msg:
+            # Capturamos el mensaje de error del SIGNAL SQLSTATE '45000' de MySQL de forma robusta
+            error_msg = e.args[1] if hasattr(e, 'args') and len(e.args) > 1 else str(e)
+            
+            if 'Límite alcanzado' in error_msg:
+                messages.error(request, "Límite alcanzado: No puedes tener más de 3 postulaciones o proyectos activos.")
+            elif 'Ya te has postulado' in error_msg:
                 messages.warning(request, "Ya te habías postulado a este proyecto anteriormente.")
             else:
-                messages.error(request, f"Error al postularse: {e}")
+                messages.error(request, f"Error del sistema: {error_msg}")
+            
+            return redirect('dashboard_desarrollador')
                 
-    return redirect('dashboard_desarrollador')
+    return render(request, 'postulaciones/postularse.html', {'proyecto': proyecto})
 
 @login_required
 def aceptar_postulacion(request, postulacion_id):
@@ -60,11 +65,11 @@ def aceptar_postulacion(request, postulacion_id):
                 
             messages.success(request, msg_exito)
         except Exception as e:
-            error_msg = str(e)
+            error_msg = e.args[1] if hasattr(e, 'args') and len(e.args) > 1 else str(e)
             if 'Postulación no válida' in error_msg:
                 messages.warning(request, "La postulación ya no es válida o el proyecto ya no tiene vacantes.")
             else:
-                messages.error(request, f"Error al procesar la contratación: {e}")
+                messages.error(request, f"Error al procesar la contratación: {error_msg}")
     else:
         messages.warning(request, "Para contratar utiliza el botón de aceptar en la lista de postulaciones.")
 

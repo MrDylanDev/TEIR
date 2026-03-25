@@ -27,32 +27,26 @@ def ver_detalle_contrato(request, contratacion_id):
 
 @login_required
 def cancelar_contratacion(request, contratacion_id):
-    """Permitir a la empresa cancelar un contrato activo"""
+    """Permitir a la empresa cancelar un contrato activo mediante un Procedimiento Almacenado"""
     if request.user.rol != 'empresa':
         return redirect('inicio')
         
     contrato = get_object_or_404(Contratacion, id=contratacion_id, empresa=request.user)
     
-    if contrato.estado == 'activa':
-        proyecto = contrato.proyecto
-        
-        # 1. Cancelar el contrato primero
-        contrato.estado = 'cancelada'
-        contrato.save()
-        
-        # 2. Recalcular vacantes ocupadas
-        contrataciones_restantes = Contratacion.objects.filter(proyecto=proyecto, estado='activa').count()
-        
-        # 3. Solo volver a 'publicado' si ahora hay vacantes libres (ocupadas < totales)
-        if contrataciones_restantes < proyecto.vacantes:
-            proyecto.estado = 'publicado'
-            proyecto.save()
-            msg_estado = "El proyecto vuelve a estar disponible en el catálogo."
-        else:
-            msg_estado = "El proyecto permanece en desarrollo con las vacantes restantes."
-        
-        messages.warning(request, f"Contrato con {contrato.desarrollador.username} cancelado. {msg_estado}")
-    else:
-        messages.error(request, "Solo se pueden cancelar contratos que estén en estado activo.")
+    from django.db import connection
+    try:
+        with connection.cursor() as cursor:
+            # Invocar la lógica atómica de la base de datos
+            cursor.callproc('sp_cancelar_contratacion', [contrato.id, request.user.id])
+            
+            # Capturar el resultado del SP
+            row = cursor.fetchone()
+            if row and len(row) > 1:
+                messages.warning(request, row[1]) # Mensaje dinámico desde la DB
+            else:
+                messages.warning(request, "Contrato cancelado exitosamente.")
+                
+    except Exception as e:
+        messages.error(request, f"Error al cancelar contrato: {str(e)}")
         
     return redirect('dashboard_empresa')

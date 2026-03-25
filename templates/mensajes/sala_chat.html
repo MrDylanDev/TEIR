@@ -29,7 +29,14 @@
                 <p style="margin:5px 0 0; font-size:13px; color: #4CAF50;">Proyecto: {{ proyecto.titulo }}</p>
             {% endif %}
         </div>
-        <a href="javascript:history.back()" style="background: #222; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver</a>
+        
+        {% if request.user.rol == 'administrador' %}
+            <a href="{% url 'dashboard_admin' %}" style="background: #222; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver al Panel</a>
+        {% elif request.user.rol == 'empresa' %}
+            <a href="{% url 'dashboard_empresa' %}?section=centro-chat" style="background: #222; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver</a>
+        {% else %}
+            <a href="{% url 'dashboard_desarrollador' %}?section=centro-chat" style="background: #222; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver</a>
+        {% endif %}
     </div>
 
     <div class="chat-container" id="chat-container">

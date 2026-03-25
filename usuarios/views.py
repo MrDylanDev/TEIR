@@ -25,8 +25,27 @@ def inicio(request):
 
 def login_view(request):
     if request.method == 'POST':
-        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        rol_seleccionado = request.POST.get('rol_seleccionado')
+        
+        # 1. Verificar si el usuario existe antes de autenticar
+        try:
+            user_check = Usuario.objects.get(username=username)
+            if not user_check.is_active:
+                messages.error(request, "Tu cuenta ha sido bloqueada por el administrador. Contacta con soporte.")
+                return render(request, 'publico/inicio_sesion.html')
+        except Usuario.DoesNotExist:
+            pass # Dejamos que authenticate maneje el error genérico después
+
+        user = authenticate(username=username, password=password)
+        
         if user:
+            # VALIDACIÓN DE SEGURIDAD: El rol real debe coincidir con el seleccionado
+            if user.rol != rol_seleccionado:
+                messages.error(request, f"Este usuario no tiene permisos para acceder como {rol_seleccionado}.")
+                return render(request, 'publico/inicio_sesion.html')
+
             # Actualizar ultimo_acceso para disparar trigger de auditoría MySQL
             user.ultimo_acceso = timezone.now()
             user.save(update_fields=['ultimo_acceso'])
@@ -35,7 +54,8 @@ def login_view(request):
             if user.rol == 'administrador': return redirect('dashboard_admin')
             if user.rol == 'empresa': return redirect('dashboard_empresa')
             return redirect('dashboard_desarrollador')
-        messages.error(request, "Credenciales incorrectas")
+            
+        messages.error(request, "Usuario o contraseña incorrectos")
     return render(request, 'publico/inicio_sesion.html')
 
 def logout_view(request):
@@ -66,6 +86,10 @@ def dashboard_empresa(request):
     historial = Proyecto.objects.filter(empresa=request.user, estado='finalizado').order_by('-fecha_aprobacion')
     postulaciones_pendientes = Postulacion.objects.filter(proyecto__empresa=request.user, estado='pendiente')
     
+    # Soporte Admin Dinámico
+    admin_instancia = Usuario.objects.filter(rol='administrador').first()
+    admin_id = admin_instancia.id if admin_instancia else 1
+
     # Reputación Corporativa: Valoraciones de desarrolladores
     from proyectos.models import Valoracion
     valoraciones_dev = Valoracion.objects.filter(empresa=request.user, rol_evaluador='desarrollador').select_related('desarrollador', 'proyecto')
@@ -83,7 +107,8 @@ def dashboard_empresa(request):
         'postulaciones_pendientes': postulaciones_pendientes,
         'notificaciones': Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:5],
         'perfil': perfil,
-        'mis_contrataciones': en_desarrollo
+        'mis_contrataciones': en_desarrollo,
+        'admin_id': admin_id
     }
     return render(request, 'empresa/empresa.html', context)
 
@@ -100,6 +125,10 @@ def dashboard_desarrollador(request):
         estado='finalizada'
     ).select_related('proyecto', 'empresa')
     
+    # Soporte Admin Dinámico
+    admin_instancia = Usuario.objects.filter(rol='administrador').first()
+    admin_id = admin_instancia.id if admin_instancia else 1
+
     # Enriquecer los contratos con su valoración correspondiente (la que hizo la empresa)
     for contrato in mis_proyectos_finalizados:
         contrato.valoracion = Valoracion.objects.filter(
@@ -119,6 +148,7 @@ def dashboard_desarrollador(request):
         'mis_postulaciones': mis_postulaciones,
         'favoritos': mis_favoritos,
         'perfil': perfil,
+        'admin_id': admin_id
     }
     return render(request, 'Desarrollador/Desarrollador.html', context)
 

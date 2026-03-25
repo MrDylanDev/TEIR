@@ -150,11 +150,10 @@
                     <div class="card-m"
                         style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
                         <div>
-                            <h3 style="margin: 0; font-size: 16px;">{{ conv.remitente__username }}</h3>
-                            <p style="font-size: 12px; opacity: 0.5;">Último mensaje: {{ conv.ultima_fecha|date:"d/m
-                                H:i" }}</p>
+                            <h3 style="margin: 0; font-size: 16px;">{{ conv.usuario.username }}</h3>
+                            <p style="font-size: 12px; opacity: 0.5;">Último mensaje: {{ conv.ultimo_mensaje.fecha_envio|date:"d/m H:i" }}</p>
                         </div>
-                        <a href="{% url 'sala_chat_general' conv.remitente__id %}"
+                        <a href="{% url 'sala_chat_general' conv.usuario.id %}"
                             style="background: white; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px;">Responder</a>
                     </div>
                     {% empty %}
@@ -181,8 +180,7 @@
                         <tbody>
                             {% for u in usuarios_todos %}
                             <tr class="log-row">
-                                <td style="padding: 15px;"><strong>{{ u.username }}</strong><br><small>{{
-                                        u.nombre|default:"-" }}</small></td>
+                                <td style="padding: 15px;"><strong>{{ u.username }}</strong><br><small>{{ u.nombre|default:"-" }}</small></td>
                                 <td>{{ u.email }}</td>
                                 <td><span class="badge badge-{{ u.rol }}">{{ u.get_rol_display }}</span></td>
                                 <td>{{ u.date_joined|date:"d/m/Y" }}</td>
@@ -302,9 +300,31 @@
             document.querySelectorAll('.sidebar ul li').forEach(l => l.classList.remove('active'));
 
             // Mostrar seleccionada
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
+            const target = document.getElementById(id);
+            if (target) {
+                target.classList.add('active');
+                if (btn) {
+                    btn.classList.add('active');
+                } else {
+                    // Si no hay botón (carga inicial), buscar el li que tenga el onclick correspondiente
+                    const menuItems = document.querySelectorAll('.sidebar ul li');
+                    menuItems.forEach(li => {
+                        if (li.getAttribute('onclick') && li.getAttribute('onclick').includes(id)) {
+                            li.classList.add('active');
+                        }
+                    });
+                }
+            }
         }
+
+        // Al cargar la página, revisar si hay una sección en la URL
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const section = urlParams.get('section');
+            if (section) {
+                showSection(section);
+            }
+        };
     </script>
 
 </body>

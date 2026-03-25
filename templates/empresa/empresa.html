@@ -49,7 +49,7 @@
 
     <main class="contenido">
         
-        <!-- MENSAJES DE SISTEMA -->
+        <!-- Mensajes de Sistema -->
         {% if messages %}
             <div style="margin-bottom: 20px;">
                 {% for message in messages %}
@@ -60,7 +60,7 @@
             </div>
         {% endif %}
 
-        <!-- SECCION: INICIO -->
+        <!-- Seccion: Inicio -->
         <section id="inicio" class="seccion-v activa">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <h1>Panel de Control</h1>
@@ -100,12 +100,12 @@
             </div>
         </section>
 
-        <!-- SECCION: CHAT -->
+        <!-- Seccion: Chat -->
         <section id="centro-chat" class="seccion-v">
             <h1>Centro de Mensajería</h1>
             <p style="opacity: 0.7; margin-bottom: 40px;">Gestiona tus comunicaciones con el equipo técnico y soporte.</p>
             
-            <!-- CATEGORÍA: SOPORTE -->
+            <!-- Categoría: Soporte -->
             <h2 style="font-size: 14px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">Soporte Oficial</h2>
             <div style="margin-bottom: 50px;">
                 <div class="card-p" style="display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #4CAF50; max-width: 600px;">
@@ -116,11 +116,11 @@
                             <p style="margin: 5px 0 0; font-size: 13px; opacity: 0.6;">Soporte técnico, pagos y dudas administrativas.</p>
                         </div>
                     </div>
-                    <a href="{% url 'sala_chat_general' 1 %}" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">Chatear</a>
+                    <a href="{% url 'sala_chat_general' admin_id %}" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">Chatear</a>
                 </div>
             </div>
 
-            <!-- CATEGORÍA: DESARROLLADORES -->
+            <!-- Categoría: Desarrolladores -->
             <h2 style="font-size: 14px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">Tus Desarrolladores Contratados</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px;">
                 {% for contratacion in en_desarrollo %}
@@ -147,7 +147,7 @@
             </div>
         </section>
 
-        <!-- SECCION: OFERTAS (PUBLICADAS) -->
+        <!-- Seccion: Ofertas (Publicadas) -->
         <section id="ofertas" class="seccion-v">
             <h1>Mis Ofertas Publicadas</h1>
             <p style="opacity: 0.7; margin-bottom: 30px;">Proyectos abiertos buscando talento.</p>
@@ -167,7 +167,7 @@
             </div>
         </section>
 
-        <!-- SECCION: EN DESARROLLO -->
+        <!-- Seccion: En Desarrollo -->
         <section id="desarrollo" class="seccion-v">
             <h1>Proyectos en Marcha</h1>
             <p style="opacity: 0.7; margin-bottom: 30px;">Control de entregas y seguimiento de desarrolladores.</p>
@@ -189,7 +189,7 @@
             </div>
         </section>
 
-        <!-- SECCION: REPUTACIÓN -->
+        <!-- Seccion: Reputación -->
         <section id="reputacion" class="seccion-v">
             <h1>Reputación Corporativa</h1>
             <p style="opacity: 0.7; margin-bottom: 30px;">Lo que dicen los desarrolladores sobre tu empresa.</p>
@@ -229,7 +229,7 @@
             </div>
         </section>
 
-        <!-- SECCION: HISTORIAL -->
+        <!-- Seccion: Historial -->
         <section id="historial" class="seccion-v">
             <h1>Historial de Proyectos</h1>
             <p style="opacity: 0.7; margin-bottom: 30px;">Proyectos finalizados y archivados.</p>
@@ -246,7 +246,7 @@
             </div>
         </section>
 
-        <!-- SECCION: PERFIL -->
+        <!-- Seccion: Perfil -->
         <section id="perfil" class="seccion-v">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <h1>Perfil de Empresa</h1>

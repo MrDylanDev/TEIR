@@ -31,15 +31,6 @@ CREATE TABLE `auth_group` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `auth_group`
---
-
-LOCK TABLES `auth_group` WRITE;
-/*!40000 ALTER TABLE `auth_group` DISABLE KEYS */;
-/*!40000 ALTER TABLE `auth_group` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `auth_group_permissions`
 --
 
@@ -59,15 +50,6 @@ CREATE TABLE `auth_group_permissions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `auth_group_permissions`
---
-
-LOCK TABLES `auth_group_permissions` WRITE;
-/*!40000 ALTER TABLE `auth_group_permissions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `auth_group_permissions` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `auth_permission`
 --
 
@@ -82,18 +64,8 @@ CREATE TABLE `auth_permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
   CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `auth_permission`
---
-
-LOCK TABLES `auth_permission` WRITE;
-/*!40000 ALTER TABLE `auth_permission` DISABLE KEYS */;
-INSERT INTO `auth_permission` VALUES (1,'Can add permission',3,'add_permission'),(2,'Can change permission',3,'change_permission'),(3,'Can delete permission',3,'delete_permission'),(4,'Can view permission',3,'view_permission'),(5,'Can add group',2,'add_group'),(6,'Can change group',2,'change_group'),(7,'Can delete group',2,'delete_group'),(8,'Can view group',2,'view_group'),(9,'Can add content type',1,'add_contenttype'),(10,'Can change content type',1,'change_contenttype'),(11,'Can delete content type',1,'delete_contenttype'),(12,'Can view content type',1,'view_contenttype'),(13,'Can add log entry',4,'add_logentry'),(14,'Can change log entry',4,'change_logentry'),(15,'Can delete log entry',4,'delete_logentry'),(16,'Can view log entry',4,'view_logentry'),(17,'Can add user',7,'add_usuario'),(18,'Can change user',7,'change_usuario'),(19,'Can delete user',7,'delete_usuario'),(20,'Can view user',7,'view_usuario'),(21,'Can add perfil desarrollador',5,'add_perfildesarrollador'),(22,'Can change perfil desarrollador',5,'change_perfildesarrollador'),(23,'Can delete perfil desarrollador',5,'delete_perfildesarrollador'),(24,'Can view perfil desarrollador',5,'view_perfildesarrollador'),(25,'Can add perfil empresa',6,'add_perfilempresa'),(26,'Can change perfil empresa',6,'change_perfilempresa'),(27,'Can delete perfil empresa',6,'delete_perfilempresa'),(28,'Can view perfil empresa',6,'view_perfilempresa'),(29,'Can add session',8,'add_session'),(30,'Can change session',8,'change_session'),(31,'Can delete session',8,'delete_session'),(32,'Can view session',8,'view_session'),(33,'Can add proyecto',10,'add_proyecto'),(34,'Can change proyecto',10,'change_proyecto'),(35,'Can delete proyecto',10,'delete_proyecto'),(36,'Can view proyecto',10,'view_proyecto'),(37,'Can add historial estado proyecto',9,'add_historialestadoproyecto'),(38,'Can change historial estado proyecto',9,'change_historialestadoproyecto'),(39,'Can delete historial estado proyecto',9,'delete_historialestadoproyecto'),(40,'Can view historial estado proyecto',9,'view_historialestadoproyecto'),(41,'Can add valoracion',11,'add_valoracion'),(42,'Can change valoracion',11,'change_valoracion'),(43,'Can delete valoracion',11,'delete_valoracion'),(44,'Can view valoracion',11,'view_valoracion'),(45,'Can add postulacion',12,'add_postulacion'),(46,'Can change postulacion',12,'change_postulacion'),(47,'Can delete postulacion',12,'delete_postulacion'),(48,'Can view postulacion',12,'view_postulacion'),(49,'Can add contratacion',13,'add_contratacion'),(50,'Can change contratacion',13,'change_contratacion'),(51,'Can delete contratacion',13,'delete_contratacion'),(52,'Can view contratacion',13,'view_contratacion'),(53,'Can add avance',14,'add_avance'),(54,'Can change avance',14,'change_avance'),(55,'Can delete avance',14,'delete_avance'),(56,'Can view avance',14,'view_avance'),(57,'Can add mensaje',15,'add_mensaje'),(58,'Can change mensaje',15,'change_mensaje'),(59,'Can delete mensaje',15,'delete_mensaje'),(60,'Can view mensaje',15,'view_mensaje'),(61,'Can add notificacion',16,'add_notificacion'),(62,'Can change notificacion',16,'change_notificacion'),(63,'Can delete notificacion',16,'delete_notificacion'),(64,'Can view notificacion',16,'view_notificacion'),(65,'Can add favorito',17,'add_favorito'),(66,'Can change favorito',17,'change_favorito'),(67,'Can delete favorito',17,'delete_favorito'),(68,'Can view favorito',17,'view_favorito'),(69,'Can add copia seguridad',18,'add_copiaseguridad'),(70,'Can change copia seguridad',18,'change_copiaseguridad'),(71,'Can delete copia seguridad',18,'delete_copiaseguridad'),(72,'Can view copia seguridad',18,'view_copiaseguridad'),(73,'Can add log auditoria',19,'add_logauditoria'),(74,'Can change log auditoria',19,'change_logauditoria'),(75,'Can delete log auditoria',19,'delete_logauditoria'),(76,'Can view log auditoria',19,'view_logauditoria');
-/*!40000 ALTER TABLE `auth_permission` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `avances`
@@ -117,18 +89,8 @@ CREATE TABLE `avances` (
   KEY `idx_proyecto_fecha` (`proyecto_id`,`fecha_hora`),
   CONSTRAINT `avances_ibfk_1` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `avances_ibfk_2` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `avances`
---
-
-LOCK TABLES `avances` WRITE;
-/*!40000 ALTER TABLE `avances` DISABLE KEYS */;
-INSERT INTO `avances` VALUES (5,101,1008,'App terminada y subida a tiendas',NULL,100,'2026-03-24 22:24:10');
-/*!40000 ALTER TABLE `avances` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -199,27 +161,15 @@ CREATE TABLE `contrataciones` (
   `fecha_fin_estimada` date DEFAULT NULL,
   `estado` varchar(10) NOT NULL DEFAULT 'activa',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `proyecto_id` (`proyecto_id`),
-  KEY `asignado_por_id` (`asignado_por_id`),
+  KEY `idx_proyecto_id` (`proyecto_id`),
   KEY `idx_desarrollador` (`desarrollador_id`),
   KEY `idx_empresa` (`empresa_id`),
   KEY `idx_estado` (`estado`),
-  CONSTRAINT `contrataciones_ibfk_1` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`),
-  CONSTRAINT `contrataciones_ibfk_2` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`),
-  CONSTRAINT `contrataciones_ibfk_3` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`),
-  CONSTRAINT `contrataciones_ibfk_4` FOREIGN KEY (`asignado_por_id`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_contrataciones_desarrollador` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_contrataciones_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_contrataciones_proyecto` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `contrataciones`
---
-
-LOCK TABLES `contrataciones` WRITE;
-/*!40000 ALTER TABLE `contrataciones` DISABLE KEYS */;
-INSERT INTO `contrataciones` VALUES (8,101,1008,1007,NULL,'2026-03-24',NULL,'activa');
-/*!40000 ALTER TABLE `contrataciones` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `copias_seguridad`
@@ -240,18 +190,8 @@ CREATE TABLE `copias_seguridad` (
   KEY `idx_fecha` (`fecha`),
   KEY `idx_estado` (`estado`),
   CONSTRAINT `copias_seguridad_ibfk_1` FOREIGN KEY (`ejecutado_por`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `copias_seguridad`
---
-
-LOCK TABLES `copias_seguridad` WRITE;
-/*!40000 ALTER TABLE `copias_seguridad` DISABLE KEYS */;
-INSERT INTO `copias_seguridad` VALUES (1,NULL,'Pendiente de ejecución manual',NULL,'2026-03-16 14:01:12','pendiente');
-/*!40000 ALTER TABLE `copias_seguridad` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `django_admin_log`
@@ -279,15 +219,6 @@ CREATE TABLE `django_admin_log` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `django_admin_log`
---
-
-LOCK TABLES `django_admin_log` WRITE;
-/*!40000 ALTER TABLE `django_admin_log` DISABLE KEYS */;
-/*!40000 ALTER TABLE `django_admin_log` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `django_content_type`
 --
 
@@ -300,18 +231,8 @@ CREATE TABLE `django_content_type` (
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `django_content_type`
---
-
-LOCK TABLES `django_content_type` WRITE;
-/*!40000 ALTER TABLE `django_content_type` DISABLE KEYS */;
-INSERT INTO `django_content_type` VALUES (4,'admin','logentry'),(2,'auth','group'),(3,'auth','permission'),(14,'avances','avance'),(1,'contenttypes','contenttype'),(13,'contrataciones','contratacion'),(17,'favoritos','favorito'),(18,'logs','copiaseguridad'),(19,'logs','logauditoria'),(15,'mensajes','mensaje'),(16,'notificaciones','notificacion'),(12,'postulaciones','postulacion'),(9,'proyectos','historialestadoproyecto'),(10,'proyectos','proyecto'),(11,'proyectos','valoracion'),(8,'sessions','session'),(5,'usuarios','perfildesarrollador'),(6,'usuarios','perfilempresa'),(7,'usuarios','usuario');
-/*!40000 ALTER TABLE `django_content_type` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `django_migrations`
@@ -326,18 +247,8 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `django_migrations`
---
-
-LOCK TABLES `django_migrations` WRITE;
-/*!40000 ALTER TABLE `django_migrations` DISABLE KEYS */;
-INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2026-03-16 19:48:07.938564'),(2,'contenttypes','0002_remove_content_type_name','2026-03-16 19:48:08.037721'),(3,'auth','0001_initial','2026-03-16 19:48:09.266060'),(4,'auth','0002_alter_permission_name_max_length','2026-03-16 19:48:09.333581'),(5,'auth','0003_alter_user_email_max_length','2026-03-16 19:48:09.345672'),(6,'auth','0004_alter_user_username_opts','2026-03-16 19:48:09.357093'),(7,'auth','0005_alter_user_last_login_null','2026-03-16 19:48:09.368923'),(8,'auth','0006_require_contenttypes_0002','2026-03-16 19:48:09.372384'),(9,'auth','0007_alter_validators_add_error_messages','2026-03-16 19:48:09.384225'),(10,'auth','0008_alter_user_username_max_length','2026-03-16 19:48:09.400825'),(11,'auth','0009_alter_user_last_name_max_length','2026-03-16 19:48:09.412949'),(12,'auth','0010_alter_group_name_max_length','2026-03-16 19:48:09.440721'),(13,'auth','0011_update_proxy_permissions','2026-03-16 19:48:09.455446'),(14,'auth','0012_alter_user_first_name_max_length','2026-03-16 19:48:09.468210'),(15,'usuarios','0001_initial','2026-03-16 19:48:10.949857'),(16,'admin','0001_initial','2026-03-16 19:48:11.120348'),(17,'admin','0002_logentry_remove_auto_add','2026-03-16 19:48:11.139332'),(18,'admin','0003_logentry_add_action_flag_choices','2026-03-16 19:48:11.160507'),(19,'sessions','0001_initial','2026-03-16 19:48:12.259892'),(20,'usuarios','0002_usuario_fecha_nacimiento_and_more','2026-03-16 19:48:13.415276'),(21,'proyectos','0001_initial','2026-03-16 19:48:14.596694'),(22,'proyectos','0002_proyecto_vacantes_alter_proyecto_estado_and_more','2026-03-16 19:48:15.110304'),(23,'avances','0001_initial','2026-03-16 19:48:16.384068'),(24,'contrataciones','0001_initial','2026-03-16 19:48:16.737282'),(25,'contrataciones','0002_alter_contratacion_proyecto','2026-03-16 19:48:16.955475'),(26,'favoritos','0001_initial','2026-03-16 19:48:17.165221'),(27,'logs','0001_initial','2026-03-16 19:48:17.430937'),(28,'mensajes','0001_initial','2026-03-16 19:48:17.734636'),(29,'notificaciones','0001_initial','2026-03-16 19:48:17.878104'),(30,'postulaciones','0001_initial','2026-03-16 19:48:18.136088'),(31,'avances','0002_alter_avance_table','2026-03-20 23:15:00.000000'),(32,'contrataciones','0003_alter_contratacion_table','2026-03-20 23:15:01.000000'),(33,'favoritos','0002_alter_favorito_table','2026-03-20 23:15:02.000000'),(34,'logs','0002_alter_copiaseguridad_table_alter_logauditoria_table','2026-03-20 23:15:03.000000'),(35,'mensajes','0002_alter_mensaje_table','2026-03-20 23:15:04.000000'),(36,'notificaciones','0002_alter_notificacion_table','2026-03-20 23:15:05.000000'),(37,'postulaciones','0002_alter_postulacion_table','2026-03-20 23:15:06.000000'),(38,'proyectos','0003_alter_historialestadoproyecto_table_and_more','2026-03-20 23:15:07.000000'),(39,'usuarios','0003_alter_usuario_options_usuario_nombre_and_more','2026-03-20 23:15:08.000000'),(40,'avances','0003_alter_avance_table','2026-03-23 00:32:42.320919'),(41,'contrataciones','0004_alter_contratacion_table','2026-03-23 00:32:42.338435'),(42,'favoritos','0003_alter_favorito_table','2026-03-23 00:32:42.343456'),(43,'logs','0003_alter_copiaseguridad_table_alter_logauditoria_table','2026-03-23 00:32:42.348322'),(44,'mensajes','0003_alter_mensaje_table','2026-03-23 00:32:42.353604'),(45,'notificaciones','0003_alter_notificacion_table','2026-03-23 00:32:42.359378'),(46,'postulaciones','0003_alter_postulacion_table','2026-03-23 00:32:42.366292'),(47,'proyectos','0004_alter_historialestadoproyecto_table_and_more','2026-03-23 00:32:42.371155'),(48,'usuarios','0004_alter_usuario_options_usuario_nombre_and_more','2026-03-23 00:32:42.375991'),(49,'avances','0003_alter_avance_archivo_url_alter_avance_table','2026-03-24 18:36:56.431708'),(50,'logs','0003_alter_logauditoria_registro_id_and_more','2026-03-24 18:36:56.439876'),(51,'proyectos','0004_valoracion_rol_evaluador_and_more','2026-03-24 18:36:56.442244'),(52,'mensajes','0003_alter_mensaje_proyecto_alter_mensaje_table','2026-03-24 18:36:56.444842'),(53,'notificaciones','0003_alter_notificacion_options_and_more','2026-03-24 18:36:56.447385');
-/*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `django_session`
@@ -354,16 +265,6 @@ CREATE TABLE `django_session` (
   KEY `django_session_expire_date_a5c62663` (`expire_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `django_session`
---
-
-LOCK TABLES `django_session` WRITE;
-/*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('3p3smms8gj7d40owvgp9914ir8rg982u','.eJxVjMsOwiAURP-FtSG8Hy7d9xsI3AtSNZCUdmX8d9ukC91N5pyZNwlxW2vYRl7CjORKLLn8dinCM7cD4CO2e6fQ27rMiR4KPemgU8f8up3u30GNo-5rBRwAUBaljFCARTGDPHsthctSa-t9iRwNF4w5zMmhS5pZ7TDtAS35fAHqbDfj:1w4mSY:QRWAGxFYE9dvukFHCA3rEDPa-bVbwvbxYkqBatShcHw','2026-03-23 22:05:14.869664'),('cjrijgs5tu8vm4ql20jjooz9xgqi70up','.eJxVjMEOwiAQRP-FsyFQYBWP3vsNZIFdqRpISnsy_rtt0oNe5jDvzbxFwHUpYe00hymLq9Di9NtFTE-qO8gPrPcmU6vLPEW5K_KgXY4t0-t2uH8HBXvZ1gndQAyGSCm01mqfBgUWIJ_BszEmew0MF9aAnAmU3SKideiBnWfx-QLbuzfl:1w4jFY:v3I0T6-dvqd-1BHgjbldVPeBaixg_wZhOxLzHQh77nQ','2026-03-23 18:39:36.350085'),('jdbyg4ov7oec1paapfdfce8qerdki4h7','.eJxVjEEOwiAQRe_C2hCHAlNcuu8ZCMOAVA0kpV0Z765NutDtf-_9l_BhW4vfelr8zOIilDj9bhTiI9Ud8D3UW5Ox1XWZSe6KPGiXU-P0vB7u30EJvXzrjAlYGWe0wUAGU9QwKGuRMmgAY88q5hGABwVE1jokzHFEbTSxBifeH8QBNuk:1w4oXS:r7-pILmhcWyGRd_MFaOtE7u7LsVSK6FegCIuL718nTk','2026-03-24 00:18:26.670742');
-/*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `favoritos`
@@ -383,17 +284,8 @@ CREATE TABLE `favoritos` (
   KEY `idx_desarrollador` (`desarrollador_id`),
   CONSTRAINT `favoritos_ibfk_1` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `favoritos_ibfk_2` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `favoritos`
---
-
-LOCK TABLES `favoritos` WRITE;
-/*!40000 ALTER TABLE `favoritos` DISABLE KEYS */;
-/*!40000 ALTER TABLE `favoritos` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `historial_estado_proyecto`
@@ -414,18 +306,8 @@ CREATE TABLE `historial_estado_proyecto` (
   KEY `cambiado_por` (`cambiado_por`),
   CONSTRAINT `historial_estado_proyecto_ibfk_1` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `historial_estado_proyecto_ibfk_2` FOREIGN KEY (`cambiado_por`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `historial_estado_proyecto`
---
-
-LOCK TABLES `historial_estado_proyecto` WRITE;
-/*!40000 ALTER TABLE `historial_estado_proyecto` DISABLE KEYS */;
-INSERT INTO `historial_estado_proyecto` VALUES (15,101,'publicado','en_desarrollo',NULL,'2026-03-24 22:24:10'),(16,101,'en_desarrollo','en_revision',NULL,'2026-03-24 22:24:10'),(17,101,'en_revision','finalizado',NULL,'2026-03-24 22:24:10');
-/*!40000 ALTER TABLE `historial_estado_proyecto` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `logs_auditoria`
@@ -447,18 +329,8 @@ CREATE TABLE `logs_auditoria` (
   KEY `idx_fecha` (`fecha_hora`),
   KEY `idx_tabla` (`tabla_afectada`),
   CONSTRAINT `logs_auditoria_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `logs_auditoria`
---
-
-LOCK TABLES `logs_auditoria` WRITE;
-/*!40000 ALTER TABLE `logs_auditoria` DISABLE KEYS */;
-INSERT INTO `logs_auditoria` VALUES (5,888,'Cambio de estado: activo -> inactivo','usuarios',888,NULL,'2026-03-24 20:42:13'),(6,888,'Cambio de estado: inactivo -> activo','usuarios',888,NULL,'2026-03-24 20:42:13'),(7,888,'Nueva postulaciÃ³n registrada','postulaciones',3,NULL,'2026-03-24 20:42:13'),(8,1000,'Nueva postulaciÃ³n registrada','postulaciones',4,NULL,'2026-03-24 20:44:25'),(9,1001,'Perfil desarrollador actualizado','perfil_desarrollador',1001,NULL,'2026-03-24 20:47:06'),(10,1002,'Perfil empresa actualizado','perfil_empresa',1002,NULL,'2026-03-24 20:47:06'),(11,1001,'Nueva postulaciÃ³n registrada','postulaciones',5,NULL,'2026-03-24 20:47:06'),(12,1003,'Perfil desarrollador actualizado','perfil_desarrollador',1003,NULL,'2026-03-24 22:13:34'),(13,1004,'Perfil empresa actualizado','perfil_empresa',1004,NULL,'2026-03-24 22:13:34'),(14,1005,'Perfil desarrollador actualizado','perfil_desarrollador',1005,NULL,'2026-03-24 22:15:36'),(15,1006,'Perfil empresa actualizado','perfil_empresa',1006,NULL,'2026-03-24 22:15:36'),(16,1005,'Nueva postulaciÃ³n registrada','postulaciones',6,NULL,'2026-03-24 22:15:36'),(17,1008,'Nueva postulaciÃ³n registrada','postulaciones',7,NULL,'2026-03-24 22:24:10');
-/*!40000 ALTER TABLE `logs_auditoria` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `mensajes`
@@ -487,15 +359,34 @@ CREATE TABLE `mensajes` (
   CONSTRAINT `mensajes_ibfk_3` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notificacion_mensaje` AFTER INSERT ON `mensajes` FOR EACH ROW BEGIN
+  DECLARE v_nombre_remitente VARCHAR(150);
 
---
--- Dumping data for table `mensajes`
---
+  
+  SELECT nombre INTO v_nombre_remitente FROM usuarios WHERE id = NEW.remitente_id;
 
-LOCK TABLES `mensajes` WRITE;
-/*!40000 ALTER TABLE `mensajes` DISABLE KEYS */;
-/*!40000 ALTER TABLE `mensajes` ENABLE KEYS */;
-UNLOCK TABLES;
+  
+  INSERT INTO notificaciones (usuario_id, tipo, mensaje)
+  VALUES (
+    NEW.receptor_id,
+    'mensaje',
+    CONCAT(v_nombre_remitente, ' te ha enviado un nuevo mensaje.')
+  );
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `notificaciones`
@@ -516,18 +407,8 @@ CREATE TABLE `notificaciones` (
   KEY `idx_tipo` (`tipo`),
   KEY `idx_fecha` (`fecha`),
   CONSTRAINT `notificaciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `notificaciones`
---
-
-LOCK TABLES `notificaciones` WRITE;
-/*!40000 ALTER TABLE `notificaciones` DISABLE KEYS */;
-INSERT INTO `notificaciones` VALUES (11,1007,'postulacion','Juan Desarrollador se ha postulado a tu proyecto: App MÃ³vil Demo',0,'2026-03-24 22:24:10'),(12,1007,'avance','Juan Desarrollador registrÃ³ un avance del 100% en App MÃ³vil Demo',0,'2026-03-24 22:24:10');
-/*!40000 ALTER TABLE `notificaciones` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `perfil_desarrollador`
@@ -548,18 +429,8 @@ CREATE TABLE `perfil_desarrollador` (
   UNIQUE KEY `usuario_id` (`usuario_id`),
   KEY `idx_calificacion` (`calificacion_promedio`),
   CONSTRAINT `perfil_desarrollador_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `perfil_desarrollador`
---
-
-LOCK TABLES `perfil_desarrollador` WRITE;
-/*!40000 ALTER TABLE `perfil_desarrollador` DISABLE KEYS */;
-INSERT INTO `perfil_desarrollador` VALUES (7,1008,NULL,NULL,NULL,5.00,1);
-/*!40000 ALTER TABLE `perfil_desarrollador` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `perfil_empresa`
@@ -582,18 +453,8 @@ CREATE TABLE `perfil_empresa` (
   KEY `idx_sector` (`sector`),
   KEY `idx_ciudad` (`ciudad`),
   CONSTRAINT `perfil_empresa_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `perfil_empresa`
---
-
-LOCK TABLES `perfil_empresa` WRITE;
-/*!40000 ALTER TABLE `perfil_empresa` DISABLE KEYS */;
-INSERT INTO `perfil_empresa` VALUES (4,1007,NULL,NULL,NULL,NULL,NULL,NULL);
-/*!40000 ALTER TABLE `perfil_empresa` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `postulaciones`
@@ -616,18 +477,8 @@ CREATE TABLE `postulaciones` (
   KEY `idx_fecha` (`fecha`),
   CONSTRAINT `postulaciones_ibfk_1` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `postulaciones_ibfk_2` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `postulaciones`
---
-
-LOCK TABLES `postulaciones` WRITE;
-/*!40000 ALTER TABLE `postulaciones` DISABLE KEYS */;
-INSERT INTO `postulaciones` VALUES (7,101,1008,'Hola, soy experto en Flutter','aceptada','2026-03-24 22:24:10');
-/*!40000 ALTER TABLE `postulaciones` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -737,18 +588,8 @@ CREATE TABLE `proyectos` (
   KEY `idx_estado_fecha` (`estado`,`fecha_publicacion`),
   CONSTRAINT `proyectos_ibfk_1` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `proyectos_ibfk_2` FOREIGN KEY (`aprobado_por_id`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `proyectos`
---
-
-LOCK TABLES `proyectos` WRITE;
-/*!40000 ALTER TABLE `proyectos` DISABLE KEYS */;
-INSERT INTO `proyectos` VALUES (101,1007,'App MÃ³vil Demo','Crear una app funcional','movil','media',1,'finalizado','2026-03-24 22:24:10.759618',NULL,NULL,NULL);
-/*!40000 ALTER TABLE `proyectos` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -808,18 +649,8 @@ CREATE TABLE `usuarios` (
   KEY `idx_rol` (`rol`),
   KEY `idx_estado` (`estado`),
   KEY `idx_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=1009 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `usuarios`
---
-
-LOCK TABLES `usuarios` WRITE;
-/*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1007,'empresa_demo','Empresa Demo S.A.S',NULL,NULL,'demo_emp@tem.com','pass','empresa','activo','2026-03-24 22:24:10',NULL,NULL,NULL,0,NULL,0,0,1,NULL,NULL,'2026-03-24 22:24:10',NULL),(1008,'dev_demo','Juan Desarrollador',NULL,NULL,'demo_dev@tem.com','pass','desarrollador','activo','2026-03-24 22:24:10',NULL,NULL,NULL,0,NULL,0,0,1,NULL,NULL,'2026-03-24 22:24:10',NULL);
-/*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -887,15 +718,6 @@ CREATE TABLE `usuarios_groups` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `usuarios_groups`
---
-
-LOCK TABLES `usuarios_groups` WRITE;
-/*!40000 ALTER TABLE `usuarios_groups` DISABLE KEYS */;
-/*!40000 ALTER TABLE `usuarios_groups` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `usuarios_user_permissions`
 --
 
@@ -913,15 +735,6 @@ CREATE TABLE `usuarios_user_permissions` (
   CONSTRAINT `usuarios_usuario_use_usuario_id_60aeea80_fk_usuarios_` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios_usuario` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `usuarios_user_permissions`
---
-
-LOCK TABLES `usuarios_user_permissions` WRITE;
-/*!40000 ALTER TABLE `usuarios_user_permissions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `usuarios_user_permissions` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Temporary view structure for view `v_calificacion_desarrolladores`
@@ -1183,18 +996,8 @@ CREATE TABLE `valoraciones` (
   CONSTRAINT `valoraciones_ibfk_2` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `valoraciones_ibfk_3` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `chk_puntuacion` CHECK ((`puntuacion` between 1 and 5))
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `valoraciones`
---
-
-LOCK TABLES `valoraciones` WRITE;
-/*!40000 ALTER TABLE `valoraciones` DISABLE KEYS */;
-INSERT INTO `valoraciones` VALUES (3,101,1007,1008,'empresa',5,'Excelente trabajo, muy profesional','2026-03-24 22:24:10');
-/*!40000 ALTER TABLE `valoraciones` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -1208,8 +1011,8 @@ DELIMITER ;;
   
   UPDATE perfil_desarrollador
   SET
-    calificacion_promedio = (SELECT COALESCE(AVG(puntuacion), 0) FROM valoraciones WHERE desarrollador_id = NEW.desarrollador_id),
-    num_proyectos_completados = (SELECT COUNT(*) FROM valoraciones WHERE desarrollador_id = NEW.desarrollador_id)
+    calificacion_promedio = (SELECT COALESCE(AVG(puntuacion), 0) FROM valoraciones WHERE desarrollador_id = NEW.desarrollador_id AND rol_evaluador = 'empresa'),
+    num_proyectos_completados = (SELECT COUNT(*) FROM valoraciones WHERE desarrollador_id = NEW.desarrollador_id AND rol_evaluador = 'empresa')
   WHERE usuario_id = NEW.desarrollador_id;
 
   
@@ -1219,7 +1022,6 @@ DELIMITER ;;
   UPDATE contrataciones 
   SET estado = 'finalizada', fecha_fin_estimada = CURDATE() 
   WHERE proyecto_id = NEW.proyecto_id AND desarrollador_id = NEW.desarrollador_id AND estado = 'activa';
-
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1246,42 +1048,42 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_aceptar_postulacion`(
 )
 BEGIN
   DECLARE v_proyecto_id BIGINT;
-  DECLARE v_desarrollador_id BIGINT;
   DECLARE v_vacantes_totales INT;
   DECLARE v_vacantes_ocupadas INT;
   DECLARE v_success BOOLEAN DEFAULT FALSE;
 
   
-  SELECT p.proyecto_id, p.desarrollador_id, pr.vacantes 
-  INTO v_proyecto_id, v_desarrollador_id, v_vacantes_totales
-  FROM postulaciones p
-  JOIN proyectos pr ON p.proyecto_id = pr.id
-  WHERE p.id = p_postulacion_id AND pr.empresa_id = p_empresa_id AND p.estado = 'pendiente';
-
-  IF v_proyecto_id IS NULL THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Postulación no válida o ya procesada.';
-  END IF;
-
   START TRANSACTION;
 
     
-    UPDATE postulaciones SET estado = 'aceptada' WHERE id = p_postulacion_id;
+    
+    SELECT pr.id, pr.vacantes INTO v_proyecto_id, v_vacantes_totales
+    FROM postulaciones p
+    JOIN proyectos pr ON p.proyecto_id = pr.id
+    WHERE p.id = p_postulacion_id AND pr.empresa_id = p_empresa_id AND p.estado = 'pendiente'
+    FOR UPDATE;
+
+    IF v_proyecto_id IS NULL THEN
+      ROLLBACK;
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Postulación no válida o ya procesada.';
+    END IF;
 
     
-    INSERT INTO contrataciones (proyecto_id, desarrollador_id, empresa_id, fecha_inicio, estado)
-    VALUES (v_proyecto_id, v_desarrollador_id, p_empresa_id, CURDATE(), 'activa');
-
-    
-    SELECT COUNT(*) INTO v_vacantes_ocupadas FROM contrataciones WHERE proyecto_id = v_proyecto_id AND estado = 'activa';
+    SELECT COUNT(*) INTO v_vacantes_ocupadas 
+    FROM contrataciones 
+    WHERE proyecto_id = v_proyecto_id AND estado = 'activa';
 
     
     IF v_vacantes_ocupadas >= v_vacantes_totales THEN
-      UPDATE proyectos SET estado = 'en_desarrollo' WHERE id = v_proyecto_id;
-      
-      UPDATE postulaciones 
-      SET estado = 'rechazada' 
-      WHERE proyecto_id = v_proyecto_id AND estado = 'pendiente';
+      ROLLBACK;
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Límite de vacantes alcanzado para este proyecto.';
     END IF;
+
+    
+    UPDATE postulaciones SET estado = 'aceptada' WHERE id = p_postulacion_id;
+    
+    
+    
 
     SET v_success = TRUE;
 
@@ -1944,4 +1746,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-24 22:55:41
+-- Dump completed on 2026-03-25  6:01:55

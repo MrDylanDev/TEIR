@@ -116,6 +116,18 @@
 
       <!-- SECCION: TRABAJO ACTUAL -->
       <div id="activos" class="seccion-v">
+          
+          <!-- MENSAJES ESPECIFICOS DE ESTA SECCION -->
+          {% if messages %}
+              <div style="margin-bottom: 25px;">
+                  {% for message in messages %}
+                      <div style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: {% if message.tags == 'error' %}#f44336{% elif message.tags == 'warning' %}#ff9800{% else %}#4CAF50{% endif %}; color: white; font-weight: bold; border-left: 5px solid rgba(0,0,0,0.2);">
+                          {{ message }}
+                      </div>
+                  {% endfor %}
+              </div>
+          {% endif %}
+
           <h1>Proyectos en Desarrollo</h1>
           <p style="opacity: 0.7; margin-bottom: 30px;">Registra tus avances y gestiona tus entregas.</p>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
