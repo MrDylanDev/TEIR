@@ -652,10 +652,9 @@ DELIMITER ;;
   
   IF NEW.estado = 'en_revision' THEN
     
-    SELECT desarrollador_id INTO v_responsable_id FROM avances 
-    WHERE proyecto_id = NEW.id AND porcentaje = 100 
-    ORDER BY fecha DESC LIMIT 1;
-    
+    SELECT desarrollador_id INTO v_responsable_id FROM avances
+    WHERE proyecto_id = NEW.id AND porcentaje = 100
+    ORDER BY fecha_hora DESC LIMIT 1;    
   ELSEIF NEW.estado = 'finalizado' THEN
     SET v_responsable_id = NEW.empresa_id; 
     
