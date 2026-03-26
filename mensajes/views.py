@@ -28,7 +28,7 @@ def sala_chat(request, receptor_id, proyecto_id=None):
 
     if proyecto:
         mensajes_chat = mensajes_chat.filter(proyecto=proyecto)
-
+    
     # Marcar leídos
     mensajes_chat.filter(receptor=request.user, leido=False).update(leido=True)
 

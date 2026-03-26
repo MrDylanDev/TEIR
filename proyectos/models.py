@@ -47,9 +47,9 @@ class Valoracion(models.Model):
         ('empresa', 'Empresa'),
         ('desarrollador', 'Desarrollador'),
     ]
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='valoraciones')
-    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_como_empresa')
-    desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_como_dev')
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='valoraciones', db_column='proyecto_id')
+    empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_como_empresa', db_column='empresa_id')
+    desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_como_dev', db_column='desarrollador_id')
     rol_evaluador = models.CharField(max_length=20, choices=ROL_EVALUADOR, default='empresa')
     puntuacion = models.PositiveSmallIntegerField()
     comentario = models.TextField(blank=True, null=True)
@@ -61,10 +61,10 @@ class Valoracion(models.Model):
         verbose_name_plural = "Valoraciones"
 
 class HistorialEstadoProyecto(models.Model):
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='historial_estados')
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='historial_estados', db_column='proyecto_id')
     estado_anterior = models.CharField(max_length=50)
     estado_nuevo = models.CharField(max_length=50)
-    cambiado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
+    cambiado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, db_column='cambiado_por')
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:

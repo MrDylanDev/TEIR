@@ -17,6 +17,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('registro/', views.registro_view, name='registro'),
     path('recuperar/', views.recuperar_view, name='recuperar'),
+    path('notificaciones/marcar-leidas/', views.marcar_notificaciones_leidas, name='marcar_notificaciones_leidas'),
 
     # APIs de Usuarios
     path('api/', views.api_usuarios, name='api_usuarios'),

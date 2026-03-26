@@ -64,7 +64,7 @@ CREATE TABLE `auth_permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
   CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,19 +119,45 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_validar_contrato_antes_de_avance` BEFORE INSERT ON `avances` FOR EACH ROW BEGIN
+    
+    IF NOT EXISTS (
+        SELECT 1 FROM contrataciones 
+        WHERE proyecto_id = NEW.proyecto_id 
+        AND desarrollador_id = NEW.desarrollador_id 
+        AND estado = 'activa'
+    ) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: No puedes registrar avances en un proyecto donde no tienes una contratación activa.';
+    END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_nuevo_avance` AFTER INSERT ON `avances` FOR EACH ROW BEGIN
   DECLARE v_empresa_id BIGINT;
   DECLARE v_nombre_dev VARCHAR(150);
   DECLARE v_titulo_proy VARCHAR(200);
 
   SELECT empresa_id, titulo INTO v_empresa_id, v_titulo_proy FROM proyectos WHERE id = NEW.proyecto_id;
-  SELECT nombre INTO v_nombre_dev FROM usuarios WHERE id = NEW.desarrollador_id;
+  SELECT COALESCE(nombre, username) INTO v_nombre_dev FROM usuarios WHERE id = NEW.desarrollador_id;
 
   INSERT INTO notificaciones (usuario_id, tipo, mensaje)
   VALUES (
     v_empresa_id,
     'avance',
-    CONCAT(v_nombre_dev, ' registró un avance del ', NEW.porcentaje, '% en ', v_titulo_proy)
+    CONCAT(v_nombre_dev, ' registro un avance del ', NEW.porcentaje, '% en ', v_titulo_proy)
   );
 
   IF NEW.porcentaje = 100 THEN
@@ -231,7 +257,7 @@ CREATE TABLE `django_content_type` (
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -247,7 +273,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -494,7 +520,7 @@ DELIMITER ;;
   DECLARE v_titulo_proy VARCHAR(200);
 
   SELECT empresa_id, titulo INTO v_empresa_id, v_titulo_proy FROM proyectos WHERE id = NEW.proyecto_id;
-  SELECT nombre INTO v_nombre_dev FROM usuarios WHERE id = NEW.desarrollador_id;
+  SELECT COALESCE(nombre, username) INTO v_nombre_dev FROM usuarios WHERE id = NEW.desarrollador_id;
 
   INSERT INTO notificaciones (usuario_id, tipo, mensaje)
   VALUES (
@@ -504,7 +530,7 @@ DELIMITER ;;
   );
 
   INSERT INTO logs_auditoria (usuario_id, accion, tabla_afectada, registro_id)
-  VALUES (NEW.desarrollador_id, 'Nueva postulación registrada', 'postulaciones', NEW.id);
+  VALUES (NEW.desarrollador_id, 'Nueva postulacion registrada', 'postulaciones', NEW.id);
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -593,17 +619,57 @@ CREATE TABLE `proyectos` (
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_historial_estado_proyecto` AFTER UPDATE ON `proyectos` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_historial_inicial_proyecto` AFTER INSERT ON `proyectos` FOR EACH ROW BEGIN
+  
+  
+  INSERT INTO historial_estado_proyecto
+    (proyecto_id, estado_anterior, estado_nuevo, cambiado_por, fecha)
+  VALUES (NEW.id, NULL, NEW.estado, NEW.empresa_id, NOW());
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = latin1 */ ;
+/*!50003 SET character_set_results = latin1 */ ;
+/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_historial_estado_proyecto` AFTER UPDATE ON `proyectos` FOR EACH ROW BEGIN
+  DECLARE v_responsable_id BIGINT;
+  
+  
+  IF NEW.estado = 'en_revision' THEN
+    
+    SELECT desarrollador_id INTO v_responsable_id FROM avances 
+    WHERE proyecto_id = NEW.id AND porcentaje = 100 
+    ORDER BY fecha DESC LIMIT 1;
+    
+  ELSEIF NEW.estado = 'finalizado' THEN
+    SET v_responsable_id = NEW.empresa_id; 
+    
+  ELSEIF NEW.estado = 'publicado' THEN
+    SET v_responsable_id = NEW.empresa_id; 
+    
+  ELSE
+    SET v_responsable_id = NEW.empresa_id; 
+  END IF;
+
   IF OLD.estado <> NEW.estado THEN
     INSERT INTO historial_estado_proyecto
       (proyecto_id, estado_anterior, estado_nuevo, cambiado_por)
-    VALUES (NEW.id, OLD.estado, NEW.estado, NEW.aprobado_por_id);  
+    VALUES (NEW.id, OLD.estado, NEW.estado, v_responsable_id);  
   END IF;
 END */;;
 DELIMITER ;
@@ -951,7 +1017,27 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `fecha_inicio`,
  1 AS `fecha_fin_estimada`,
  1 AS `porcentaje_avance`,
- 1 AS `ultimo_avance`*/;
+ 1 AS `ultimo_avance`,
+ 1 AS `desarrollador_id`,
+ 1 AS `empresa_id`,
+ 1 AS `estado`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `v_reputacion_empresas`
+--
+
+DROP TABLE IF EXISTS `v_reputacion_empresas`;
+/*!50001 DROP VIEW IF EXISTS `v_reputacion_empresas`*/;
+SET @saved_cs_client     = @@character_set_client;
+/*!50503 SET character_set_client = utf8mb4 */;
+/*!50001 CREATE VIEW `v_reputacion_empresas` AS SELECT 
+ 1 AS `empresa_id`,
+ 1 AS `nombre_usuario`,
+ 1 AS `nombre_empresa`,
+ 1 AS `sector`,
+ 1 AS `total_evaluaciones`,
+ 1 AS `promedio_reputacion`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1391,8 +1477,18 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_registrar_usuario`(
   IN p_rol          ENUM('empresa','desarrollador','administrador')
 )
 BEGIN
-  INSERT INTO usuarios (username, nombre, email, password, rol, estado, is_active, is_staff, is_superuser, date_joined)
-  VALUES (p_username, p_nombre, p_email, p_password, p_rol, 'activo', 1, 0, 0, NOW());
+  
+  DECLARE v_pass_django VARCHAR(255);
+  SET v_pass_django = CONCAT('plain$$', p_password);
+
+  INSERT INTO usuarios (
+    username, nombre, email, password, rol, 
+    estado, is_active, is_staff, is_superuser, date_joined
+  )
+  VALUES (
+    p_username, p_nombre, p_email, v_pass_django, p_rol, 
+    'activo', 1, 0, 0, NOW()
+  );
   
   SET @nuevo_id = LAST_INSERT_ID();
   
@@ -1529,12 +1625,12 @@ DELIMITER ;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_calificacion_desarrolladores` AS select `valoraciones`.`desarrollador_id` AS `desarrollador_id`,count(0) AS `total_calificaciones`,round(avg(`valoraciones`.`puntuacion`),2) AS `promedio` from `valoraciones` group by `valoraciones`.`desarrollador_id` */;
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_calificacion_desarrolladores` AS select `valoraciones`.`desarrollador_id` AS `desarrollador_id`,count(`valoraciones`.`id`) AS `total_calificaciones`,round(avg(`valoraciones`.`puntuacion`),2) AS `promedio` from `valoraciones` where (`valoraciones`.`rol_evaluador` = 'empresa') group by `valoraciones`.`desarrollador_id` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -1565,12 +1661,12 @@ DELIMITER ;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_dashboard_desarrollador` AS select `u`.`id` AS `desarrollador_id`,`u`.`nombre` AS `nombre`,`pd`.`calificacion_promedio` AS `calificacion_promedio`,`pd`.`num_proyectos_completados` AS `num_proyectos_completados`,(select count(0) from `mensajes` where ((`mensajes`.`receptor_id` = `u`.`id`) and (`mensajes`.`leido` = false))) AS `mensajes_nuevos`,(select count(0) from (`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) where ((`c`.`desarrollador_id` = `u`.`id`) and (`p`.`estado` = 'en_desarrollo'))) AS `proyectos_activos`,(select count(0) from `favoritos` where (`favoritos`.`desarrollador_id` = `u`.`id`)) AS `proyectos_favoritos` from (`usuarios` `u` left join `perfil_desarrollador` `pd` on((`u`.`id` = `pd`.`usuario_id`))) where (`u`.`rol` = 'desarrollador') */;
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_dashboard_desarrollador` AS select `u`.`id` AS `desarrollador_id`,`u`.`nombre` AS `nombre`,coalesce(`vc`.`promedio`,0.00) AS `calificacion_promedio`,(select count(0) from (`contrataciones` `c` join `proyectos` `p` on((`c`.`proyecto_id` = `p`.`id`))) where ((`c`.`desarrollador_id` = `u`.`id`) and (`p`.`estado` = 'finalizado'))) AS `num_proyectos_completados`,(select count(0) from `mensajes` where ((`mensajes`.`receptor_id` = `u`.`id`) and (`mensajes`.`leido` = false))) AS `mensajes_nuevos`,(select count(0) from (`contrataciones` `c` join `proyectos` `p` on((`c`.`proyecto_id` = `p`.`id`))) where ((`c`.`desarrollador_id` = `u`.`id`) and (`p`.`estado` = 'en_desarrollo'))) AS `proyectos_activos`,(select count(0) from `favoritos` where (`favoritos`.`desarrollador_id` = `u`.`id`)) AS `proyectos_favoritos` from (`usuarios` `u` left join `v_calificacion_desarrolladores` `vc` on((`u`.`id` = `vc`.`desarrollador_id`))) where (`u`.`rol` = 'desarrollador') */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -1714,7 +1810,25 @@ DELIMITER ;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`emp`.`nombre` AS `empresa_nombre`,`dev`.`nombre` AS `desarrollador_nombre`,`c`.`fecha_inicio` AS `fecha_inicio`,`c`.`fecha_fin_estimada` AS `fecha_fin_estimada`,(select `avances`.`porcentaje` from `avances` where (`avances`.`proyecto_id` = `p`.`id`) order by `avances`.`fecha_hora` desc limit 1) AS `porcentaje_avance`,(select `avances`.`fecha_hora` from `avances` where (`avances`.`proyecto_id` = `p`.`id`) order by `avances`.`fecha_hora` desc limit 1) AS `ultimo_avance` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where (`p`.`estado` = 'en_desarrollo') */;
+/*!50001 VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`emp`.`nombre` AS `empresa_nombre`,`dev`.`nombre` AS `desarrollador_nombre`,`c`.`fecha_inicio` AS `fecha_inicio`,`c`.`fecha_fin_estimada` AS `fecha_fin_estimada`,(select `a`.`porcentaje` from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`) order by `a`.`fecha_hora` desc limit 1) AS `porcentaje_avance`,(select `a`.`fecha_hora` from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`) order by `a`.`fecha_hora` desc limit 1) AS `ultimo_avance`,`dev`.`id` AS `desarrollador_id`,`emp`.`id` AS `empresa_id`,`p`.`estado` AS `estado` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where (`p`.`estado` in ('en_desarrollo','en_revision')) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `v_reputacion_empresas`
+--
+
+/*!50001 DROP VIEW IF EXISTS `v_reputacion_empresas`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_reputacion_empresas` AS select `u`.`id` AS `empresa_id`,`u`.`nombre` AS `nombre_usuario`,`pe`.`nombre_empresa` AS `nombre_empresa`,`pe`.`sector` AS `sector`,count(`v`.`id`) AS `total_evaluaciones`,round(avg(`v`.`puntuacion`),2) AS `promedio_reputacion` from ((`usuarios` `u` left join `perfil_empresa` `pe` on((`u`.`id` = `pe`.`usuario_id`))) join `valoraciones` `v` on((`u`.`id` = `v`.`empresa_id`))) where ((`u`.`rol` = 'empresa') and (`v`.`rol_evaluador` = 'desarrollador')) group by `u`.`id`,`u`.`nombre`,`pe`.`nombre_empresa`,`pe`.`sector` order by `promedio_reputacion` desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -1727,12 +1841,12 @@ DELIMITER ;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_top_desarrolladores` AS select `u`.`id` AS `id`,`u`.`nombre` AS `nombre`,`pd`.`programa_formacion` AS `programa_formacion`,`pd`.`calificacion_promedio` AS `calificacion_promedio`,`pd`.`num_proyectos_completados` AS `num_proyectos_completados`,`pd`.`habilidades` AS `habilidades`,(select count(0) from (`contrataciones` `c` join `proyectos` `p` on((`c`.`proyecto_id` = `p`.`id`))) where ((`c`.`desarrollador_id` = `u`.`id`) and (`p`.`estado` = 'en_desarrollo'))) AS `proyectos_activos` from (`usuarios` `u` join `perfil_desarrollador` `pd` on((`u`.`id` = `pd`.`usuario_id`))) where ((`u`.`rol` = 'desarrollador') and (`u`.`estado` = 'activo') and (`pd`.`num_proyectos_completados` > 0)) order by `pd`.`calificacion_promedio` desc,`pd`.`num_proyectos_completados` desc limit 10 */;
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_top_desarrolladores` AS select `u`.`id` AS `id`,`u`.`nombre` AS `nombre`,`pd`.`programa_formacion` AS `programa_formacion`,coalesce(`vc`.`promedio`,0.00) AS `calificacion_promedio`,`pd`.`num_proyectos_completados` AS `num_proyectos_completados`,`pd`.`habilidades` AS `habilidades`,(select count(0) from (`contrataciones` `c` join `proyectos` `p` on((`c`.`proyecto_id` = `p`.`id`))) where ((`c`.`desarrollador_id` = `u`.`id`) and (`p`.`estado` = 'en_desarrollo'))) AS `proyectos_activos` from ((`usuarios` `u` join `perfil_desarrollador` `pd` on((`u`.`id` = `pd`.`usuario_id`))) left join `v_calificacion_desarrolladores` `vc` on((`u`.`id` = `vc`.`desarrollador_id`))) where ((`u`.`rol` = 'desarrollador') and (`u`.`estado` = 'activo') and (`pd`.`num_proyectos_completados` > 0)) order by `calificacion_promedio` desc,`pd`.`num_proyectos_completados` desc limit 10 */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -1746,4 +1860,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-25  6:01:55
+-- Dump completed on 2026-03-26 19:26:17

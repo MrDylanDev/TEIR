@@ -30,7 +30,12 @@
     </div>
 
     <nav class="menu" style="margin-top: 30px;">
-      <button class="btn-nav active" onclick="verSeccion('inicio', this)">🏠 Inicio</button>
+      <button class="btn-nav active" onclick="verSeccion('inicio', this)">
+          🏠 Inicio
+          {% if notificaciones_pendientes_count > 0 %}
+              <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">{{ notificaciones_pendientes_count }}</span>
+          {% endif %}
+      </button>
       <button class="btn-nav" onclick="verSeccion('centro-chat', this)" style="color: #4CAF50;">💬 Chat</button>
       
       <div style="margin: 20px 0 10px 20px; font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;">Proyectos</div>
@@ -49,6 +54,17 @@
   <main>
     <section class="contenido">
       
+      <!-- MENSAJES GLOBALES DE DJANGO -->
+      {% if messages %}
+          <div style="margin-bottom: 25px;">
+              {% for message in messages %}
+                  <div style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: {% if message.tags == 'error' %}#f44336{% elif message.tags == 'warning' %}#ff9800{% else %}#4CAF50{% endif %}; color: white; font-weight: bold; border-left: 5px solid rgba(0,0,0,0.2); animation: slideDown 0.5s ease;">
+                      {{ message }}
+                  </div>
+              {% endfor %}
+          </div>
+      {% endif %}
+      
       <!-- SECCION: INICIO -->
       <div id="inicio" class="seccion-v activa">
           <h1>Resumen de Actividad</h1>
@@ -62,7 +78,12 @@
 
           <div style="margin-top: 40px; max-width: 600px;">
               <div class="perfil-bloque" style="background: #0a0a0a;">
-                  <h3>🔔 Notificaciones Recientes</h3>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                      <h3 style="margin: 0;">🔔 Notificaciones Recientes</h3>
+                      {% if notificaciones_pendientes_count > 0 %}
+                        <a href="{% url 'marcar_notificaciones_leidas' %}" style="font-size: 11px; color: #4CAF50; text-decoration: none; border: 1px solid #4CAF50; padding: 4px 8px; border-radius: 4px;">Marcar leídas</a>
+                      {% endif %}
+                  </div>
                   <ul style="list-style: none; padding: 0;">
                       {% for notif in notificaciones %}
                         <li style="padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; opacity: 0.8;">{{ notif.mensaje }}</li>
@@ -83,13 +104,20 @@
               <div class="card-p" style="border-color: #4CAF50;">
                   <h3 style="margin-bottom: 5px;">Soporte TEM</h3>
                   <p style="font-size: 13px; opacity: 0.6; margin-bottom: 20px;">Ayuda técnica y administrativa.</p>
-                  <a href="{% url 'sala_chat_general' 1 %}" style="display: block; background: #4CAF50; color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Chatear con Admin</a>
+                  <a href="{% url 'sala_chat_general' admin_id %}" style="display: block; background: #4CAF50; color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Chatear con Admin</a>
               </div>
-              {% for contratacion in mis_proyectos_activos %}
+              {% for contrato in mis_proyectos_activos_v %}
                 <div class="card-p">
+                    <h3 style="margin-bottom: 5px;">{{ contrato.empresa_nombre }}</h3>
+                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 15px;">Proyecto: {{ contrato.titulo }}</p>
+                    <a href="{% url 'sala_chat' contrato.empresa_id contrato.proyecto_id %}" style="display: block; background: white; color: black; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Hablar con Empresa</a>
+                </div>
+              {% endfor %}
+              {% for contratacion in mis_proyectos_finalizados %}
+                <div class="card-p" style="opacity: 0.7;">
                     <h3 style="margin-bottom: 5px;">{{ contratacion.empresa.username }}</h3>
-                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 15px;">Proyecto: {{ contratacion.proyecto.titulo }}</p>
-                    <a href="{% url 'sala_chat' contratacion.empresa.id contratacion.proyecto.id %}" style="display: block; background: white; color: black; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Hablar con Empresa</a>
+                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 15px;">Proyecto: {{ contratacion.proyecto.titulo }} <span style="color: #4CAF50;">(Finalizado)</span></p>
+                    <a href="{% url 'sala_chat' contratacion.empresa.id contratacion.proyecto.id %}" style="display: block; background: #222; color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; border: 1px solid #444;">Ver Historial de Chat</a>
                 </div>
               {% endfor %}
           </div>
@@ -131,13 +159,22 @@
           <h1>Proyectos en Desarrollo</h1>
           <p style="opacity: 0.7; margin-bottom: 30px;">Registra tus avances y gestiona tus entregas.</p>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
-              {% for contratacion in mis_proyectos_activos %}
+              {% for proyecto in mis_proyectos_activos_v %}
                 <div class="card-p">
-                    <h3 style="margin-bottom: 10px; color: #4CAF50;">{{ contratacion.proyecto.titulo }}</h3>
-                    <p style="font-size: 14px; opacity: 0.7; margin-bottom: 20px; line-height: 1.5;">{{ contratacion.proyecto.descripcion|truncatewords:20 }}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <h3 style="margin-bottom: 10px; color: #4CAF50;">{{ proyecto.titulo }}</h3>
+                        <span style="font-weight: bold; color: #4CAF50;">{{ proyecto.porcentaje }}%</span>
+                    </div>
+                    
+                    <div style="margin: 15px 0; background: #222; height: 6px; border-radius: 3px;">
+                        <div style="background: #4CAF50; width: {{ proyecto.porcentaje }}%; height: 100%; border-radius: 3px;"></div>
+                    </div>
+
+                    <p style="font-size: 13px; opacity: 0.5; margin-bottom: 20px;">Empresa: {{ proyecto.empresa_nombre }}</p>
+                    
                     <div style="display: flex; gap: 10px;">
-                        <a href="{% url 'registrar_avance' contratacion.proyecto.id %}" style="flex: 1; background: white; color: black; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">Registrar Avance</a>
-                        <a href="{% url 'ver_avances' contratacion.proyecto.id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;">Historial</a>
+                        <a href="{% url 'registrar_avance' proyecto.proyecto_id %}" style="flex: 1; background: white; color: black; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">Registrar Avance</a>
+                        <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;">Historial</a>
                     </div>
                 </div>
               {% empty %}

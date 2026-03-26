@@ -83,8 +83,18 @@
                 <h2 style="margin-top: 15px; font-size: 18px; color: white;">Panel Maestro</h2>
             </div>
             <ul style="padding: 0;">
-                <li onclick="showSection('statsSection', this)" class="active">📊 Estadísticas</li>
-                <li onclick="showSection('chatSection', this)" style="color: #4CAF50;">💬 Chat Central</li>
+                <li onclick="showSection('statsSection', this)" class="active">
+                    📊 Estadísticas
+                    {% if notificaciones_pendientes_count > 0 %}
+                        <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">{{ notificaciones_pendientes_count }}</span>
+                    {% endif %}
+                </li>
+                <li onclick="showSection('chatSection', this)" style="color: #4CAF50;">
+                    💬 Chat Central 
+                    {% if mensajes_no_leidos_admin > 0 %}
+                        <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">{{ mensajes_no_leidos_admin }}</span>
+                    {% endif %}
+                </li>
                 <li onclick="showSection('usersSection', this)">👥 Gestión Usuarios</li>
                 <li onclick="showSection('projectsSection', this)">🏗️ Monitor Proyectos</li>
                 <li onclick="showSection('auditSection', this)">📜 Auditoría (Logs)</li>
@@ -119,7 +129,50 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 50px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                    <div style="background: #111; padding: 10px; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                        <span style="font-size: 11px; opacity: 0.6;">✅ Finalizados</span>
+                        <h4 style="margin: 5px 0 0 0;">{{ p_fin }}</h4>
+                    </div>
+                    <div style="background: #111; padding: 10px; border-radius: 8px; border-left: 4px solid #2196F3;">
+                        <span style="font-size: 11px; opacity: 0.6;">🏗️ En Desarrollo</span>
+                        <h4 style="margin: 5px 0 0 0;">{{ p_des }}</h4>
+                    </div>
+                    <div style="background: #111; padding: 10px; border-radius: 8px; border-left: 4px solid #FF9800;">
+                        <span style="font-size: 11px; opacity: 0.6;">📢 Disponibles</span>
+                        <h4 style="margin: 5px 0 0 0;">{{ p_pub }}</h4>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                    <div style="background: #111; padding: 10px; border-radius: 8px; border-bottom: 2px solid #9C27B0;">
+                        <span style="font-size: 11px; opacity: 0.6;">⏳ Postulaciones Pendientes</span>
+                        <h4 style="margin: 5px 0 0 0; color: #9C27B0;">{{ post_pen }}</h4>
+                    </div>
+                    <div style="background: #111; padding: 10px; border-radius: 8px; border-bottom: 2px solid #FFD700;">
+                        <span style="font-size: 11px; opacity: 0.6;">⭐ Calificación Global</span>
+                        <h4 style="margin: 5px 0 0 0; color: #FFD700;">{{ promedio_global }}</h4>
+                    </div>
+                    <div style="background: #111; padding: 10px; border-radius: 8px; border-bottom: 2px solid #f44336;">
+                        <span style="font-size: 11px; opacity: 0.6;">⚠️ Proyectos con Retraso</span>
+                        <h4 style="margin: 5px 0 0 0; color: #f44336;">{{ p_ret }}</h4>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div class="card-m" style="text-align: left;">
+                        <h3>🔔 Notificaciones Recientes</h3>
+                        <ul style="list-style: none; padding: 0; margin-top: 20px;">
+                            {% for notif in notificaciones %}
+                                <li style="padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; opacity: 0.8;">
+                                    <strong>{{ notif.get_tipo_display }}:</strong> {{ notif.mensaje }}
+                                    <br><small style="opacity: 0.5;">{{ notif.fecha|date:"d/m H:i" }}</small>
+                                </li>
+                            {% empty %}
+                                <li style="opacity: 0.4;">Sin notificaciones nuevas.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                     <div class="card-m" style="text-align: left;">
                         <h3>🚀 Últimos Proyectos Publicados</h3>
                         <table style="width: 100%; margin-top: 20px; font-size: 14px;">
@@ -132,28 +185,152 @@
                             {% endfor %}
                         </table>
                     </div>
-                    <div class="card-m">
-                        <h3>⭐ Mejores Calificados</h3>
-                        <p style="opacity: 0.5; margin-top: 20px;">Próximamente: Ranking de devs basado en estrellas.
-                        </p>
+                    <div class="card-m" style="text-align: left;">
+                        <h3>⭐ Mejores Calificados (Talento)</h3>
+                        <table style="width: 100%; margin-top: 20px; font-size: 14px;">
+                            {% for dev in ranking_talento %}
+                            <tr style="border-bottom: 1px solid #222;">
+                                <td style="padding: 10px 0;">{{ dev.0 }}</td>
+                                <td style="text-align: center;"><span style="color: #FFD700;">★</span> {{ dev.2 }}</td>
+                                <td style="opacity: 0.5; text-align: right;">{{ dev.1 }} proy.</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" style="opacity: 0.4; padding: 20px 0;">Sin calificaciones aún.</td></tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="card-m" style="text-align: left;">
+                        <h3>🏢 Mejores Empresas (SENA-Socio)</h3>
+                        <table style="width: 100%; margin-top: 20px; font-size: 14px;">
+                            {% for emp in ranking_empresas %}
+                            <tr style="border-bottom: 1px solid #222;">
+                                <td style="padding: 10px 0;">{{ emp.1|default:emp.0 }}</td>
+                                <td style="text-align: center;"><span style="color: #2196F3;">★</span> {{ emp.2 }}</td>
+                                <td style="opacity: 0.5; text-align: right;">{{ emp.3 }} eval.</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3" style="opacity: 0.4; padding: 20px 0;">Sin evaluaciones de alumnos.</td></tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="card-m" style="text-align: left; grid-column: span 2;">
+                        <h3>📖 Auditoría de Reseñas (Flujo 360°)</h3>
+                        <p style="font-size: 12px; opacity: 0.6; margin-bottom: 15px;">Monitor de comentarios entre Empresas y Desarrolladores.</p>
+                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                            <thead style="opacity: 0.5; font-size: 11px; text-transform: uppercase;">
+                                <tr style="border-bottom: 1px solid #333;">
+                                    <th style="text-align: left; padding: 8px;">Evaluador</th>
+                                    <th style="text-align: left;">Evaluado</th>
+                                    <th>Nota</th>
+                                    <th style="text-align: left;">Comentario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in resenas_auditoria %}
+                                <tr style="border-bottom: 1px solid #222;">
+                                    <td style="padding: 10px 0;">{{ r.0 }} <span style="font-size: 9px; opacity: 0.5;">({{ r.4|upper }})</span></td>
+                                    <td>{{ r.1 }}</td>
+                                    <td style="text-align: center;"><strong>{{ r.2 }}</strong></td>
+                                    <td style="opacity: 0.8; font-style: italic;">"{{ r.3|truncatechars:60 }}"</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" style="padding: 20px 0; opacity: 0.4;">No hay reseñas registradas aún.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </section>
+
+            <!-- SECCION: PROYECTOS -->
+            <section id="projectsSection" class="section-v">
+                <h1>Monitor Maestro de Proyectos</h1>
+                <div style="background: #111; border-radius: 12px; margin-top: 30px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead style="background: #1a1a1a; color: #666;">
+                            <tr>
+                                <th style="padding: 15px; text-align: left;">Título</th>
+                                <th>Empresa</th>
+                                <th>Estado</th>
+                                <th>Vacantes</th>
+                                <th>Publicación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in proyectos_todos %}
+                            <tr class="log-row" style="text-align: center;">
+                                <td style="padding: 15px; text-align: left;">{{ p.titulo }}</td>
+                                <td>{{ p.empresa.username }}</td>
+                                <td><span class="badge" style="background: #222;">{{ p.get_estado_display|upper
+                                        }}</span></td>
+                                <td>{{ p.vacantes }}</td>
+                                <td>
+                                    <a href="{% url 'admin_toggle_proyecto' p.id %}" class="badge"
+                                        style="background: {% if p.estado == 'publicado' %}#f44336{% else %}#4CAF50{% endif %}; text-decoration: none; color: white;">
+                                        {% if p.estado == 'publicado' %}🚫 Desactivar{% else %}✅ Activar{% endif %}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ALERTAS DE INACTIVIDAD (INTEGRADAS) -->
+                {% if alertas_retraso %}
+                <div style="margin-top: 50px;">
+                    <h2 style="color: #ff5555; font-size: 18px;">⚠️ Proyectos con Alerta de Inactividad</h2>
+                    <p style="opacity: 0.7; font-size: 13px; margin-bottom: 20px;">Estos proyectos requieren atención inmediata por falta de avances (más de 15 días).</p>
+                    <div style="background: #111; border-radius: 12px; overflow: hidden; border: 1px solid #f44336;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                            <thead style="background: #2a1010; color: #ff5555; text-transform: uppercase; font-size: 11px;">
+                                <tr>
+                                    <th style="padding: 12px; text-align: left;">Proyecto</th>
+                                    <th>Empresa</th>
+                                    <th>Desarrollador</th>
+                                    <th>Inactividad</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alerta in alertas_retraso %}
+                                <tr class="log-row" style="text-align: center; border-bottom: 1px solid #222;">
+                                    <td style="padding: 12px; text-align: left;"><strong>{{ alerta.0 }}</strong></td>
+                                    <td>{{ alerta.1 }}</td>
+                                    <td>{{ alerta.2 }}</td>
+                                    <td style="color: #ff5555; font-weight: bold;">{{ alerta.3 }} días</td>
+                                    <td>
+                                        <a href="{% url 'sala_chat' admin_id 0 %}" style="background: #444; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 10px;">Intervenir</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
             </section>
 
             <!-- SECCION: CHAT CENTRAL -->
             <section id="chatSection" class="section-v">
                 <h1>Centro de Mensajería Global</h1>
+                
                 <p style="opacity: 0.7; margin-bottom: 30px;">Conversaciones activas con todos los perfiles del sistema.
                 </p>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
                     {% for conv in conversaciones %}
                     <div class="card-m"
-                        style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
+                        style="display: flex; justify-content: space-between; align-items: center; text-align: left; {% if conv.pendiente %}border: 1px solid #4CAF50; background: #0a1a0a;{% endif %}">
                         <div>
-                            <h3 style="margin: 0; font-size: 16px;">{{ conv.usuario.username }}</h3>
+                            <h3 style="margin: 0; font-size: 16px;">
+                                {{ conv.usuario.username }}
+                                {% if conv.pendiente %}
+                                    <span style="color: #4CAF50; font-size: 10px; margin-left: 5px;">● Nuevo</span>
+                                {% endif %}
+                            </h3>
                             <p style="font-size: 12px; opacity: 0.5;">Último mensaje: {{ conv.ultimo_mensaje.fecha_envio|date:"d/m H:i" }}</p>
                         </div>
-                        <a href="{% url 'sala_chat_general' conv.usuario.id %}"
+                        <a href="{% url 'sala_chat' conv.usuario.id 0 %}"
                             style="background: white; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px;">Responder</a>
                     </div>
                     {% empty %}
@@ -188,41 +365,6 @@
                                     <a href="{% url 'admin_toggle_usuario' u.id %}"
                                         style="text-decoration: none; font-size: 18px;" title="Alternar Estado">
                                         {% if u.is_active %}🟢{% else %}🔴{% endif %}
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- SECCION: PROYECTOS -->
-            <section id="projectsSection" class="section-v">
-                <h1>Monitor Maestro de Proyectos</h1>
-                <div style="background: #111; border-radius: 12px; margin-top: 30px; overflow: hidden;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <thead style="background: #1a1a1a; color: #666;">
-                            <tr>
-                                <th style="padding: 15px; text-align: left;">Título</th>
-                                <th>Empresa</th>
-                                <th>Estado</th>
-                                <th>Vacantes</th>
-                                <th>Publicación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in proyectos_todos %}
-                            <tr class="log-row" style="text-align: center;">
-                                <td style="padding: 15px; text-align: left;">{{ p.titulo }}</td>
-                                <td>{{ p.empresa.username }}</td>
-                                <td><span class="badge" style="background: #222;">{{ p.get_estado_display|upper
-                                        }}</span></td>
-                                <td>{{ p.vacantes }}</td>
-                                <td>
-                                    <a href="{% url 'admin_toggle_proyecto' p.id %}" class="badge"
-                                        style="background: {% if p.estado == 'publicado' %}#f44336{% else %}#4CAF50{% endif %}; text-decoration: none; color: white;">
-                                        {% if p.estado == 'publicado' %}🚫 Desactivar{% else %}✅ Activar{% endif %}
                                     </a>
                                 </td>
                             </tr>

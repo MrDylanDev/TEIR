@@ -79,6 +79,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'usuarios.validators.ComplexPasswordValidator'},
 ]
 
+PASSWORD_HASHERS = [
+    'usuarios.hashers.PlainTextPasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+]
+
 LANGUAGE_CODE = 'es-co'
 TIME_ZONE = 'America/Bogota'
 USE_I18N = True

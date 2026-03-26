@@ -22,7 +22,7 @@ class CopiaSeguridad(models.Model):
         ('fallido', 'Fallido'),
         ('pendiente', 'Pendiente'),
     ]
-    ejecutado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True)
+    ejecutado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True, db_column='ejecutado_por')
     archivo_url = models.CharField(max_length=500)
     tamano_mb = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     fecha = models.DateTimeField(auto_now_add=True)

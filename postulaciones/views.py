@@ -9,7 +9,29 @@ from django.utils import timezone
 @login_required
 def ver_postulaciones_empresa(request, proyecto_id):
     proyecto = get_object_or_404(Proyecto, id=proyecto_id, empresa=request.user)
-    postulaciones = Postulacion.objects.filter(proyecto=proyecto).select_related('desarrollador').order_by('-fecha')
+    
+    # --- DESPERTANDO v_postulaciones_activas ---
+    postulaciones = []
+    from django.db import connection
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT id, desarrollador_nombre, calificacion_promedio, num_proyectos_completados, habilidades, mensaje, fecha 
+            FROM v_postulaciones_activas 
+            WHERE proyecto_id = %s AND estado = 'pendiente'
+            ORDER BY fecha DESC
+        """, [proyecto_id])
+        rows = cursor.fetchall()
+        for row in rows:
+            postulaciones.append({
+                'id': row[0],
+                'desarrollador': {'nombre': row[1]},
+                'calificacion_promedio': row[2],
+                'proyectos_completados': row[3],
+                'habilidades': row[4],
+                'mensaje': row[5],
+                'fecha': row[6]
+            })
+            
     return render(request, 'postulaciones/lista_recibidas.html', {'proyecto': proyecto, 'postulaciones': postulaciones})
 
 @login_required
@@ -17,7 +39,16 @@ def postularse_a_proyecto(request, proyecto_id):
     if request.user.rol != 'desarrollador':
         return redirect('inicio')
     
-    proyecto = get_object_or_404(Proyecto, id=proyecto_id, estado='publicado')
+    # En lugar de get_object_or_404, usamos filter para manejar el error amigablemente
+    proyecto = Proyecto.objects.filter(id=proyecto_id).first()
+
+    if not proyecto:
+        messages.error(request, "El proyecto solicitado no existe.")
+        return redirect('dashboard_desarrollador')
+
+    if proyecto.estado != 'publicado':
+        messages.warning(request, f"Lo sentimos, el proyecto '{proyecto.titulo}' ya no acepta postulaciones (Estado: {proyecto.get_estado_display()}).")
+        return redirect('dashboard_desarrollador')
     
     if request.method == 'POST':
         mensaje = request.POST.get('mensaje')

@@ -27,7 +27,12 @@
             <h2 style="font-size: 18px; margin-top: 10px;">TEM Business</h2>
         </div>
         <nav style="padding: 10px;">
-            <button class="btn-nav active" onclick="switchTab('inicio', this)">📊 Dashboard</button>
+            <button class="btn-nav active" onclick="switchTab('inicio', this)">
+                📊 Dashboard
+                {% if notificaciones_pendientes_count > 0 %}
+                    <span class="badge-count" style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">{{ notificaciones_pendientes_count }}</span>
+                {% endif %}
+            </button>
             <button class="btn-nav" onclick="switchTab('centro-chat', this)" style="color: #4CAF50;">💬 Chat</button>
             
             <div style="margin: 20px 0 10px 20px; font-size: 11px; opacity: 0.4; text-transform: uppercase;">Gestión</div>
@@ -88,8 +93,13 @@
 
             <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
                 <div class="card-p">
-                    <h3>🔔 Actividad Reciente</h3>
-                    <ul style="list-style: none; padding: 0; margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0;">🔔 Actividad Reciente</h3>
+                        {% if notificaciones_pendientes_count > 0 %}
+                            <a href="{% url 'marcar_notificaciones_leidas' %}" style="font-size: 11px; color: #4CAF50; text-decoration: none; border: 1px solid #4CAF50; padding: 4px 8px; border-radius: 4px;">Marcar leídas</a>
+                        {% endif %}
+                    </div>
+                    <ul style="list-style: none; padding: 0;">
                         {% for notif in notificaciones %}
                             <li style="padding: 15px 0; border-bottom: 1px solid #222; font-size: 14px; opacity: 0.8;">{{ notif.mensaje }}</li>
                         {% empty %}
@@ -123,18 +133,18 @@
             <!-- Categoría: Desarrolladores -->
             <h2 style="font-size: 14px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">Tus Desarrolladores Contratados</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px;">
-                {% for contratacion in en_desarrollo %}
+                {% for contratacion in en_desarrollo_v %}
                     <div class="card-p" style="display: flex; justify-content: space-between; align-items: center; background: #0a0a0a;">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <div style="width: 45px; height: 45px; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #2196F3;">
-                                {{ contratacion.desarrollador.username|slice:":1"|upper }}
+                                {{ contratacion.desarrollador_nombre|slice:":1"|upper }}
                             </div>
                             <div>
-                                <h3 style="margin: 0; font-size: 16px;">{{ contratacion.desarrollador.username }}</h3>
-                                <p style="margin: 3px 0 0; font-size: 12px; color: #2196F3;">Proyecto: <strong>{{ contratacion.proyecto.titulo }}</strong></p>
+                                <h3 style="margin: 0; font-size: 16px;">{{ contratacion.desarrollador_nombre }}</h3>
+                                <p style="margin: 3px 0 0; font-size: 12px; color: #2196F3;">Proyecto: <strong>{{ contratacion.titulo }}</strong></p>
                             </div>
                         </div>
-                        <a href="{% url 'sala_chat' contratacion.desarrollador.id contratacion.proyecto.id %}" 
+                        <a href="{% url 'sala_chat' contratacion.desarrollador_id contratacion.proyecto_id %}" 
                            style="background: white; color: black; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px;">
                            Abrir Chat
                         </a>
@@ -172,15 +182,19 @@
             <h1>Proyectos en Marcha</h1>
             <p style="opacity: 0.7; margin-bottom: 30px;">Control de entregas y seguimiento de desarrolladores.</p>
             <div style="display: flex; flex-direction: column; gap: 20px;">
-                {% for contratacion in en_desarrollo %}
+                {% for contratacion in en_desarrollo_v %}
                     <div class="card-p" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h3 style="margin: 0;">{{ contratacion.proyecto.titulo }}</h3>
-                            <p style="font-size: 14px; opacity: 0.6; margin-top: 5px;">Desarrollador: <strong>{{ contratacion.desarrollador.username }}</strong></p>
+                            <h3 style="margin: 0;">{{ contratacion.titulo }}</h3>
+                            <p style="font-size: 14px; opacity: 0.6; margin-top: 5px;">Desarrollador: <strong>{{ contratacion.desarrollador_nombre }}</strong></p>
+                            <div style="margin-top: 10px; background: #222; height: 8px; border-radius: 4px; width: 200px;">
+                                <div style="background: #4CAF50; height: 100%; border-radius: 4px; width: {{ contratacion.porcentaje }}%;"></div>
+                            </div>
+                            <p style="font-size: 11px; opacity: 0.4; margin-top: 5px;">Avance: {{ contratacion.porcentaje }}% | Último: {{ contratacion.ultimo_avance|date:"d M"|default:"Sin avances" }}</p>
                         </div>
                         <div style="display: flex; gap: 12px;">
-                            <a href="{% url 'ver_avances' contratacion.proyecto.id %}" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">👁️ Ver Avances</a>
-                            <a href="{% url 'finalizar_proyecto' contratacion.proyecto.id %}" style="background: #2196F3; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">🏁 Finalizar</a>
+                            <a href="{% url 'ver_avances' contratacion.proyecto_id %}" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">👁️ Ver Avances</a>
+                            <a href="{% url 'finalizar_proyecto' contratacion.proyecto_id %}" style="background: #2196F3; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">🏁 Finalizar</a>
                         </div>
                     </div>
                 {% empty %}
@@ -233,12 +247,20 @@
         <section id="historial" class="seccion-v">
             <h1>Historial de Proyectos</h1>
             <p style="opacity: 0.7; margin-bottom: 30px;">Proyectos finalizados y archivados.</p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
                 {% for proyecto in historial %}
-                    <div class="card-p" style="opacity: 0.8;">
+                    <div class="card-p" style="opacity: 0.8; border-color: #4CAF50;">
                         <h3>{{ proyecto.titulo }}</h3>
                         <p style="font-size: 12px; color: #4CAF50; margin-top: 10px;">Estado: FINALIZADO</p>
-                        <a href="{% url 'ver_avances' proyecto.id %}" style="display: block; background: #222; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; color: white; margin-top: 15px; font-size: 13px;">Ver Detalles</a>
+                        
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <a href="{% url 'ver_avances' proyecto.id %}" style="flex: 1; background: #222; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; color: white; font-size: 13px;">Ver Detalles</a>
+                            
+                            <!-- Buscamos al desarrollador en las contrataciones del proyecto -->
+                            {% for contratacion in proyecto.contrataciones.all %}
+                                <a href="{% url 'sala_chat' contratacion.desarrollador.id proyecto.id %}" style="flex: 1; background: #111; color: #2196F3; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; border: 1px solid #222; font-size: 13px; font-weight: bold;">💬 Ver Chat</a>
+                            {% endfor %}
+                        </div>
                     </div>
                 {% empty %}
                     <p style="opacity: 0.4;">Aún no has finalizado proyectos.</p>

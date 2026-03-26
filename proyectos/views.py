@@ -9,14 +9,39 @@ from favoritos.models import Favorito
 
 @login_required
 def listar_proyectos(request):
-    proyectos = Proyecto.objects.filter(estado='publicado').order_by('-fecha_publicacion')
+    # --- DESPERTANDO v_proyectos_disponibles ---
+    proyectos = []
     
     tipo = request.GET.get('tipo')
     prioridad = request.GET.get('prioridad')
+    
+    sql = "SELECT id, titulo, descripcion, tipo_solucion, prioridad, fecha_publicacion, nombre_empresa, num_postulaciones FROM v_proyectos_disponibles WHERE 1=1"
+    params = []
+    
     if tipo:
-        proyectos = proyectos.filter(tipo_solucion=tipo)
+        sql += " AND tipo_solucion = %s"
+        params.append(tipo)
     if prioridad:
-        proyectos = proyectos.filter(prioridad=prioridad)
+        sql += " AND prioridad = %s"
+        params.append(prioridad)
+        
+    sql += " ORDER BY fecha_publicacion DESC"
+    
+    from django.db import connection
+    with connection.cursor() as cursor:
+        cursor.execute(sql, params)
+        rows = cursor.fetchall()
+        for row in rows:
+            proyectos.append({
+                'id': row[0],
+                'titulo': row[1],
+                'descripcion': row[2],
+                'tipo_solucion': row[3],
+                'prioridad': row[4],
+                'fecha_publicacion': row[5],
+                'empresa_nombre': row[6],
+                'num_postulaciones': row[7]
+            })
     
     favoritos_ids = []
     
@@ -27,10 +52,10 @@ def listar_proyectos(request):
         # Obtener IDs de proyectos donde el usuario ya tiene una postulación
         postulaciones_ids = Postulacion.objects.filter(desarrollador=request.user).values_list('proyecto_id', flat=True)
         
-        # Excluir esos proyectos de la lista principal
-        proyectos = proyectos.exclude(id__in=postulaciones_ids)
+        # Excluir esos proyectos de la lista
+        proyectos = [p for p in proyectos if p['id'] not in postulaciones_ids]
         
-        favoritos_ids = Favorito.objects.filter(desarrollador=request.user).values_list('proyecto_id', flat=True)
+        favoritos_ids = list(Favorito.objects.filter(desarrollador=request.user).values_list('proyecto_id', flat=True))
         
     return render(request, 'proyectos/listar.html', {
         'proyectos': proyectos,
@@ -53,7 +78,8 @@ def crear_proyecto(request):
                 prioridad=request.POST.get('prioridad', 'media'),
                 vacantes=int(request.POST.get('vacantes', 1)),
                 fecha_limite=request.POST.get('fecha_limite') or None,
-                estado='publicado' # Publicación directa
+                estado='publicado', # Publicación directa sin intervención del administrador
+                aprobado_por_id=None # No se requiere aprobación del administrador
             )
             proyecto.save()
             messages.success(request, f"¡Proyecto '{proyecto.titulo}' publicado exitosamente!")

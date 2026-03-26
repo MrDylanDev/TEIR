@@ -103,11 +103,18 @@ Combinamos tecnología de punta, análisis estratégico y creatividad para trans
   {% for caso in casos_exito %}
     <div class="card" style="background: #111; padding: 20px; border-radius: 15px; border: 1px solid #222; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
         <h3 style="color: #4CAF50; font-weight: 300; margin-bottom: 10px;">{{ caso.titulo }}</h3>
-        <p style="font-size: 14px; opacity: 0.7;">{{ caso.get_tipo_solucion_display }}</p>
+        <p style="font-size: 14px; opacity: 0.7;">{{ caso.tipo_solucion }}</p>
+        <div style="color: #FFD700; margin: 10px 0;">
+            {% for i in "12345"|make_list %}
+                <i class="fa{% if forloop.counter <= caso.calificacion %}s{% else %}r{% endif %} fa-star"></i>
+            {% endfor %}
+        </div>
         <hr style="width: 50%; border: 0; border-top: 1px solid #333; margin: 15px 0;">
-        <p style="font-size: 12px; opacity: 0.5;">Desarrollado para: <strong>{{ caso.empresa.username }}</strong></p>
+        <p style="font-size: 12px; opacity: 0.5;">Empresa: <strong>{{ caso.empresa_nombre }}</strong></p>
+        <p style="font-size: 12px; opacity: 0.5;">Desarrollador: <strong>{{ caso.desarrollador_nombre }}</strong></p>
     </div>
   {% empty %}
+
     <div class="card"><img src="{% static 'IMG/website.png' %}" alt="Paginas Web"></div>
     <div class="card"><img src="{% static 'IMG/ia.png' %}" alt="Inteigencia artificial"></div>
     <div class="card"><img src="{% static 'IMG/automatizacion.png' %}" alt="automatizacion"></div>

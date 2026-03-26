@@ -80,7 +80,7 @@
         {% for proyecto in proyectos %}
           <div class="project-card">
               <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                  <span class="tag-solucion">{{ proyecto.get_tipo_solucion_display }}</span>
+                  <span class="tag-solucion">{{ proyecto.tipo_solucion }}</span>
                   <a href="{% url 'toggle_favorito' proyecto.id %}" style="text-decoration: none; font-size: 16px;">
                       {% if proyecto.id in favoritos_ids %}❤️{% else %}🤍{% endif %}
                   </a>
@@ -90,14 +90,14 @@
               <p class="project-desc">{{ proyecto.descripcion|truncatewords:18 }}</p>
               
               <div style="margin-bottom: 25px;">
-                  <span class="badge-prio prio-{{ proyecto.prioridad }}">{{ proyecto.get_prioridad_display }}</span>
-                  <span style="font-size: 11px; opacity: 0.4; margin-left: 10px;">{{ proyecto.vacantes }} vacante{{ proyecto.vacantes|pluralize }}</span>
+                  <span class="badge-prio prio-{{ proyecto.prioridad }}">{{ proyecto.prioridad }}</span>
+                  <span style="font-size: 11px; opacity: 0.4; margin-left: 10px;">{{ proyecto.num_postulaciones }} postulaciones</span>
               </div>
 
               <div class="card-footer">
                   <div class="company-info">
                       <div style="width: 20px; height: 20px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">🏢</div>
-                      {{ proyecto.empresa.username }}
+                      {{ proyecto.empresa_nombre }}
                   </div>
                   
                   <a href="{% url 'postularse_a_proyecto' proyecto.id %}" class="btn-apply">Postularse</a>

@@ -20,7 +20,25 @@ from favoritos.models import Favorito
 from mensajes.models import Mensaje
 
 def inicio(request):
-    casos_exito = Proyecto.objects.filter(estado='finalizado').order_by('-fecha_aprobacion')[:4]
+    # --- DESPERTANDO v_portafolio_publico ---
+    casos_exito = []
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT titulo, tipo_solucion, empresa_nombre, desarrollador_nombre, calificacion_proyecto 
+            FROM v_portafolio_publico 
+            ORDER BY fecha_finalizacion DESC 
+            LIMIT 4
+        """)
+        rows = cursor.fetchall()
+        for row in rows:
+            casos_exito.append({
+                'titulo': row[0],
+                'tipo_solucion': row[1],
+                'empresa_nombre': row[2],
+                'desarrollador_nombre': row[3],
+                'calificacion': row[4]
+            })
+
     return render(request, 'publico/index.html', {'casos_exito': casos_exito})
 
 def login_view(request):
@@ -79,57 +97,156 @@ def recuperar_view(request):
 
 @login_required
 def dashboard_empresa(request):
+    # --- CERROJO DE SEGURIDAD: Solo usuarios ACTIVOS ---
+    if request.user.estado != 'activo':
+        from django.contrib.auth import logout
+        from django.contrib import messages
+        logout(request)
+        messages.error(request, "Tu cuenta ha sido suspendida o está inactiva. Contacta al administrador.")
+        return redirect('login')
+
     if request.user.rol != 'empresa': return redirect('inicio')
+    
+    # --- DESPERTANDO v_dashboard_empresa ---
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT proyectos_publicados, proyectos_activos, postulaciones_pendientes, desarrolladores_contratados 
+            FROM v_dashboard_empresa 
+            WHERE empresa_id = %s
+        """, [request.user.id])
+        stats = cursor.fetchone()
+
+    # Si no hay datos, inicializamos en cero
+    p_pub, p_act, post_pen, dev_con = stats if stats else (0, 0, 0, 0)
+
+    # --- DESPERTANDO v_proyectos_en_desarrollo (para Empresa) ---
+    proyectos_en_marcha = []
+    with connection.cursor() as cursor:
+        # Nota: La vista usa empresa_id_raw si queremos filtrar por el ID real
+        # Si no existe empresa_id_raw, usamos empresa_id
+        cursor.execute("""
+            SELECT proyecto_id, titulo, desarrollador_nombre, porcentaje_avance, ultimo_avance, fecha_fin_estimada, estado, desarrollador_id 
+            FROM v_proyectos_en_desarrollo 
+            WHERE empresa_id = %s
+        """, [request.user.id])
+        rows = cursor.fetchall()
+        for row in rows:
+            proyectos_en_marcha.append({
+                'proyecto_id': row[0],
+                'titulo': row[1],
+                'desarrollador_nombre': row[2],
+                'porcentaje': row[3],
+                'ultimo_avance': row[4],
+                'fecha_fin': row[5],
+                'estado': row[6],
+                'desarrollador_id': row[7]
+            })
+
     perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=request.user)
     mis_ofertas = Proyecto.objects.filter(empresa=request.user, estado='publicado').order_by('-fecha_publicacion')
-    en_desarrollo = Contratacion.objects.filter(empresa=request.user, estado='activa').select_related('proyecto', 'desarrollador')
-    historial = Proyecto.objects.filter(empresa=request.user, estado='finalizado').order_by('-fecha_aprobacion')
-    postulaciones_pendientes = Postulacion.objects.filter(proyecto__empresa=request.user, estado='pendiente')
+    
+    # Optimizamos el historial para traer la contratación y el desarrollador asociado
+    historial = Proyecto.objects.filter(
+        empresa=request.user, 
+        estado='finalizado'
+    ).prefetch_related('contrataciones', 'contrataciones__desarrollador').order_by('-fecha_aprobacion')
+    postulaciones_pendientes_obj = Postulacion.objects.filter(proyecto__empresa=request.user, estado='pendiente')
     
     # Soporte Admin Dinámico
     admin_instancia = Usuario.objects.filter(rol='administrador').first()
     admin_id = admin_instancia.id if admin_instancia else 1
 
-    # Reputación Corporativa: Valoraciones de desarrolladores
+    # Reputación Corporativa
     from proyectos.models import Valoracion
     valoraciones_dev = Valoracion.objects.filter(empresa=request.user, rol_evaluador='desarrollador').select_related('desarrollador', 'proyecto')
     promedio_empresa = valoraciones_dev.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
 
+    # --- MEJORA: Historial de Notificaciones (Leídas y No Leídas) ---
+    notificaciones_recientes = []
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT tipo, mensaje, fecha, leida 
+            FROM notificaciones 
+            WHERE usuario_id = %s 
+            ORDER BY fecha DESC 
+            LIMIT 10
+        """, [request.user.id])
+        rows = cursor.fetchall()
+        for row in rows:
+            notificaciones_recientes.append({
+                'tipo': row[0], 
+                'mensaje': row[1], 
+                'fecha': row[2],
+                'leida': row[3]
+            })
+
+    # --- MEJORA: Conteo de Notificaciones Pendientes (Universal) ---
+    notificaciones_pendientes_count = 0
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM v_notificaciones_pendientes WHERE usuario_id = %s", [request.user.id])
+        notificaciones_pendientes_count = cursor.fetchone()[0]
+
     context = {
-        'total_proyectos': Proyecto.objects.filter(empresa=request.user).count(),
-        'proyectos_activos': en_desarrollo.count(),
-        'total_postulaciones': postulaciones_pendientes.count(),
+        'total_proyectos': p_pub,
+        'proyectos_activos': p_act,
+        'total_postulaciones': post_pen,
+        'total_contratados': dev_con,
         'mis_ofertas': mis_ofertas,
-        'en_desarrollo': en_desarrollo,
+        'en_desarrollo_v': proyectos_en_marcha,
         'historial': historial,
         'valoraciones_recibidas': valoraciones_dev,
         'promedio_empresa': round(promedio_empresa, 1),
-        'postulaciones_pendientes': postulaciones_pendientes,
-        'notificaciones': Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:5],
+        'postulaciones_pendientes': postulaciones_pendientes_obj,
+        'notificaciones': notificaciones_recientes,
+        'notificaciones_pendientes_count': notificaciones_pendientes_count,
         'perfil': perfil,
-        'mis_contrataciones': en_desarrollo,
+        'mis_contrataciones_v': proyectos_en_marcha,
         'admin_id': admin_id
     }
     return render(request, 'empresa/empresa.html', context)
 
 @login_required
 def dashboard_desarrollador(request):
-    if request.user.rol != 'desarrollador': return redirect('inicio')
-    mis_postulaciones = Postulacion.objects.filter(desarrollador=request.user).select_related('proyecto')
-    mis_favoritos = Favorito.objects.filter(desarrollador=request.user).select_related('proyecto')
-    mis_proyectos_activos = Contratacion.objects.filter(desarrollador=request.user, estado='activa').select_related('proyecto', 'empresa')
-    # 3. Portafolio: Proyectos finalizados con sus valoraciones reales
-    from proyectos.models import Valoracion
-    mis_proyectos_finalizados = Contratacion.objects.filter(
-        desarrollador=request.user, 
-        estado='finalizada'
-    ).select_related('proyecto', 'empresa')
-    
-    # Soporte Admin Dinámico
-    admin_instancia = Usuario.objects.filter(rol='administrador').first()
-    admin_id = admin_instancia.id if admin_instancia else 1
+    # --- CERROJO DE SEGURIDAD: Solo usuarios ACTIVOS ---
+    if request.user.estado != 'activo':
+        from django.contrib.auth import logout
+        from django.contrib import messages
+        logout(request)
+        messages.error(request, "Tu cuenta ha sido suspendida o está inactiva. Contacta al administrador.")
+        return redirect('login')
 
-    # Enriquecer los contratos con su valoración correspondiente (la que hizo la empresa)
+    if request.user.rol != 'desarrollador': return redirect('inicio')
+    
+    # --- DESPERTANDO v_dashboard_desarrollador ---
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT calificacion_promedio, num_proyectos_completados, proyectos_activos, proyectos_favoritos 
+            FROM v_dashboard_desarrollador 
+            WHERE desarrollador_id = %s
+        """, [request.user.id])
+        stats = cursor.fetchone()
+
+    # Si no tiene datos, inicializamos
+    promedio, p_comp, p_act, p_fav = stats if stats else (0, 0, 0, 0)
+
+    # --- CONSULTAS DJANGO OPTIMIZADAS ---
+    mis_postulaciones = Postulacion.objects.filter(desarrollador=request.user).select_related('proyecto')
+    mis_proyectos_activos_q = Contratacion.objects.filter(desarrollador=request.user, estado='activa').select_related('proyecto', 'empresa')
+    mis_proyectos_finalizados = Contratacion.objects.filter(desarrollador=request.user, estado='finalizada').select_related('proyecto', 'empresa')
+    
+    # IDs de proyectos donde el usuario YA TIENE acción (para excluir de favoritos)
+    proyectos_con_accion = set(mis_postulaciones.values_list('proyecto_id', flat=True))
+    proyectos_con_accion.update(mis_proyectos_activos_q.values_list('proyecto_id', flat=True))
+    proyectos_con_accion.update(mis_proyectos_finalizados.values_list('proyecto_id', flat=True))
+
+    # Favoritos: Solo proyectos PUBLICADOS y donde NO TENGA acción aún
+    mis_favoritos = Favorito.objects.filter(
+        desarrollador=request.user, 
+        proyecto__estado='publicado'
+    ).exclude(proyecto_id__in=proyectos_con_accion).select_related('proyecto')
+
+    # Enriquecer los contratos finalizados con su valoración correspondiente
+    from proyectos.models import Valoracion
     for contrato in mis_proyectos_finalizados:
         contrato.valoracion = Valoracion.objects.filter(
             proyecto=contrato.proyecto, 
@@ -137,13 +254,66 @@ def dashboard_desarrollador(request):
             rol_evaluador='empresa' 
         ).first()
 
+    # --- DESPERTANDO v_proyectos_en_desarrollo (Vista de Avances) ---
+    mis_proyectos_v = []
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT proyecto_id, titulo, empresa_nombre, porcentaje_avance, ultimo_avance, fecha_fin_estimada, estado, empresa_id 
+            FROM v_proyectos_en_desarrollo 
+            WHERE desarrollador_id = %s
+        """, [request.user.id])
+        rows = cursor.fetchall()
+        for row in rows:
+            mis_proyectos_v.append({
+                'proyecto_id': row[0],
+                'titulo': row[1],
+                'empresa_nombre': row[2],
+                'porcentaje': row[3],
+                'ultimo_avance': row[4],
+                'fecha_fin': row[5],
+                'estado': row[6],
+                'empresa_id': row[7]
+            })
+
+    # Soporte Admin Dinámico
+    admin_instancia = Usuario.objects.filter(rol='administrador').first()
+    admin_id = admin_instancia.id if admin_instancia else 1
+
+    # --- MEJORA: Historial de Notificaciones (Vista SQL Personalizada) ---
+    notificaciones_recientes = []
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT tipo, mensaje, fecha, leida 
+            FROM notificaciones 
+            WHERE usuario_id = %s 
+            ORDER BY fecha DESC 
+            LIMIT 10
+        """, [request.user.id])
+        rows = cursor.fetchall()
+        for row in rows:
+            notificaciones_recientes.append({
+                'tipo': row[0], 
+                'mensaje': row[1], 
+                'fecha': row[2],
+                'leida': row[3]
+            })
+
+    # --- MEJORA: Conteo de Notificaciones Pendientes (Universal) ---
+    notificaciones_pendientes_count = 0
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM v_notificaciones_pendientes WHERE usuario_id = %s", [request.user.id])
+        notificaciones_pendientes_count = cursor.fetchone()[0]
+
     perfil, _ = PerfilDesarrollador.objects.get_or_create(usuario=request.user)
     context = {
-        'proyectos_activos_count': mis_proyectos_activos.count(),
-        'proyectos_completados': mis_proyectos_finalizados.count(),
+        'proyectos_activos_count': p_act,
+        'proyectos_completados': p_comp,
+        'calificacion_promedio': round(float(promedio), 1) if promedio else 0,
+        'favoritos_count': p_fav,
         'nuevos_proyectos': Proyecto.objects.filter(estado='publicado').count(),
-        'notificaciones': Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:5],
-        'mis_proyectos_activos': mis_proyectos_activos,
+        'notificaciones': notificaciones_recientes,
+        'notificaciones_pendientes_count': notificaciones_pendientes_count,
+        'mis_proyectos_activos_v': mis_proyectos_v,
         'mis_proyectos_finalizados': mis_proyectos_finalizados,
         'mis_postulaciones': mis_postulaciones,
         'favoritos': mis_favoritos,
@@ -155,10 +325,30 @@ def dashboard_desarrollador(request):
 @login_required
 def dashboard_admin(request):
     if request.user.rol != 'administrador': return redirect('inicio')
-    total_usuarios = Usuario.objects.count()
-    total_proyectos = Proyecto.objects.count()
-    total_devs = Usuario.objects.filter(rol='desarrollador').count()
-    total_empresas = Usuario.objects.filter(rol='empresa').count()
+    
+    # --- UNIFICACIÓN: v_estadisticas_sistema (Motor de Salud Global) ---
+    stats_globales = None
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                total_empresas_activas, total_desarrolladores_activos, 
+                proyectos_publicados, proyectos_en_desarrollo, proyectos_finalizados,
+                proyectos_pendientes_aprobacion, postulaciones_pendientes, 
+                calificacion_promedio_global, proyectos_con_retraso
+            FROM v_estadisticas_sistema
+        """)
+        stats_globales = cursor.fetchone()
+
+    # Mapeo de variables (Si la vista no devuelve nada, usamos ceros)
+    if stats_globales:
+        total_empresas, total_devs, p_pub, p_des, p_fin, p_pen, post_pen, promedio_global, p_ret = stats_globales
+        total_proyectos = p_pub + p_des + p_fin + p_pen
+        total_usuarios = total_empresas + total_devs
+    else:
+        total_empresas, total_devs, p_pub, p_des, p_fin, p_pen, post_pen, promedio_global, p_ret = (0, 0, 0, 0, 0, 0, 0, 0, 0)
+        total_proyectos = 0
+        total_usuarios = 0
+    
     usuarios_lista = Usuario.objects.all().order_by('-date_joined')
     proyectos_lista = Proyecto.objects.all().select_related('empresa').order_by('-fecha_publicacion')
     
@@ -168,6 +358,10 @@ def dashboard_admin(request):
         logs = cursor.fetchall()
 
     admin_ids = Usuario.objects.filter(rol='administrador').values_list('id', flat=True)
+    
+    # --- CONTEO DE MENSAJES NO LEÍDOS PARA EL BADGE ---
+    mensajes_no_leidos_admin = Mensaje.objects.filter(receptor_id__in=admin_ids, leido=False).count()
+
     mensajes_soporte = Mensaje.objects.filter(Q(remitente_id__in=admin_ids) | Q(receptor_id__in=admin_ids)).values_list('remitente_id', 'receptor_id')
     u_ids = set()
     for r, s in mensajes_soporte:
@@ -179,7 +373,14 @@ def dashboard_admin(request):
         try:
             contacto = Usuario.objects.get(id=uid)
             ultimo_m = Mensaje.objects.filter((Q(remitente=contacto, receptor_id__in=admin_ids) | Q(remitente_id__in=admin_ids, receptor=contacto))).order_by('-fecha_envio').first()
-            if ultimo_m: conversaciones.append({'usuario': contacto, 'ultimo_mensaje': ultimo_m})
+            if ultimo_m: 
+                # Verificar si esta conversación específica tiene mensajes pendientes para admin
+                tiene_pendientes = Mensaje.objects.filter(remitente=contacto, receptor_id__in=admin_ids, leido=False).exists()
+                conversaciones.append({
+                    'usuario': contacto, 
+                    'ultimo_mensaje': ultimo_m,
+                    'pendiente': tiene_pendientes
+                })
         except Usuario.DoesNotExist: continue
     conversaciones.sort(key=lambda x: x['ultimo_mensaje'].fecha_envio, reverse=True)
 
@@ -201,17 +402,80 @@ def dashboard_admin(request):
         cursor.execute("SELECT titulo, empresa_nombre, desarrollador_nombre, dias_sin_avance FROM v_proyectos_alerta_inactividad")
         alertas_retraso = cursor.fetchall()
 
+    # 8. Obtener Ranking de Empresas (v_reputacion_empresas)
+    ranking_empresas = []
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nombre_usuario, nombre_empresa, promedio_reputacion, total_evaluaciones FROM v_reputacion_empresas LIMIT 5")
+        ranking_empresas = cursor.fetchall()
+
+    # 9. Obtener Reseñas Recientes para Auditoría (valoraciones directas)
+    resenas_auditoria = []
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                u_evaluador.nombre as evaluador,
+                u_evaluado.nombre as evaluado,
+                v.puntuacion,
+                v.comentario,
+                v.rol_evaluador,
+                v.fecha
+            FROM valoraciones v
+            JOIN usuarios u_evaluador ON v.rol_evaluador = (CASE WHEN v.rol_evaluador = 'empresa' THEN 'empresa' ELSE 'desarrollador' END) AND u_evaluador.id = (CASE WHEN v.rol_evaluador = 'empresa' THEN v.empresa_id ELSE v.desarrollador_id END)
+            JOIN usuarios u_evaluado ON u_evaluado.id = (CASE WHEN v.rol_evaluador = 'empresa' THEN v.desarrollador_id ELSE v.empresa_id END)
+            ORDER BY v.fecha DESC LIMIT 10
+        """)
+        # Simplificando la lógica de la consulta para evitar confusiones de JOIN
+        cursor.execute("""
+            SELECT 
+                (SELECT nombre FROM usuarios WHERE id = (CASE WHEN rol_evaluador = 'empresa' THEN empresa_id ELSE desarrollador_id END)) as de,
+                (SELECT nombre FROM usuarios WHERE id = (CASE WHEN rol_evaluador = 'empresa' THEN desarrollador_id ELSE empresa_id END)) as para,
+                puntuacion, comentario, rol_evaluador
+            FROM valoraciones ORDER BY fecha DESC LIMIT 10
+        """)
+        resenas_auditoria = cursor.fetchall()
+
+    # 10. Notificaciones para el Admin (Historial)
+    notificaciones_admin = Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:10]
+
+    # --- MEJORA: Conteo de Notificaciones Pendientes (Universal) ---
+    notificaciones_pendientes_count = 0
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) FROM v_notificaciones_pendientes WHERE usuario_id = %s", [request.user.id])
+        notificaciones_pendientes_count = cursor.fetchone()[0]
+
     context = {
         'total_usuarios': total_usuarios, 'total_proyectos': total_proyectos,
         'total_devs': total_devs, 'total_empresas': total_empresas,
+        'p_pub': p_pub, 'p_des': p_des, 'p_fin': p_fin, 'p_pen': p_pen,
+        'post_pen': post_pen, 'promedio_global': promedio_global, 'p_ret': p_ret,
         'usuarios_todos': usuarios_lista, 'proyectos_todos': proyectos_lista,
         'logs_auditoria': logs, 'conversaciones': conversaciones, 
+        'mensajes_no_leidos_admin': mensajes_no_leidos_admin,
         'ranking_talento': ranking,
+        'ranking_empresas': ranking_empresas,
+        'resenas_auditoria': resenas_auditoria,
         'salud_global': salud_global,
-        'alertas_retraso': alertas_retraso 
+        'alertas_retraso': alertas_retraso,
+        'notificaciones': notificaciones_admin,
+        'notificaciones_pendientes_count': notificaciones_pendientes_count,
+        'admin_id': request.user.id,
+        'admin_ids': list(admin_ids)
     }
-
     return render(request, 'administrador/Administrador.html', context)
+
+@login_required
+def marcar_notificaciones_leidas(request):
+    # Usamos el Procedimiento Almacenado de MySQL para mantener la lógica centralizada
+    with connection.cursor() as cursor:
+        cursor.callproc('sp_marcar_notificaciones_leidas', [request.user.id])
+    
+    # Redirección inteligente según el rol
+    if request.user.rol == 'administrador':
+        return redirect('dashboard_admin')
+    elif request.user.rol == 'empresa':
+        return redirect('dashboard_empresa')
+    else:
+        return redirect('dashboard_desarrollador')
 
 @login_required
 def admin_toggle_usuario(request, usuario_id):
