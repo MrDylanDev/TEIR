@@ -959,7 +959,10 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` (`id`, `username`, `nombre`, `cedula`, `fecha_nacimiento`, `email`, `password`, `rol`, `estado`, `fecha_registro`, `ultimo_acceso`, `token_recuperacion`, `token_expiracion`, `intentos_fallidos`, `bloqueado_hasta`, `is_staff`, `is_superuser`, `is_active`, `first_name`, `last_name`, `date_joined`, `last_login`) VALUES (1,'admin_tem','Super Admin TEM',NULL,NULL,'admin@tem.com','pbkdf2_sha256$1200000$00yAwe3Gvv28gReYlOSbr6$knJih9/qY0hILfDokyz6q9Vw6g2hLbvVY6z3k8rQQss=','administrador','activo',NOW(),NULL,NULL,NULL,0,NULL,1,1,1,'','',NOW(),NULL);
+INSERT INTO `usuarios` (`id`, `username`, `nombre`, `cedula`, `fecha_nacimiento`, `email`, `password`, `rol`, `estado`, `fecha_registro`, `ultimo_acceso`, `token_recuperacion`, `token_expiracion`, `intentos_fallidos`, `bloqueado_hasta`, `is_staff`, `is_superuser`, `is_active`, `first_name`, `last_name`, `date_joined`, `last_login`) VALUES 
+(1,'admin_tem','Super Admin TEM',NULL,NULL,'admin@tem.com','pbkdf2_sha256$1200000$harIyw7rnE1703jbH6Le6l$G2RVI59/PzDgUogX3JptCmR/hLRpmayv/mo5GGljl0w=','administrador','activo',NOW(),NULL,NULL,NULL,0,NULL,1,1,1,'','',NOW(),NULL),
+(2,'dev_tem','Desarrollador de Prueba',NULL,NULL,'dev@tem.com','pbkdf2_sha256$1200000$nAxlcoTDsnBgf6Gz7ZxpqF$1OgGp/xHXnkmpegSkTNDnB4cKnLqb57jHlu/n0a4Rrs=','desarrollador','activo',NOW(),NULL,NULL,NULL,0,NULL,0,0,1,'','',NOW(),NULL),
+(3,'emp_tem','Empresa de Prueba',NULL,NULL,'emp@tem.com','pbkdf2_sha256$1200000$YUCjjGDH3J4gSGw5lbd1aS$gAwXFsncAbIHgYEjqSp6ntBhzRcvaz2Dk8Cs2HU7f9s=','empresa','activo',NOW(),NULL,NULL,NULL,0,NULL,0,0,1,'','',NOW(),NULL);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
