@@ -120,28 +120,28 @@ def dashboard_empresa(request):
     p_pub, p_act, post_pen, dev_con = stats if stats else (0, 0, 0, 0)
 
     # --- DESPERTANDO v_proyectos_en_desarrollo (para Empresa) ---
-    proyectos_en_marcha = []
+    en_desarrollo_v = []
     with connection.cursor() as cursor:
-        # Nota: La vista usa empresa_id_raw si queremos filtrar por el ID real
-        # Si no existe empresa_id_raw, usamos empresa_id
         cursor.execute("""
-            SELECT proyecto_id, titulo, desarrollador_nombre, porcentaje_avance, ultimo_avance, fecha_fin_estimada, estado, desarrollador_id 
-            FROM v_proyectos_en_desarrollo 
+            SELECT proyecto_id, titulo, desarrolladores_nombres, porcentaje_avance_promedio, ultimo_avance, fecha_fin_estimada, estado, desarrolladores_ids, avances_individuales
+            FROM v_proyectos_en_desarrollo
             WHERE empresa_id = %s
         """, [request.user.id])
         rows = cursor.fetchall()
         for row in rows:
-            proyectos_en_marcha.append({
+            dev_ids = row[7].split(',') if row[7] else []
+            en_desarrollo_v.append({
                 'proyecto_id': row[0],
                 'titulo': row[1],
-                'desarrollador_nombre': row[2],
+                'desarrolladores': row[2],
                 'porcentaje': row[3],
                 'ultimo_avance': row[4],
                 'fecha_fin': row[5],
                 'estado': row[6],
-                'desarrollador_id': row[7]
+                'ids': row[7],
+                'individuales': row[8],
+                'primer_dev_id': dev_ids[0] if dev_ids else None
             })
-
     perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=request.user)
     mis_ofertas = Proyecto.objects.filter(empresa=request.user, estado='publicado').order_by('-fecha_publicacion')
     
@@ -192,7 +192,7 @@ def dashboard_empresa(request):
         'total_postulaciones': post_pen,
         'total_contratados': dev_con,
         'mis_ofertas': mis_ofertas,
-        'en_desarrollo_v': proyectos_en_marcha,
+        'en_desarrollo_v': en_desarrollo_v,
         'historial': historial,
         'valoraciones_recibidas': valoraciones_dev,
         'promedio_empresa': round(promedio_empresa, 1),
@@ -200,7 +200,7 @@ def dashboard_empresa(request):
         'notificaciones': notificaciones_recientes,
         'notificaciones_pendientes_count': notificaciones_pendientes_count,
         'perfil': perfil,
-        'mis_contrataciones_v': proyectos_en_marcha,
+        'mis_contrataciones_v': en_desarrollo_v,
         'admin_id': admin_id
     }
     return render(request, 'empresa/empresa.html', context)
@@ -258,10 +258,10 @@ def dashboard_desarrollador(request):
     mis_proyectos_v = []
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT proyecto_id, titulo, empresa_nombre, porcentaje_avance, ultimo_avance, fecha_fin_estimada, estado, empresa_id 
-            FROM v_proyectos_en_desarrollo 
-            WHERE desarrollador_id = %s
-        """, [request.user.id])
+            SELECT proyecto_id, titulo, empresa_nombre, porcentaje_avance_promedio, ultimo_avance, fecha_fin_estimada, estado, empresa_id
+            FROM v_proyectos_en_desarrollo
+            WHERE desarrolladores_ids LIKE %s
+        """, [f"%{request.user.id}%"])
         rows = cursor.fetchall()
         for row in rows:
             mis_proyectos_v.append({
@@ -274,7 +274,6 @@ def dashboard_desarrollador(request):
                 'estado': row[6],
                 'empresa_id': row[7]
             })
-
     # Soporte Admin Dinámico
     admin_instancia = Usuario.objects.filter(rol='administrador').first()
     admin_id = admin_instancia.id if admin_instancia else 1
@@ -350,7 +349,18 @@ def dashboard_admin(request):
         total_usuarios = 0
     
     usuarios_lista = Usuario.objects.all().order_by('-date_joined')
-    proyectos_lista = Proyecto.objects.all().select_related('empresa').order_by('-fecha_publicacion')
+    # --- MEJORA: Consulta de proyectos agrupada con sus desarrolladores ---
+    from django.db.models import Prefetch
+    from contrataciones.models import Contratacion
+    
+    # Traemos proyectos con sus empresas y pre-cargamos sus contrataciones activas con los desarrolladores
+    proyectos_lista = Proyecto.objects.all().select_related('empresa').prefetch_related(
+        Prefetch(
+            'contrataciones',
+            queryset=Contratacion.objects.filter(estado='activa').select_related('desarrollador'),
+            to_attr='contratos_activos'
+        )
+    ).order_by('-fecha_publicacion')
     
     logs = []
     with connection.cursor() as cursor:

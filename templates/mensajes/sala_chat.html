@@ -24,9 +24,16 @@
 
     <div class="chat-header">
         <div>
-            <h2 style="margin:0; font-weight: 300;">{{ receptor.username }} <small style="font-size: 12px; opacity:0.5;">({{ receptor.get_rol_display }})</small></h2>
-            {% if proyecto %}
-                <p style="margin:5px 0 0; font-size:13px; color: #4CAF50;">Proyecto: {{ proyecto.titulo }}</p>
+            {% if es_grupal %}
+                <h2 style="margin:0; font-weight: 300;">🚀 Espacio de Trabajo: {{ proyecto.titulo }}</h2>
+                <p style="margin:5px 0 0; font-size:12px; opacity:0.6;">Equipo: 
+                    {% for comp in companeros %}{{ comp.username }}{% if not forloop.last %}, {% endif %}{% endfor %} | {{ proyecto.empresa.username }}
+                </p>
+            {% else %}
+                <h2 style="margin:0; font-weight: 300;">{{ receptor.username }} <small style="font-size: 12px; opacity:0.5;">({{ receptor.get_rol_display }})</small></h2>
+                {% if proyecto %}
+                    <p style="margin:5px 0 0; font-size:13px; color: #4CAF50;">Proyecto: {{ proyecto.titulo }}</p>
+                {% endif %}
             {% endif %}
         </div>
         
@@ -42,6 +49,11 @@
     <div class="chat-container" id="chat-container">
         {% for msg in mensajes_chat %}
             <div class="mensaje {% if msg.remitente == request.user %}enviado{% else %}recibido{% endif %}">
+                {% if es_grupal and msg.remitente != request.user %}
+                    <small style="display: block; font-weight: bold; font-size: 10px; margin-bottom: 5px; color: #4CAF50;">
+                        {{ msg.remitente.username }} ({% if msg.remitente.rol == 'empresa' %}Empresa{% else %}Dev{% endif %})
+                    </small>
+                {% endif %}
                 {{ msg.cuerpo }}
                 <span class="meta">{{ msg.fecha_envio|date:"H:i" }}</span>
             </div>

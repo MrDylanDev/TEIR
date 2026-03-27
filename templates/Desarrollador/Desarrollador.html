@@ -172,9 +172,12 @@
 
                     <p style="font-size: 13px; opacity: 0.5; margin-bottom: 20px;">Empresa: {{ proyecto.empresa_nombre }}</p>
                     
-                    <div style="display: flex; gap: 10px;">
-                        <a href="{% url 'registrar_avance' proyecto.proyecto_id %}" style="flex: 1; background: white; color: black; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">Registrar Avance</a>
-                        <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;">Historial</a>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; gap: 10px;">
+                            <a href="{% url 'registrar_avance' proyecto.proyecto_id %}" style="flex: 1; background: white; color: black; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">Registrar Avance</a>
+                            <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;">Historial</a>
+                        </div>
+                        <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid rgba(76, 175, 80, 0.3);">🚀 Abrir Espacio de Trabajo</a>
                     </div>
                 </div>
               {% empty %}

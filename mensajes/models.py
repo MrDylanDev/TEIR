@@ -4,7 +4,7 @@ from proyectos.models import Proyecto
 
 class Mensaje(models.Model):
     remitente = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='mensajes_enviados')
-    receptor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='mensajes_recibidos')
+    receptor = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='mensajes_recibidos', null=True, blank=True)
     proyecto = models.ForeignKey(Proyecto, null=True, blank=True, on_delete=models.SET_NULL)
     asunto = models.CharField(max_length=200, blank=True, null=True)
     cuerpo = models.TextField()
@@ -16,4 +16,5 @@ class Mensaje(models.Model):
         db_table = 'mensajes'
 
     def __str__(self):
-        return f"De: {self.remitente.username} Para: {self.receptor.username}"
+        receptor_name = self.receptor.username if self.receptor else "GRUPO"
+        return f"De: {self.remitente.username} Para: {receptor_name}"

@@ -137,14 +137,14 @@
                     <div class="card-p" style="display: flex; justify-content: space-between; align-items: center; background: #0a0a0a;">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <div style="width: 45px; height: 45px; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #2196F3;">
-                                {{ contratacion.desarrollador_nombre|slice:":1"|upper }}
+                                {{ contratacion.desarrolladores|slice:":1"|upper }}
                             </div>
                             <div>
-                                <h3 style="margin: 0; font-size: 16px;">{{ contratacion.desarrollador_nombre }}</h3>
+                                <h3 style="margin: 0; font-size: 16px;">{{ contratacion.desarrolladores|truncatechars:20 }}</h3>
                                 <p style="margin: 3px 0 0; font-size: 12px; color: #2196F3;">Proyecto: <strong>{{ contratacion.titulo }}</strong></p>
                             </div>
                         </div>
-                        <a href="{% url 'sala_chat' contratacion.desarrollador_id contratacion.proyecto_id %}" 
+                        <a href="{% url 'sala_chat' contratacion.primer_dev_id contratacion.proyecto_id %}" 
                            style="background: white; color: black; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px;">
                            Abrir Chat
                         </a>
@@ -182,19 +182,25 @@
             <h1>Proyectos en Marcha</h1>
             <p style="opacity: 0.7; margin-bottom: 30px;">Control de entregas y seguimiento de desarrolladores.</p>
             <div style="display: flex; flex-direction: column; gap: 20px;">
-                {% for contratacion in en_desarrollo_v %}
+                {% for proyecto in en_desarrollo_v %}
                     <div class="card-p" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h3 style="margin: 0;">{{ contratacion.titulo }}</h3>
-                            <p style="font-size: 14px; opacity: 0.6; margin-top: 5px;">Desarrollador: <strong>{{ contratacion.desarrollador_nombre }}</strong></p>
+                            <h3 style="margin: 0;">{{ proyecto.titulo }}</h3>
+                            <p style="font-size: 14px; opacity: 0.6; margin-top: 5px;">Desarrolladores: <strong>{{ proyecto.desarrolladores }}</strong></p>
                             <div style="margin-top: 10px; background: #222; height: 8px; border-radius: 4px; width: 200px;">
-                                <div style="background: #4CAF50; height: 100%; border-radius: 4px; width: {{ contratacion.porcentaje }}%;"></div>
+                                <div style="background: #4CAF50; height: 100%; border-radius: 4px; width: {{ proyecto.porcentaje }}%;"></div>
                             </div>
-                            <p style="font-size: 11px; opacity: 0.4; margin-top: 5px;">Avance: {{ contratacion.porcentaje }}% | Último: {{ contratacion.ultimo_avance|date:"d M"|default:"Sin avances" }}</p>
+                            <p style="font-size: 11px; opacity: 0.4; margin-top: 5px;">Avance Promedio: {{ proyecto.porcentaje|default:"0" }}% | Último: {{ proyecto.ultimo_avance|date:"d M"|default:"Sin avances" }}</p>
+                            <p style="font-size: 11px; color: #4CAF50; margin-top: 3px; font-weight: bold;">
+                                Detalle: <span style="opacity: 0.8;">{{ proyecto.individuales }}</span>
+                            </p>
                         </div>
-                        <div style="display: flex; gap: 12px;">
-                            <a href="{% url 'ver_avances' contratacion.proyecto_id %}" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">👁️ Ver Avances</a>
-                            <a href="{% url 'finalizar_proyecto' contratacion.proyecto_id %}" style="background: #2196F3; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px;">🏁 Finalizar</a>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; gap: 12px;">
+                                <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; flex: 1; text-align: center;">👁️ Ver Avances</a>
+                                <a href="{% url 'finalizar_proyecto' proyecto.proyecto_id %}" style="background: #2196F3; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; flex: 1; text-align: center;">🏁 Finalizar</a>
+                            </div>
+                            <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" style="background: rgba(33, 150, 243, 0.1); color: #2196F3; padding: 10px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid rgba(33, 150, 243, 0.3);">🚀 Abrir Espacio de Trabajo</a>
                         </div>
                     </div>
                 {% empty %}

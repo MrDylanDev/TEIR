@@ -97,21 +97,26 @@ def finalizar_proyecto(request, proyecto_id):
     
     proyecto = get_object_or_404(Proyecto, id=proyecto_id, empresa=request.user)
     
-    # Buscar la contratación activa para este proyecto
-    contratacion = Contratacion.objects.filter(proyecto=proyecto, estado='activa').first()
+    # Obtener todos los desarrolladores contratados que aún no han sido calificados por la empresa para este proyecto
+    desarrolladores_pendientes = Usuario.objects.filter(
+        id__in=Contratacion.objects.filter(proyecto=proyecto, estado='activa').values_list('desarrollador_id', flat=True)
+    ).exclude(
+        id__in=Valoracion.objects.filter(proyecto=proyecto, rol_evaluador='empresa').values_list('desarrollador_id', flat=True)
+    )
     
-    if not contratacion:
-        messages.error(request, "No puedes finalizar un proyecto que no tiene un desarrollador contratado.")
+    if not desarrolladores_pendientes.exists():
+        messages.info(request, "Ya has calificado a todos los desarrolladores de este proyecto.")
         return redirect('dashboard_empresa')
     
-    desarrollador = contratacion.desarrollador
+    # Tomamos el primero de la lista para calificarlo ahora
+    desarrollador = desarrolladores_pendientes.first()
+    quedan_mas = desarrolladores_pendientes.count() > 1
 
     if request.method == 'POST':
         try:
             puntuacion = int(request.POST.get('puntuacion'))
             comentario = request.POST.get('comentario')
 
-            # Invocamos al Procedimiento Almacenado de MySQL
             from django.db import connection
             with connection.cursor() as cursor:
                 cursor.callproc('sp_calificar_proyecto', [
@@ -120,16 +125,24 @@ def finalizar_proyecto(request, proyecto_id):
                     desarrollador.id,
                     puntuacion,
                     comentario,
-                    'empresa' # Rol del evaluador
+                    'empresa'
                 ])
 
-            messages.success(request, f"Proyecto '{proyecto.titulo}' finalizado y calificado exitosamente.")
-            return redirect('dashboard_empresa')
+            if quedan_mas:
+                messages.success(request, f"Has calificado a {desarrollador.username}. Ahora califica al siguiente desarrollador.")
+                return redirect('finalizar_proyecto', proyecto_id=proyecto.id)
+            else:
+                messages.success(request, f"¡Todos los desarrolladores calificados! Proyecto '{proyecto.titulo}' finalizado.")
+                return redirect('dashboard_empresa')
 
         except Exception as e:
-            messages.error(request, f"Error al finalizar proyecto: {e}")
+            messages.error(request, f"Error al calificar: {e}")
 
-    return render(request, 'proyectos/finalizar.html', {'proyecto': proyecto, 'desarrollador': desarrollador})
+    return render(request, 'proyectos/finalizar.html', {
+        'proyecto': proyecto, 
+        'desarrollador': desarrollador,
+        'pendientes_count': desarrolladores_pendientes.count()
+    })
 
 @login_required
 def calificar_empresa(request, proyecto_id):

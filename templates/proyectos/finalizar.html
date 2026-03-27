@@ -41,7 +41,10 @@
     
     <div style="background: #1a1a1a; padding: 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #4CAF50;">
         <h2 style="font-weight: 300; font-size: 22px; margin-bottom: 10px;">{{ proyecto.titulo }}</h2>
-        <p style="opacity: 0.7;">Desarrollador: <strong>{{ desarrollador.username }}</strong></p>
+        <p style="opacity: 0.7;">Calificando a: <strong>{{ desarrollador.username }}</strong></p>
+        {% if pendientes_count > 1 %}
+            <p style="font-size: 12px; color: #ff9800; margin-top: 10px;">⚠️ Faltan {{ pendientes_count }} desarrolladores por calificar.</p>
+        {% endif %}
     </div>
 
     <form method="post">

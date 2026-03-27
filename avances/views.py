@@ -79,4 +79,18 @@ def ver_avances(request, proyecto_id):
         return redirect('inicio')
         
     avances = Avance.objects.filter(proyecto=proyecto).order_by('-fecha_hora')
-    return render(request, 'avances/ver_lista.html', {'proyecto': proyecto, 'avances': avances})
+    
+    # Obtener el progreso individual desde la vista SQL para mostrar un resumen
+    individuales = ""
+    from django.db import connection
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT avances_individuales FROM v_proyectos_en_desarrollo WHERE proyecto_id = %s", [proyecto.id])
+        row = cursor.fetchone()
+        if row:
+            individuales = row[0]
+
+    return render(request, 'avances/ver_lista.html', {
+        'proyecto': proyecto, 
+        'avances': avances,
+        'individuales': individuales
+    })

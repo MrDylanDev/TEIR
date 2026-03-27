@@ -57,7 +57,7 @@ class Valoracion(models.Model):
 
     class Meta:
         db_table = 'valoraciones'
-        unique_together = ('proyecto', 'rol_evaluador')
+        unique_together = ('proyecto', 'desarrollador', 'rol_evaluador')
         verbose_name_plural = "Valoraciones"
 
 class HistorialEstadoProyecto(models.Model):

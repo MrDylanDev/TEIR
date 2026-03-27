@@ -194,10 +194,13 @@ DELIMITER ;;
   DECLARE v_empresa_id BIGINT;
   DECLARE v_nombre_dev VARCHAR(150);
   DECLARE v_titulo_proy VARCHAR(200);
+  DECLARE v_avance_total DECIMAL(5,2);
 
+  -- Obtener datos para la notificación
   SELECT empresa_id, titulo INTO v_empresa_id, v_titulo_proy FROM proyectos WHERE id = NEW.proyecto_id;
   SELECT COALESCE(nombre, username) INTO v_nombre_dev FROM usuarios WHERE id = NEW.desarrollador_id;
 
+  -- Insertar notificación para la empresa
   INSERT INTO notificaciones (usuario_id, tipo, mensaje)
   VALUES (
     v_empresa_id,
@@ -205,7 +208,21 @@ DELIMITER ;;
     CONCAT(v_nombre_dev, ' registro un avance del ', NEW.porcentaje, '% en ', v_titulo_proy)
   );
 
-  IF NEW.porcentaje = 100 THEN
+  -- Calcular el avance promedio real del proyecto considerando a todos los desarrolladores contratados
+  -- Tomamos el último porcentaje de cada desarrollador y lo promediamos
+  SELECT COALESCE(AVG(ultimo_p), 0) INTO v_avance_total
+  FROM (
+    SELECT c.desarrollador_id, 
+           COALESCE((SELECT a.porcentaje FROM avances a 
+                     WHERE a.proyecto_id = NEW.proyecto_id 
+                     AND a.desarrollador_id = c.desarrollador_id 
+                     ORDER BY a.fecha_hora DESC LIMIT 1), 0) as ultimo_p
+    FROM contrataciones c
+    WHERE c.proyecto_id = NEW.proyecto_id AND c.estado = 'activa'
+  ) as avances_por_dev;
+
+  -- Solo si el promedio de todos los desarrolladores es 100%, pasamos a revisión
+  IF v_avance_total >= 100 THEN
     UPDATE proyectos SET estado = 'en_revision' WHERE id = NEW.proyecto_id;
   END IF;
 END */;;
@@ -534,16 +551,16 @@ DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notificacion_mensaje` AFTER INSERT ON `mensajes` FOR EACH ROW BEGIN
   DECLARE v_nombre_remitente VARCHAR(150);
 
-  
   SELECT nombre INTO v_nombre_remitente FROM usuarios WHERE id = NEW.remitente_id;
 
-  
-  INSERT INTO notificaciones (usuario_id, tipo, mensaje)
-  VALUES (
-    NEW.receptor_id,
-    'mensaje',
-    CONCAT(v_nombre_remitente, ' te ha enviado un nuevo mensaje.')
-  );
+  IF NEW.receptor_id IS NOT NULL THEN
+    INSERT INTO notificaciones (usuario_id, tipo, mensaje)
+    VALUES (
+      NEW.receptor_id,
+      'mensaje',
+      CONCAT(v_nombre_remitente, ' te ha enviado un nuevo mensaje.')
+    );
+  END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -833,8 +850,9 @@ DELIMITER ;;
   
   IF OLD.estado <> NEW.estado THEN
     IF NEW.estado = 'en_revision' THEN
+      -- Tomamos al desarrollador que subió el último avance registrado para este proyecto
       SELECT desarrollador_id INTO v_responsable_id FROM avances
-      WHERE proyecto_id = NEW.id AND porcentaje = 100
+      WHERE proyecto_id = NEW.id
       ORDER BY fecha_hora DESC LIMIT 1;
     ELSEIF NEW.estado = 'finalizado' THEN
       SET v_responsable_id = NEW.empresa_id;
@@ -1256,12 +1274,12 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `fecha_publicacion`,
  1 AS `fecha_limite`,
  1 AS `empresa_nombre`,
- 1 AS `desarrollador_nombre`,
+ 1 AS `desarrolladores_nombres`,
  1 AS `fecha_inicio`,
  1 AS `fecha_fin_estimada`,
- 1 AS `porcentaje_avance`,
+ 1 AS `porcentaje_avance_promedio`,
  1 AS `ultimo_avance`,
- 1 AS `desarrollador_id`,
+ 1 AS `desarrolladores_ids`,
  1 AS `empresa_id`,
  1 AS `estado`*/;
 SET character_set_client = @saved_cs_client;
@@ -2089,12 +2107,10 @@ USE `tem_dbv2`;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`emp`.`nombre` AS `empresa_nombre`,`dev`.`nombre` AS `desarrollador_nombre`,`c`.`fecha_inicio` AS `fecha_inicio`,`c`.`fecha_fin_estimada` AS `fecha_fin_estimada`,(select `a`.`porcentaje` from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`) order by `a`.`fecha_hora` desc limit 1) AS `porcentaje_avance`,(select `a`.`fecha_hora` from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`) order by `a`.`fecha_hora` desc limit 1) AS `ultimo_avance`,`dev`.`id` AS `desarrollador_id`,`emp`.`id` AS `empresa_id`,`p`.`estado` AS `estado` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where (`p`.`estado` in ('en_desarrollo','en_revision')) */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`emp`.`nombre` AS `empresa_nombre`,group_concat(distinct `dev`.`nombre` separator ', ') AS `desarrolladores_nombres`,min(`c`.`fecha_inicio`) AS `fecha_inicio`,max(`c`.`fecha_fin_estimada`) AS `fecha_fin_estimada`,coalesce(avg((select `a`.`porcentaje` from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`desarrollador_id` = `dev`.`id`)) order by `a`.`fecha_hora` desc limit 1)),0) AS `porcentaje_avance_promedio`,max((select `a`.`fecha_hora` from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`) order by `a`.`fecha_hora` desc limit 1)) AS `ultimo_avance`,group_concat(distinct concat(`dev`.`nombre`, ': ', coalesce((select `a`.`porcentaje` from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`desarrollador_id` = `dev`.`id`)) order by `a`.`fecha_hora` desc limit 1), 0), '%') separator ' | ') AS `avances_individuales`,group_concat(distinct `dev`.`id` separator ',') AS `desarrolladores_ids`,`emp`.`id` AS `empresa_id`,`p`.`estado` AS `estado` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where (`p`.`estado` in ('en_desarrollo','en_revision')) group by `p`.`id`,`p`.`titulo`,`p`.`descripcion`,`p`.`tipo_solucion`,`p`.`prioridad`,`p`.`fecha_publicacion`,`p`.`fecha_limite`,`emp`.`nombre`,`emp`.`id`,`p`.`estado`;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
