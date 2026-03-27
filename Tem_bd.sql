@@ -627,6 +627,7 @@ CREATE TABLE `perfil_desarrollador` (
 
 LOCK TABLES `perfil_desarrollador` WRITE;
 /*!40000 ALTER TABLE `perfil_desarrollador` DISABLE KEYS */;
+INSERT INTO `perfil_desarrollador` (`usuario_id`, `programa_formacion`, `ficha`, `habilidades`, `calificacion_promedio`, `num_proyectos_completados`) VALUES (2, 'ADSO', '2560664', 'Python, MySQL, Django', 0.00, 0);
 /*!40000 ALTER TABLE `perfil_desarrollador` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -958,6 +959,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
+INSERT INTO `usuarios` (`id`, `username`, `nombre`, `cedula`, `fecha_nacimiento`, `email`, `password`, `rol`, `estado`, `fecha_registro`, `ultimo_acceso`, `token_recuperacion`, `token_expiracion`, `intentos_fallidos`, `bloqueado_hasta`, `is_staff`, `is_superuser`, `is_active`, `first_name`, `last_name`, `date_joined`, `last_login`) VALUES (1,'admin_tem','Super Admin TEM',NULL,NULL,'admin@tem.com','pbkdf2_sha256$1200000$00yAwe3Gvv28gReYlOSbr6$knJih9/qY0hILfDokyz6q9Vw6g2hLbvVY6z3k8rQQss=','administrador','activo',NOW(),NULL,NULL,NULL,0,NULL,1,1,1,'','',NOW(),NULL);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -2161,3 +2163,4 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed
+leted
