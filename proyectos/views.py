@@ -111,16 +111,19 @@ def finalizar_proyecto(request, proyecto_id):
             puntuacion = int(request.POST.get('puntuacion'))
             comentario = request.POST.get('comentario')
 
-            # El trigger 
-            Valoracion.objects.create(
-                proyecto=proyecto,
-                empresa=request.user,
-                desarrollador=desarrollador,
-                puntuacion=puntuacion,
-                comentario=comentario
-            )
+            # Invocamos al Procedimiento Almacenado de MySQL
+            from django.db import connection
+            with connection.cursor() as cursor:
+                cursor.callproc('sp_calificar_proyecto', [
+                    proyecto.id,
+                    request.user.id,
+                    desarrollador.id,
+                    puntuacion,
+                    comentario,
+                    'empresa' # Rol del evaluador
+                ])
 
-            messages.success(request, f"Proyecto '{proyecto.titulo}' finalizado exitosamente.")
+            messages.success(request, f"Proyecto '{proyecto.titulo}' finalizado y calificado exitosamente.")
             return redirect('dashboard_empresa')
 
         except Exception as e:
@@ -144,8 +147,15 @@ def calificar_empresa(request, proyecto_id):
             
             from django.db import connection
             with connection.cursor() as cursor:
-                cursor.execute("CALL sp_calificar_empresa(%s, %s, %s, %s, %s)", 
-                               [proyecto.id, request.user.id, proyecto.empresa.id, puntuacion, comentario])
+                # Usamos el SP universal: sp_calificar_proyecto
+                cursor.callproc('sp_calificar_proyecto', [
+                    proyecto.id,
+                    request.user.id,        # Evaluador (Desarrollador)
+                    proyecto.empresa.id,    # Evaluado (Empresa)
+                    puntuacion,
+                    comentario,
+                    'desarrollador'         # Rol del evaluador
+                ])
                 
             messages.success(request, "¡Gracias! Tu calificación ha sido registrada.")
             return redirect('dashboard_desarrollador')
