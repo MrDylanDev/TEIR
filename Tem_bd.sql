@@ -335,6 +335,7 @@ CREATE TABLE `django_content_type` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `app_label` varchar(100) NOT NULL,
   `model` varchar(100) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
