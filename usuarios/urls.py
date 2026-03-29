@@ -5,7 +5,7 @@ urlpatterns = [
     # Dashboards y Acciones Administrativas
     path('admin/dashboard/', views.dashboard_admin, name='dashboard_admin'),
     path('admin/usuario/toggle/<int:usuario_id>/', views.admin_toggle_usuario, name='admin_toggle_usuario'),
-    path('admin/proyecto/toggle/<int:proyecto_id>/', views.admin_toggle_proyecto, name='admin_toggle_proyecto'),
+    path('admin/proyecto/reactivar/<int:proyecto_id>/', views.admin_reactivar_proyecto, name='admin_reactivar_proyecto'),
     path('empresa/dashboard/', views.dashboard_empresa, name='dashboard_empresa'),
     path('desarrollador/dashboard/', views.dashboard_desarrollador, name='dashboard_desarrollador'),
     

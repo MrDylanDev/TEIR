@@ -28,41 +28,43 @@ def registrar_avance(request, proyecto_id):
         try:
             descripcion = request.POST.get('descripcion')
             archivo_url = request.POST.get('archivo_url')
-            porcentaje = int(request.POST.get('porcentaje', 0))
+            entregable_id = request.POST.get('entregable_id') # Nuevo campo
             
+            if not entregable_id:
+                messages.error(request, "Debes seleccionar un hito para registrar el avance.")
+                return redirect('registrar_avance', proyecto_id=proyecto.id)
+
             from django.db import connection
             with connection.cursor() as cursor:
                 cursor.callproc('sp_subir_avance', [
                     proyecto.id, 
                     request.user.id, 
+                    entregable_id, # Enviamos el ID del hito
                     descripcion, 
-                    archivo_url, 
-                    porcentaje
+                    archivo_url
                 ])
-                # Capturamos el resultado del SP
-                row = cursor.fetchone()
-                if row and len(row) > 1:
-                    messages.success(request, row[1]) # 'Avance registrado correctamente'
-                else:
-                    messages.success(request, "Avance registrado correctamente.")
+                cursor.fetchone()
             
+            messages.success(request, "¡Hito completado y avance registrado exitosamente!")
             return redirect('/desarrollador/dashboard/?section=activos')
         except Exception as e:
-            # Capturar mensaje de error del SIGNAL SQLSTATE '45000' de forma robusta
-            error_msg = e.args[1] if hasattr(e, 'args') and len(e.args) > 1 else str(e)
-            
-            if 'Solo puedes registrar un avance' in error_msg:
-                messages.warning(request, "Límite alcanzado: Solo puedes registrar un avance por día en este proyecto.")
-            else:
-                messages.error(request, f"Error al registrar avance: {error_msg}")
+            error_msg = str(e)
+            messages.error(request, f"Error al registrar avance: {error_msg}")
 
-    return render(request, 'avances/registrar.html', {'proyecto': proyecto})
+    # Obtener hitos pendientes para el select del formulario
+    from proyectos.models import Entregable
+    hitos_pendientes = Entregable.objects.filter(proyecto=proyecto, estado='pendiente')
+
+    return render(request, 'avances/registrar.html', {
+        'proyecto': proyecto,
+        'hitos_pendientes': hitos_pendientes
+    })
 
 @login_required
 def ver_avances(request, proyecto_id):
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     
-    # Verificar si el usuario tiene relación con el proyecto (Desarrollador, Empresa dueña o Admin)
+    # Verificar si el usuario tiene relación con el proyecto (Desarrollador, Empresa, Admin)
     es_admin = request.user.rol == 'administrador'
     es_empresa_duena = (request.user.rol == 'empresa' and proyecto.empresa == request.user)
     es_desarrollador_relacionado = Contratacion.objects.filter(
@@ -80,11 +82,11 @@ def ver_avances(request, proyecto_id):
         
     avances = Avance.objects.filter(proyecto=proyecto).order_by('-fecha_hora')
     
-    # Obtener el progreso individual desde la vista SQL para mostrar un resumen
-    individuales = ""
+    # Obtener el progreso total desde la vista SQL
+    individuales = 0
     from django.db import connection
     with connection.cursor() as cursor:
-        cursor.execute("SELECT avances_individuales FROM v_proyectos_en_desarrollo WHERE proyecto_id = %s", [proyecto.id])
+        cursor.execute("SELECT porcentaje_avance_promedio FROM v_proyectos_en_desarrollo WHERE proyecto_id = %s", [proyecto.id])
         row = cursor.fetchone()
         if row:
             individuales = row[0]

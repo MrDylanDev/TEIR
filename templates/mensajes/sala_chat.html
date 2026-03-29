@@ -65,11 +65,17 @@
     </div>
 
     <div class="chat-input">
-        <form method="post" class="input-group">
-            {% csrf_token %}
-            <input type="text" name="cuerpo" placeholder="Escribe un mensaje..." required autocomplete="off">
-            <button type="submit" class="btn-enviar">Enviar</button>
-        </form>
+        {% if proyecto and proyecto.estado == 'finalizado' %}
+            <div style="text-align: center; padding: 15px; background: #1a1a1a; border-radius: 10px; color: #ff9800; border: 1px solid #333;">
+                🔒 Este proyecto ha finalizado. El chat es ahora de solo lectura.
+            </div>
+        {% else %}
+            <form method="post" class="input-group">
+                {% csrf_token %}
+                <input type="text" name="cuerpo" placeholder="Escribe un mensaje..." required autocomplete="off">
+                <button type="submit" class="btn-enviar">Enviar</button>
+            </form>
+        {% endif %}
     </div>
 
     <script>

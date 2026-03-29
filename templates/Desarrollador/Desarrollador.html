@@ -42,7 +42,7 @@
       <a href="{% url 'listar_proyectos' %}" style="text-decoration: none;"><button class="btn-nav">🔍 Explorar Proyectos</button></a>
       <button class="btn-nav" onclick="verSeccion('postulaciones', this)">📝 Mis Postulaciones</button>
       <button class="btn-nav" onclick="verSeccion('activos', this)">🚀 Trabajo Actual</button>
-      <button class="btn-nav" onclick="verSeccion('completados', this)">🏆 Mi Portafolio</button>
+      <button class="btn-nav" onclick="verSeccion('completados', this)">🏆 Historial de Proyectos</button>
       <button class="btn-nav" onclick="verSeccion('favoritos', this)">❤️ Favoritos</button>
 
       <div style="margin: 20px 0 10px 20px; font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;">Cuenta</div>
@@ -113,13 +113,6 @@
                     <a href="{% url 'sala_chat' contrato.empresa_id contrato.proyecto_id %}" style="display: block; background: white; color: black; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Hablar con Empresa</a>
                 </div>
               {% endfor %}
-              {% for contratacion in mis_proyectos_finalizados %}
-                <div class="card-p" style="opacity: 0.7;">
-                    <h3 style="margin-bottom: 5px;">{{ contratacion.empresa.username }}</h3>
-                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 15px;">Proyecto: {{ contratacion.proyecto.titulo }} <span style="color: #4CAF50;">(Finalizado)</span></p>
-                    <a href="{% url 'sala_chat' contratacion.empresa.id contratacion.proyecto.id %}" style="display: block; background: #222; color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; border: 1px solid #444;">Ver Historial de Chat</a>
-                </div>
-              {% endfor %}
           </div>
       </div>
 
@@ -145,17 +138,6 @@
       <!-- SECCION: TRABAJO ACTUAL -->
       <div id="activos" class="seccion-v">
           
-          <!-- MENSAJES ESPECIFICOS DE ESTA SECCION -->
-          {% if messages %}
-              <div style="margin-bottom: 25px;">
-                  {% for message in messages %}
-                      <div style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: {% if message.tags == 'error' %}#f44336{% elif message.tags == 'warning' %}#ff9800{% else %}#4CAF50{% endif %}; color: white; font-weight: bold; border-left: 5px solid rgba(0,0,0,0.2);">
-                          {{ message }}
-                      </div>
-                  {% endfor %}
-              </div>
-          {% endif %}
-
           <h1>Proyectos en Desarrollo</h1>
           <p style="opacity: 0.7; margin-bottom: 30px;">Registra tus avances y gestiona tus entregas.</p>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
@@ -163,11 +145,26 @@
                 <div class="card-p">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <h3 style="margin-bottom: 10px; color: #4CAF50;">{{ proyecto.titulo }}</h3>
-                        <span style="font-weight: bold; color: #4CAF50;">{{ proyecto.porcentaje }}%</span>
                     </div>
                     
-                    <div style="margin: 15px 0; background: #222; height: 6px; border-radius: 3px;">
-                        <div style="background: #4CAF50; width: {{ proyecto.porcentaje }}%; height: 100%; border-radius: 3px;"></div>
+                    <!-- Lista de Hitos en el Dashboard -->
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="font-size: 11px; opacity: 0.4; text-transform: uppercase; margin-bottom: 10px;">Hitos del Proyecto</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            {% for hito in proyecto.hitos %}
+                                <div style="border-bottom: 1px solid #111; padding-bottom: 8px; opacity: {% if hito.estado == 'completado' %}0.4{% else %}1{% endif %};">
+                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: bold;">
+                                        <span style="color: {% if hito.estado == 'completado' %}#4CAF50{% else %}#ff9800{% endif %};">{% if hito.estado == 'completado' %}✔{% else %}○{% endif %}</span>
+                                        <span style="{% if hito.estado == 'completado' %}text-decoration: line-through;{% endif %}">{{ hito.titulo }}</span>
+                                    </div>
+                                    {% if hito.descripcion %}
+                                        <p style="margin: 4px 0 0 22px; font-size: 11px; opacity: 0.6; line-height: 1.4;">{{ hito.descripcion }}</p>
+                                    {% endif %}
+                                </div>
+                            {% empty %}
+                                <p style="font-size: 11px; opacity: 0.3;">La empresa aún no ha definido hitos.</p>
+                            {% endfor %}
+                        </div>
                     </div>
 
                     <p style="font-size: 13px; opacity: 0.5; margin-bottom: 20px;">Empresa: {{ proyecto.empresa_nombre }}</p>
@@ -177,7 +174,9 @@
                             <a href="{% url 'registrar_avance' proyecto.proyecto_id %}" style="flex: 1; background: white; color: black; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">Registrar Avance</a>
                             <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;">Historial</a>
                         </div>
+                        {% if proyecto.num_desarrolladores >= 2 %}
                         <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid rgba(76, 175, 80, 0.3);">🚀 Abrir Espacio de Trabajo</a>
+                        {% endif %}
                     </div>
                 </div>
               {% empty %}
@@ -186,9 +185,9 @@
           </div>
       </div>
 
-      <!-- SECCION: PORTAFOLIO -->
+      <!-- Seccion: Historial de proyectos -->
       <div id="completados" class="seccion-v">
-          <h1>Mi Portafolio</h1>
+          <h1>Historial de Proyectos</h1>
           <p style="opacity: 0.7; margin-bottom: 30px;">Historial de proyectos finalizados y testimonios de empresas.</p>
           <div style="display: flex; flex-direction: column; gap: 20px;">
               {% for contratacion in mis_proyectos_finalizados %}
@@ -213,8 +212,15 @@
                             "Proyecto finalizado satisfactoriamente."
                         {% endif %}
                     </div>
-                    <div style="margin-top: 10px; text-align: right;">
-                        <a href="{% url 'calificar_empresa' contratacion.proyecto.id %}" style="color: #4CAF50; font-size: 12px; text-decoration: none; font-weight: bold;">⭐ Calificar a la Empresa</a>
+                    <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; gap: 10px;">
+                            <a href="{% url 'sala_chat' contratacion.proyecto.empresa.id contratacion.proyecto.id %}" style="flex: 1; background: #222; color: #4CAF50; text-align: center; padding: 8px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #333;">💬 Historial Chat Privado</a>
+                            <a href="{% url 'calificar_empresa' contratacion.proyecto.id %}" style="flex: 1; background: #4CAF50; color: white; text-align: center; padding: 8px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px;">⭐ Calificar Empresa</a>
+                        </div>
+                        <!-- Botón chat grupal si el proyecto fue colaborativo -->
+                        {% if contratacion.num_desarrolladores >= 2 %}
+                        <a href="{% url 'sala_chat_grupal' contratacion.proyecto.id %}" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50; padding: 8px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid rgba(76, 175, 80, 0.3);">🚀 Ver Chat Grupal (Espacio de Trabajo)</a>
+                        {% endif %}
                     </div>
                 </div>
               {% empty %}
@@ -223,7 +229,7 @@
           </div>
       </div>
 
-      <!-- SECCION: FAVORITOS -->
+      <!-- Seccion: Favoritos -->
       <div id="favoritos" class="seccion-v">
           <h1>Mis Proyectos Favoritos</h1>
           <p style="opacity: 0.7; margin-bottom: 30px;">Proyectos que te interesaron. ¡Postúlate antes de que se agoten las vacantes!</p>

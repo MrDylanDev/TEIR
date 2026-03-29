@@ -252,8 +252,8 @@
                                 <th style="padding: 15px; text-align: left;">Título</th>
                                 <th>Empresa</th>
                                 <th>Estado</th>
-                                <th>Desarrolladores (Avance)</th>
-                                <th>Acción</th>
+                                <th>Desarrolladores (Hitos)</th>
+                                <th>Moderación</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -271,7 +271,7 @@
                                         {% for contrato in p.contratos_activos %}
                                             <div style="background: #1a1a1a; padding: 5px 10px; border-radius: 4px; border-left: 3px solid #4CAF50;">
                                                 <span style="font-weight: bold;">{{ contrato.desarrollador.nombre|default:contrato.desarrollador.username }}</span>
-                                                <span style="float: right; color: #4CAF50;">{{ contrato.porcentaje_avance|default:"0" }}%</span>
+                                                <span style="float: right; color: #4CAF50;">{{ contrato.hitos_completados }}/{{ contrato.total_hitos }} Hitos</span>
                                             </div>
                                         {% endfor %}
                                         </div>
@@ -280,10 +280,16 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'admin_toggle_proyecto' p.id %}" class="badge"
-                                        style="background: {% if p.estado == 'publicado' %}#f44336{% else %}#4CAF50{% endif %}; text-decoration: none; color: white;">
-                                        {% if p.estado == 'publicado' %}🚫 Desactivar{% else %}✅ Activar{% endif %}
-                                    </a>
+                                    <div style="display: flex; gap: 5px; justify-content: center;">
+                                        <a href="{% url 'sala_chat' p.empresa.id 0 %}" class="badge"
+                                            style="background: #2196F3; text-decoration: none; color: white; font-size: 10px;">
+                                            💬 Contactar
+                                        </a>
+                                        <a href="{% url 'ver_avances' p.id %}" class="badge"
+                                            style="background: #444; text-decoration: none; color: white; font-size: 10px;">
+                                            👁️ Auditar
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}

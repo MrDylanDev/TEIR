@@ -87,7 +87,7 @@
                 </div>
                 <div class="card-metrica" style="background: #111; padding: 20px; border-radius: 12px; border: 1px solid #222;">
                     <h3 style="font-size: 12px; opacity: 0.5;">NOTIFICACIONES</h3>
-                    <p style="font-size: 28px; font-weight: bold;">{{ notificaciones.count }}</p>
+                    <p style="font-size: 28px; font-weight: bold; color: {% if notificaciones_pendientes_count > 0 %}#f44336{% else %}white{% endif %};">{{ notificaciones_pendientes_count }}</p>
                 </div>
             </div>
 
@@ -133,18 +133,18 @@
             <!-- Categoría: Desarrolladores -->
             <h2 style="font-size: 14px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">Tus Desarrolladores Contratados</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px;">
-                {% for contratacion in en_desarrollo_v %}
+                {% for colaboracion in colaboradores_activos %}
                     <div class="card-p" style="display: flex; justify-content: space-between; align-items: center; background: #0a0a0a;">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <div style="width: 45px; height: 45px; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #2196F3;">
-                                {{ contratacion.desarrolladores|slice:":1"|upper }}
+                                {{ colaboracion.desarrollador.nombre|default:colaboracion.desarrollador.username|slice:":1"|upper }}
                             </div>
                             <div>
-                                <h3 style="margin: 0; font-size: 16px;">{{ contratacion.desarrolladores|truncatechars:20 }}</h3>
-                                <p style="margin: 3px 0 0; font-size: 12px; color: #2196F3;">Proyecto: <strong>{{ contratacion.titulo }}</strong></p>
+                                <h3 style="margin: 0; font-size: 16px;">{{ colaboracion.desarrollador.nombre|default:colaboracion.desarrollador.username }}</h3>
+                                <p style="margin: 3px 0 0; font-size: 12px; color: #2196F3;">Proyecto: <strong>{{ colaboracion.proyecto.titulo }}</strong></p>
                             </div>
                         </div>
-                        <a href="{% url 'sala_chat' contratacion.primer_dev_id contratacion.proyecto_id %}" 
+                        <a href="{% url 'sala_chat' colaboracion.desarrollador.id colaboracion.proyecto.id %}" 
                            style="background: white; color: black; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px;">
                            Abrir Chat
                         </a>
@@ -187,22 +187,26 @@
                         <div>
                             <h3 style="margin: 0;">{{ proyecto.titulo }}</h3>
                             <p style="font-size: 14px; opacity: 0.6; margin-top: 5px;">Desarrolladores: <strong>{{ proyecto.desarrolladores }}</strong></p>
-                            <div style="margin-top: 10px; background: #222; height: 8px; border-radius: 4px; width: 200px;">
-                                <div style="background: #4CAF50; height: 100%; border-radius: 4px; width: {{ proyecto.porcentaje }}%;"></div>
-                            </div>
-                            <p style="font-size: 11px; opacity: 0.4; margin-top: 5px;">Avance Promedio: {{ proyecto.porcentaje|default:"0" }}% | Último: {{ proyecto.ultimo_avance|date:"d M"|default:"Sin avances" }}</p>
-                            <p style="font-size: 11px; color: #4CAF50; margin-top: 3px; font-weight: bold;">
-                                Detalle: <span style="opacity: 0.8;">{{ proyecto.individuales }}</span>
-                            </p>
+                            <p style="font-size: 11px; opacity: 0.4; margin-top: 5px;">Última actividad: {{ proyecto.ultimo_avance|date:"d M"|default:"Sin avances" }}</p>
                         </div>
+                        <!-- SECCION: EN DESARROLLO (Actualizada) -->
                         <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <a href="{% url 'gestionar_hitos' proyecto.proyecto_id %}" style="background: #222; color: #ff9800; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid #ff9800;">⚙️ Gestionar Hitos</a>
                             <div style="display: flex; gap: 12px;">
                                 <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; flex: 1; text-align: center;">👁️ Ver Avances</a>
-                                <a href="{% url 'finalizar_proyecto' proyecto.proyecto_id %}" style="background: #2196F3; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; flex: 1; text-align: center;">🏁 Finalizar</a>
+                                {% if proyecto.ultimo_avance %}
+                                    <a href="{% url 'finalizar_proyecto' proyecto.proyecto_id %}" style="background: #2196F3; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; flex: 1; text-align: center;">🏁 Finalizar</a>
+                                {% else %}
+                                    <button disabled title="Se requiere al menos un avance para finalizar" style="background: #333; color: #666; padding: 10px 20px; border-radius: 8px; border: 1px solid #444; font-weight: bold; font-size: 13px; flex: 1; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                        <span style="font-size: 10px;">⏳</span> Finalizar
+                                    </button>
+                                {% endif %}
                             </div>
-                            <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" style="background: rgba(33, 150, 243, 0.1); color: #2196F3; padding: 10px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid rgba(33, 150, 243, 0.3);">🚀 Abrir Espacio de Trabajo</a>
-                        </div>
-                    </div>
+                            
+                            {% if proyecto.num_desarrolladores >= 2 %}
+                                <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" style="background: rgba(33, 150, 243, 0.1); color: #2196F3; padding: 10px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid rgba(33, 150, 243, 0.3); margin-top: 5px;">🚀 Abrir Espacio de Trabajo (Equipo)</a>
+                            {% endif %}
+                        </div>                    </div>
                 {% empty %}
                     <p style="opacity: 0.4; text-align: center; padding: 50px;">No hay proyectos en desarrollo actualmente.</p>
                 {% endfor %}
@@ -259,13 +263,20 @@
                         <h3>{{ proyecto.titulo }}</h3>
                         <p style="font-size: 12px; color: #4CAF50; margin-top: 10px;">Estado: FINALIZADO</p>
                         
-                        <div style="margin-top: 20px; display: flex; gap: 10px;">
-                            <a href="{% url 'ver_avances' proyecto.id %}" style="flex: 1; background: #222; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; color: white; font-size: 13px;">Ver Detalles</a>
+                        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                            <a href="{% url 'ver_avances' proyecto.id %}" style="background: #222; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; color: white; font-size: 13px;">Ver Detalles y Avances</a>
                             
-                            <!-- Buscamos al desarrollador en las contrataciones del proyecto -->
-                            {% for contratacion in proyecto.contrataciones.all %}
-                                <a href="{% url 'sala_chat' contratacion.desarrollador.id proyecto.id %}" style="flex: 1; background: #111; color: #2196F3; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; border: 1px solid #222; font-size: 13px; font-weight: bold;">💬 Ver Chat</a>
-                            {% endfor %}
+                            {% if proyecto.num_desarrolladores >= 2 %}
+                                <a href="{% url 'sala_chat_grupal' proyecto.id %}" style="background: rgba(33, 150, 243, 0.1); color: #2196F3; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; border: 1px solid rgba(33, 150, 243, 0.3); font-size: 13px; font-weight: bold;">🚀 Ver Chat Grupal</a>
+                            {% endif %}
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                {% for contratacion in proyecto.contrataciones %}
+                                    <a href="{% url 'sala_chat' contratacion.desarrollador.id proyecto.id %}" style="background: #111; color: #aaa; text-align: center; padding: 8px; border-radius: 8px; text-decoration: none; border: 1px solid #222; font-size: 11px;">
+                                        💬 Chat con {{ contratacion.desarrollador.username }}
+                                    </a>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                 {% empty %}

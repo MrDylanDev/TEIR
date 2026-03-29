@@ -123,7 +123,7 @@ def dashboard_empresa(request):
     en_desarrollo_v = []
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT proyecto_id, titulo, desarrolladores_nombres, porcentaje_avance_promedio, ultimo_avance, fecha_fin_estimada, estado, desarrolladores_ids, avances_individuales
+            SELECT proyecto_id, titulo, desarrolladores_nombres, porcentaje_avance_promedio, ultimo_avance, fecha_fin_estimada, estado, desarrolladores_ids
             FROM v_proyectos_en_desarrollo
             WHERE empresa_id = %s
         """, [request.user.id])
@@ -139,8 +139,8 @@ def dashboard_empresa(request):
                 'fecha_fin': row[5],
                 'estado': row[6],
                 'ids': row[7],
-                'individuales': row[8],
-                'primer_dev_id': dev_ids[0] if dev_ids else None
+                'primer_dev_id': dev_ids[0] if dev_ids else None,
+                'num_desarrolladores': len(dev_ids)
             })
     perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=request.user)
     mis_ofertas = Proyecto.objects.filter(empresa=request.user, estado='publicado').order_by('-fecha_publicacion')
@@ -161,7 +161,7 @@ def dashboard_empresa(request):
     valoraciones_dev = Valoracion.objects.filter(empresa=request.user, rol_evaluador='desarrollador').select_related('desarrollador', 'proyecto')
     promedio_empresa = valoraciones_dev.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
 
-    # --- MEJORA: Historial de Notificaciones (Leídas y No Leídas) ---
+    # --- Historial de Notificaciones (Leídas y No Leídas) ---
     notificaciones_recientes = []
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -180,11 +180,31 @@ def dashboard_empresa(request):
                 'leida': row[3]
             })
 
-    # --- MEJORA: Conteo de Notificaciones Pendientes (Universal) ---
+    # --- Conteo de Notificaciones Pendientes (Universal) ---
     notificaciones_pendientes_count = 0
     with connection.cursor() as cursor:
         cursor.execute("SELECT COUNT(*) FROM v_notificaciones_pendientes WHERE usuario_id = %s", [request.user.id])
         notificaciones_pendientes_count = cursor.fetchone()[0]
+
+    
+    # Filtramos para que solo aparezcan si el contrato está activo Y el proyecto NO ha finalizado
+    colaboradores_activos = Contratacion.objects.filter(
+        empresa=request.user, 
+        estado='activa',
+        proyecto__estado='en_desarrollo'
+    ).select_related('desarrollador', 'proyecto')
+
+    # --- Historial detallado para Empresa ---
+    historial_objs = Proyecto.objects.filter(empresa=request.user, estado='finalizado').order_by('-fecha_publicacion')
+    historial_v = []
+    for p in historial_objs:
+        contrataciones = p.contrataciones.all()
+        historial_v.append({
+            'id': p.id,
+            'titulo': p.titulo,
+            'num_desarrolladores': contrataciones.count(),
+            'contrataciones': contrataciones
+        })
 
     context = {
         'total_proyectos': p_pub,
@@ -193,7 +213,8 @@ def dashboard_empresa(request):
         'total_contratados': dev_con,
         'mis_ofertas': mis_ofertas,
         'en_desarrollo_v': en_desarrollo_v,
-        'historial': historial,
+        'colaboradores_activos': colaboradores_activos,
+        'historial': historial_v,
         'valoraciones_recibidas': valoraciones_dev,
         'promedio_empresa': round(promedio_empresa, 1),
         'postulaciones_pendientes': postulaciones_pendientes_obj,
@@ -245,9 +266,12 @@ def dashboard_desarrollador(request):
         proyecto__estado='publicado'
     ).exclude(proyecto_id__in=proyectos_con_accion).select_related('proyecto')
 
-    # Enriquecer los contratos finalizados con su valoración correspondiente
+    # Enriquecer los contratos finalizados con su valoración y CONTEO DE EQUIPO
     from proyectos.models import Valoracion
     for contrato in mis_proyectos_finalizados:
+        # Contar total de miembros del equipo en este proyecto
+        contrato.num_desarrolladores = Contratacion.objects.filter(proyecto=contrato.proyecto).count()
+        
         contrato.valoracion = Valoracion.objects.filter(
             proyecto=contrato.proyecto, 
             desarrollador=request.user,
@@ -258,12 +282,17 @@ def dashboard_desarrollador(request):
     mis_proyectos_v = []
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT proyecto_id, titulo, empresa_nombre, porcentaje_avance_promedio, ultimo_avance, fecha_fin_estimada, estado, empresa_id
+            SELECT proyecto_id, titulo, empresa_nombre, porcentaje_avance_promedio, ultimo_avance, fecha_fin_estimada, estado, empresa_id, desarrolladores_ids
             FROM v_proyectos_en_desarrollo
             WHERE desarrolladores_ids LIKE %s
         """, [f"%{request.user.id}%"])
         rows = cursor.fetchall()
         for row in rows:
+            dev_ids = row[8].split(',') if row[8] else []
+            # Obtener hitos de este proyecto
+            from proyectos.models import Entregable
+            hitos = list(Entregable.objects.filter(proyecto_id=row[0]).values('titulo', 'estado', 'descripcion'))
+            
             mis_proyectos_v.append({
                 'proyecto_id': row[0],
                 'titulo': row[1],
@@ -272,13 +301,15 @@ def dashboard_desarrollador(request):
                 'ultimo_avance': row[4],
                 'fecha_fin': row[5],
                 'estado': row[6],
-                'empresa_id': row[7]
+                'empresa_id': row[7],
+                'num_desarrolladores': len(dev_ids),
+                'hitos': hitos # Enviamos los hitos al frontend
             })
     # Soporte Admin Dinámico
     admin_instancia = Usuario.objects.filter(rol='administrador').first()
     admin_id = admin_instancia.id if admin_instancia else 1
 
-    # --- MEJORA: Historial de Notificaciones (Vista SQL Personalizada) ---
+    # --- Historial de Notificaciones (Vista SQL Personalizada) ---
     notificaciones_recientes = []
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -297,7 +328,7 @@ def dashboard_desarrollador(request):
                 'leida': row[3]
             })
 
-    # --- MEJORA: Conteo de Notificaciones Pendientes (Universal) ---
+    # --- Conteo de Notificaciones Pendientes (Universal) ---
     notificaciones_pendientes_count = 0
     with connection.cursor() as cursor:
         cursor.execute("SELECT COUNT(*) FROM v_notificaciones_pendientes WHERE usuario_id = %s", [request.user.id])
@@ -349,15 +380,15 @@ def dashboard_admin(request):
         total_usuarios = 0
     
     usuarios_lista = Usuario.objects.all().order_by('-date_joined')
-    # --- MEJORA: Consulta de proyectos agrupada con sus desarrolladores ---
-    from django.db.models import Prefetch
-    from contrataciones.models import Contratacion
-    
     # Traemos proyectos con sus empresas y pre-cargamos sus contrataciones activas con los desarrolladores
+    from django.db.models import Count, Q, Prefetch
     proyectos_lista = Proyecto.objects.all().select_related('empresa').prefetch_related(
         Prefetch(
             'contrataciones',
-            queryset=Contratacion.objects.filter(estado='activa').select_related('desarrollador'),
+            queryset=Contratacion.objects.filter(estado='activa').select_related('desarrollador').annotate(
+                hitos_completados=Count('proyecto__entregables', filter=Q(proyecto__entregables__estado='completado')),
+                total_hitos=Count('proyecto__entregables')
+            ),
             to_attr='contratos_activos'
         )
     ).order_by('-fecha_publicacion')
@@ -447,7 +478,7 @@ def dashboard_admin(request):
     # 10. Notificaciones para el Admin (Historial)
     notificaciones_admin = Notificacion.objects.filter(usuario=request.user).order_by('-fecha')[:10]
 
-    # --- MEJORA: Conteo de Notificaciones Pendientes (Universal) ---
+    # --- Conteo de Notificaciones Pendientes (Universal) ---
     notificaciones_pendientes_count = 0
     with connection.cursor() as cursor:
         cursor.execute("SELECT COUNT(*) FROM v_notificaciones_pendientes WHERE usuario_id = %s", [request.user.id])
@@ -505,13 +536,44 @@ def admin_toggle_usuario(request, usuario_id):
     return redirect('/admin/dashboard/?section=usersSection')
 
 @login_required
-def admin_toggle_proyecto(request, proyecto_id):
-    if request.user.rol != 'administrador': return redirect('inicio')
+def admin_reactivar_proyecto(request, proyecto_id):
+    """Acción de moderación: Reactiva un proyecto finalizado a petición de la empresa"""
+    if request.user.rol != 'administrador':
+        messages.error(request, "Acceso denegado.")
+        return redirect('inicio')
+    
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-    proyecto.estado = 'inactivo' if proyecto.estado == 'publicado' else 'publicado'
-    proyecto.save()
-    messages.info(request, f"Proyecto actualizado.")
-    return redirect('/admin/dashboard/?section=projectsSection')
+    
+    if proyecto.estado != 'finalizado':
+        messages.warning(request, "Solo se pueden reactivar proyectos finalizados.")
+        return redirect('ver_avances', proyecto_id=proyecto.id)
+
+    with transaction.atomic():
+        # 1. Cambiar estado del proyecto
+        proyecto.estado = 'en_desarrollo'
+        proyecto.save()
+        
+        # 2. Reactivar contrataciones
+        Contratacion.objects.filter(proyecto=proyecto, estado='finalizada').update(estado='activa')
+        
+        # 3. Notificar a los involucrados (Empresa y Devs)
+        from notificaciones.models import Notificacion
+        Notificacion.objects.create(
+            usuario=proyecto.empresa,
+            tipo='avance',
+            mensaje=f"SOPORTE: Tu proyecto '{proyecto.titulo}' ha sido reactivado exitosamente."
+        )
+        
+        devs_ids = Contratacion.objects.filter(proyecto=proyecto, estado='activa').values_list('desarrollador_id', flat=True)
+        for dev_id in devs_ids:
+            Notificacion.objects.create(
+                usuario_id=dev_id,
+                tipo='avance',
+                mensaje=f"ALERTA: El proyecto '{proyecto.titulo}' ha sido reactivado por la empresa."
+            )
+
+    messages.success(request, f"Proyecto '{proyecto.titulo}' reactivado y contratos restablecidos.")
+    return redirect('ver_avances', proyecto_id=proyecto.id)
 
 @login_required
 def editar_perfil(request):

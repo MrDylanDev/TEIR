@@ -33,9 +33,16 @@
       </div>
 
       <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px;">Porcentaje de avance acumulado (%)</label>
-          <input type="number" name="porcentaje" min="0" max="100" required value="0" style="width: 100%; background: #111; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;">
-          <small style="opacity: 0.5;">Ejemplo: Si el proyecto va por la mitad, pon 50.</small>
+          <label style="display: block; margin-bottom: 8px;">Hito a completar</label>
+          <select name="entregable_id" required style="width: 100%; background: #111; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 14px;">
+              <option value="">-- Selecciona el hito que has terminado --</option>
+              {% for hito in hitos_pendientes %}
+                  <option value="{{ hito.id }}">{{ hito.titulo }}</option>
+              {% empty %}
+                  <option value="" disabled>⚠️ No hay hitos pendientes definidos por la empresa.</option>
+              {% endfor %}
+          </select>
+          <small style="opacity: 0.5; margin-top: 5px; display: block;">Al guardar, este hito se marcará como terminado automáticamente.</small>
       </div>
 
       <div style="margin-bottom: 20px;">

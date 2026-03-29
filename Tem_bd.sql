@@ -105,17 +105,19 @@ CREATE TABLE `avances` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `proyecto_id` bigint NOT NULL,
   `desarrollador_id` bigint NOT NULL,
+  `entregable_id` bigint DEFAULT NULL,
   `descripcion` text NOT NULL,
   `archivo_url` varchar(500) DEFAULT NULL,
-  `porcentaje` tinyint DEFAULT '0',
   `fecha_hora` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `desarrollador_id` (`desarrollador_id`),
   KEY `idx_proyecto` (`proyecto_id`),
   KEY `idx_fecha` (`fecha_hora`),
   KEY `idx_proyecto_fecha` (`proyecto_id`,`fecha_hora`),
+  KEY `fk_avances_entregable` (`entregable_id`),
   CONSTRAINT `avances_ibfk_1` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `avances_ibfk_2` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`)
+  CONSTRAINT `avances_ibfk_2` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`),
+  CONSTRAINT `fk_avances_entregable` FOREIGN KEY (`entregable_id`) REFERENCES `entregables` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -175,46 +177,43 @@ DELIMITER ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_nuevo_avance` AFTER INSERT ON `avances` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_nuevo_avance` AFTER INSERT ON `avances` FOR EACH ROW BEGIN
   DECLARE v_empresa_id BIGINT;
-  DECLARE v_nombre_dev VARCHAR(150);
   DECLARE v_titulo_proy VARCHAR(200);
-  DECLARE v_avance_total DECIMAL(5,2);
+  DECLARE v_total_hitos INT;
+  DECLARE v_hitos_completados INT;
+  DECLARE v_progreso DECIMAL(5,2);
 
-  
+  -- Notificar a la empresa
   SELECT empresa_id, titulo INTO v_empresa_id, v_titulo_proy FROM proyectos WHERE id = NEW.proyecto_id;
-  SELECT COALESCE(nombre, username) INTO v_nombre_dev FROM usuarios WHERE id = NEW.desarrollador_id;
-
   
   INSERT INTO notificaciones (usuario_id, tipo, mensaje)
-  VALUES (
-    v_empresa_id,
-    'avance',
-    CONCAT(v_nombre_dev, ' registro un avance del ', NEW.porcentaje, '% en ', v_titulo_proy)
-  );
+  VALUES (v_empresa_id, 'avance', CONCAT('Nuevo hito completado en: ', v_titulo_proy));
 
-  
-  
-  SELECT COALESCE(AVG(ultimo_p), 0) INTO v_avance_total
-  FROM (
-    SELECT c.desarrollador_id, 
-           COALESCE((SELECT a.porcentaje FROM avances a 
-                     WHERE a.proyecto_id = NEW.proyecto_id 
-                     AND a.desarrollador_id = c.desarrollador_id 
-                     ORDER BY a.fecha_hora DESC LIMIT 1), 0) as ultimo_p
-    FROM contrataciones c
-    WHERE c.proyecto_id = NEW.proyecto_id AND c.estado = 'activa'
-  ) as avances_por_dev;
+  -- Calcular progreso basado en la tabla entregables
+  -- Solo si el avance está ligado a un hito
+  IF NEW.entregable_id IS NOT NULL THEN
+    -- Marcamos el hito como completado si no lo está
+    UPDATE entregables SET estado = 'completado' WHERE id = NEW.entregable_id;
 
-  
-  IF v_avance_total >= 100 THEN
-    UPDATE proyectos SET estado = 'en_revision' WHERE id = NEW.proyecto_id;
+    -- Cálculo de progreso real
+    SELECT COUNT(*) INTO v_total_hitos FROM entregables WHERE proyecto_id = NEW.proyecto_id;
+    SELECT COUNT(*) INTO v_hitos_completados FROM entregables WHERE proyecto_id = NEW.proyecto_id AND estado = 'completado';
+
+    IF v_total_hitos > 0 THEN
+      SET v_progreso = (v_hitos_completados / v_total_hitos) * 100;
+      
+      -- Si llegamos al 100%, pasar a revisión automáticamente
+      IF v_progreso >= 100 THEN
+        UPDATE proyectos SET estado = 'en_revision' WHERE id = NEW.proyecto_id;
+      END IF;
+    END IF;
   END IF;
 END */;;
 DELIMITER ;
@@ -244,6 +243,7 @@ CREATE TABLE `contrataciones` (
   KEY `idx_desarrollador` (`desarrollador_id`),
   KEY `idx_empresa` (`empresa_id`),
   KEY `idx_estado` (`estado`),
+  KEY `idx_contrataciones_proy_dev` (`proyecto_id`,`desarrollador_id`,`estado`),
   CONSTRAINT `fk_contrataciones_desarrollador` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_contrataciones_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_contrataciones_proyecto` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE
@@ -363,7 +363,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -372,6 +372,7 @@ CREATE TABLE `django_migrations` (
 
 LOCK TABLES `django_migrations` WRITE;
 /*!40000 ALTER TABLE `django_migrations` DISABLE KEYS */;
+INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2026-03-29 04:23:55.863778'),(2,'contenttypes','0002_remove_content_type_name','2026-03-29 04:23:55.871318'),(3,'auth','0001_initial','2026-03-29 04:23:55.874710'),(4,'auth','0002_alter_permission_name_max_length','2026-03-29 04:23:55.877892'),(5,'auth','0003_alter_user_email_max_length','2026-03-29 04:23:55.881796'),(6,'auth','0004_alter_user_username_opts','2026-03-29 04:23:55.886557'),(7,'auth','0005_alter_user_last_login_null','2026-03-29 04:23:55.892218'),(8,'auth','0006_require_contenttypes_0002','2026-03-29 04:23:55.895678'),(9,'auth','0007_alter_validators_add_error_messages','2026-03-29 04:23:55.899018'),(10,'auth','0008_alter_user_username_max_length','2026-03-29 04:23:55.902758'),(11,'auth','0009_alter_user_last_name_max_length','2026-03-29 04:23:55.906008'),(12,'auth','0010_alter_group_name_max_length','2026-03-29 04:23:55.911793'),(13,'auth','0011_update_proxy_permissions','2026-03-29 04:23:55.915298'),(14,'auth','0012_alter_user_first_name_max_length','2026-03-29 04:23:55.920728'),(15,'usuarios','0001_initial','2026-03-29 04:23:55.925257'),(16,'admin','0001_initial','2026-03-29 04:23:55.928491'),(17,'admin','0002_logentry_remove_auto_add','2026-03-29 04:23:55.932352'),(18,'admin','0003_logentry_add_action_flag_choices','2026-03-29 04:23:55.935763'),(19,'proyectos','0001_initial','2026-03-29 04:23:55.939068'),(20,'avances','0001_initial','2026-03-29 04:23:55.942110'),(21,'avances','0002_alter_avance_table','2026-03-29 04:23:55.945825'),(22,'avances','0003_alter_avance_archivo_url_alter_avance_table','2026-03-29 04:23:55.952191'),(23,'proyectos','0002_proyecto_vacantes_alter_proyecto_estado_and_more','2026-03-29 04:23:55.957885'),(24,'contrataciones','0001_initial','2026-03-29 04:23:55.962270'),(25,'contrataciones','0002_alter_contratacion_proyecto','2026-03-29 04:23:55.966383'),(26,'contrataciones','0003_alter_contratacion_table','2026-03-29 04:23:55.970009'),(27,'contrataciones','0004_alter_contratacion_table','2026-03-29 04:23:55.973082'),(28,'favoritos','0001_initial','2026-03-29 04:23:55.976146'),(29,'favoritos','0002_alter_favorito_table','2026-03-29 04:23:55.979098'),(30,'favoritos','0003_alter_favorito_table','2026-03-29 04:23:55.983339'),(31,'logs','0001_initial','2026-03-29 04:23:55.989042'),(32,'logs','0002_alter_copiaseguridad_table_alter_logauditoria_table','2026-03-29 04:23:55.993469'),(33,'logs','0003_alter_logauditoria_registro_id_and_more','2026-03-29 04:23:55.996551'),(34,'logs','0004_alter_copiaseguridad_ejecutado_por','2026-03-29 04:23:55.999703'),(35,'proyectos','0003_alter_historialestadoproyecto_table_and_more','2026-03-29 04:23:56.003926'),(36,'proyectos','0004_valoracion_rol_evaluador_and_more','2026-03-29 04:23:56.007151'),(37,'mensajes','0001_initial','2026-03-29 04:23:56.009947'),(38,'mensajes','0002_alter_mensaje_table','2026-03-29 04:23:56.013734'),(39,'mensajes','0003_alter_mensaje_proyecto_alter_mensaje_table','2026-03-29 04:23:56.019321'),(40,'mensajes','0004_alter_mensaje_receptor','2026-03-29 04:23:56.024721'),(41,'notificaciones','0001_initial','2026-03-29 04:23:56.029021'),(42,'notificaciones','0002_alter_notificacion_table','2026-03-29 04:23:56.033018'),(43,'notificaciones','0003_alter_notificacion_options_and_more','2026-03-29 04:23:56.037894'),(44,'postulaciones','0001_initial','2026-03-29 04:23:56.041829'),(45,'postulaciones','0002_alter_postulacion_table','2026-03-29 04:23:56.046251'),(46,'postulaciones','0003_alter_postulacion_table','2026-03-29 04:23:56.050483'),(47,'proyectos','0005_alter_historialestadoproyecto_cambiado_por_and_more','2026-03-29 04:23:56.056128'),(48,'proyectos','0006_alter_valoracion_unique_together','2026-03-29 04:23:56.059907'),(49,'sessions','0001_initial','2026-03-29 04:23:56.063376'),(50,'usuarios','0002_usuario_fecha_nacimiento_and_more','2026-03-29 04:23:56.066575'),(51,'usuarios','0003_alter_usuario_options_usuario_nombre_and_more','2026-03-29 04:23:56.071108'),(52,'usuarios','0004_alter_usuario_options_usuario_nombre_and_more','2026-03-29 04:23:56.074639');
 /*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -397,9 +398,61 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
-INSERT INTO `django_session` VALUES ('ca0edjkfixwhsixww9g5680i28ibvqd8','.eJxVjMsOwiAUBf-FtSGlXAVcuu83ELgPqRqalHZl_HfbpAvdnpk5bxXTupS4Np7jSOqqjDr9bjnhk-sO6JHqfdI41WUes94VfdCmh4n4dTvcv4OSWtlqAQwWOnRwseQc2mTo7EEyoUuW2XdsJEifTQ_iQyYSsN44BDZb5NXnC_AdOEM:1w6eOh:YPShgpKMd4DJfcYL962-_LZubXp7HevyzPVJfkTmR34','2026-03-29 01:52:59.957916');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `entregables`
+--
+
+DROP TABLE IF EXISTS `entregables`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `entregables` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `proyecto_id` bigint NOT NULL,
+  `titulo` varchar(200) NOT NULL,
+  `descripcion` text,
+  `estado` enum('pendiente','completado') DEFAULT 'pendiente',
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_entregables_proy_estado` (`proyecto_id`,`estado`),
+  CONSTRAINT `fk_entregables_proyecto` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `entregables`
+--
+
+LOCK TABLES `entregables` WRITE;
+/*!40000 ALTER TABLE `entregables` DISABLE KEYS */;
+INSERT INTO `entregables` VALUES (4,8,'Crear un login','Neceistamos que sea si o si con react','completado','2026-03-29 20:36:39'),(5,9,'m','m','completado','2026-03-29 20:49:19'),(6,10,'lolo','lili','completado','2026-03-29 21:16:41'),(7,11,'Hacer los mockups','con notion','completado','2026-03-29 21:25:07');
+/*!40000 ALTER TABLE `entregables` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_notificar_nuevo_hito` AFTER INSERT ON `entregables` FOR EACH ROW BEGIN
+  DECLARE v_titulo_proy VARCHAR(200);
+  SELECT titulo INTO v_titulo_proy FROM proyectos WHERE id = NEW.proyecto_id;
+
+  INSERT INTO notificaciones (usuario_id, tipo, mensaje)
+  SELECT desarrollador_id, 'avance', CONCAT('Nuevo hito añadido en ', v_titulo_proy, ': ', NEW.titulo)
+  FROM contrataciones 
+  WHERE proyecto_id = NEW.proyecto_id AND estado = 'activa';
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `favoritos`
@@ -491,7 +544,7 @@ CREATE TABLE `logs_auditoria` (
 
 LOCK TABLES `logs_auditoria` WRITE;
 /*!40000 ALTER TABLE `logs_auditoria` DISABLE KEYS */;
-INSERT INTO `logs_auditoria` VALUES (1,1,'Inicio de sesiÃ³n registrado','usuarios',1,NULL,'2026-03-29 00:52:59');
+INSERT INTO `logs_auditoria` VALUES (1,3,'Inicio de sesiÃ³n registrado','usuarios',3,NULL,'2026-03-29 22:10:50');
 /*!40000 ALTER TABLE `logs_auditoria` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -505,7 +558,7 @@ DROP TABLE IF EXISTS `mensajes`;
 CREATE TABLE `mensajes` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `remitente_id` bigint NOT NULL,
-  `receptor_id` bigint NOT NULL,
+  `receptor_id` bigint DEFAULT NULL,
   `proyecto_id` bigint DEFAULT NULL,
   `asunto` varchar(200) DEFAULT NULL,
   `cuerpo` text NOT NULL,
@@ -517,6 +570,7 @@ CREATE TABLE `mensajes` (
   KEY `idx_receptor_leido` (`receptor_id`,`leido`),
   KEY `idx_remitente` (`remitente_id`),
   KEY `idx_fecha` (`fecha_envio`),
+  KEY `idx_mensajes_proyecto` (`proyecto_id`),
   CONSTRAINT `mensajes_ibfk_1` FOREIGN KEY (`remitente_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `mensajes_ibfk_2` FOREIGN KEY (`receptor_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `mensajes_ibfk_3` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`)
@@ -534,24 +588,39 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notificacion_mensaje` AFTER INSERT ON `mensajes` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`%`*/ /*!50003 TRIGGER `trg_notificacion_mensaje` AFTER INSERT ON `mensajes` FOR EACH ROW BEGIN
   DECLARE v_nombre_remitente VARCHAR(150);
+  DECLARE v_titulo_proy VARCHAR(200);
+  DECLARE v_empresa_id BIGINT;
 
   SELECT nombre INTO v_nombre_remitente FROM usuarios WHERE id = NEW.remitente_id;
 
+  -- CASO 1: Chat Privado
   IF NEW.receptor_id IS NOT NULL THEN
     INSERT INTO notificaciones (usuario_id, tipo, mensaje)
-    VALUES (
-      NEW.receptor_id,
-      'mensaje',
-      CONCAT(v_nombre_remitente, ' te ha enviado un nuevo mensaje.')
-    );
+    VALUES (NEW.receptor_id, 'mensaje', CONCAT(v_nombre_remitente, ' te ha enviado un mensaje.'));
+  
+  -- CASO 2: Espacio de Trabajo (Bulk Insert para eficiencia)
+  ELSEIF NEW.proyecto_id IS NOT NULL THEN
+    SELECT titulo, empresa_id INTO v_titulo_proy, v_empresa_id FROM proyectos WHERE id = NEW.proyecto_id;
+
+    -- Notificamos a la empresa y a todos los devs del proyecto en una sola operación
+    INSERT INTO notificaciones (usuario_id, tipo, mensaje)
+    SELECT id_usuario, 'mensaje', CONCAT(v_nombre_remitente, ' escribió en el Espacio de Trabajo: ', v_titulo_proy)
+    FROM (
+      -- ID de la empresa (si no es el remitente)
+      SELECT v_empresa_id AS id_usuario WHERE v_empresa_id != NEW.remitente_id
+      UNION
+      -- IDs de los desarrolladores contratados (si no son el remitente)
+      SELECT desarrollador_id FROM contrataciones 
+      WHERE proyecto_id = NEW.proyecto_id AND estado = 'activa' AND desarrollador_id != NEW.remitente_id
+    ) AS equipo_notificar;
   END IF;
 END */;;
 DELIMITER ;
@@ -578,6 +647,7 @@ CREATE TABLE `notificaciones` (
   KEY `idx_usuario_leida` (`usuario_id`,`leida`),
   KEY `idx_tipo` (`tipo`),
   KEY `idx_fecha` (`fecha`),
+  KEY `idx_notif_usuario_fecha` (`usuario_id`,`fecha` DESC),
   CONSTRAINT `notificaciones_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -610,7 +680,7 @@ CREATE TABLE `perfil_desarrollador` (
   UNIQUE KEY `usuario_id` (`usuario_id`),
   KEY `idx_calificacion` (`calificacion_promedio`),
   CONSTRAINT `perfil_desarrollador_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -619,6 +689,7 @@ CREATE TABLE `perfil_desarrollador` (
 
 LOCK TABLES `perfil_desarrollador` WRITE;
 /*!40000 ALTER TABLE `perfil_desarrollador` DISABLE KEYS */;
+INSERT INTO `perfil_desarrollador` VALUES (1,3,NULL,NULL,NULL,0.00,0);
 /*!40000 ALTER TABLE `perfil_desarrollador` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -643,7 +714,7 @@ CREATE TABLE `perfil_empresa` (
   KEY `idx_sector` (`sector`),
   KEY `idx_ciudad` (`ciudad`),
   CONSTRAINT `perfil_empresa_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -652,6 +723,7 @@ CREATE TABLE `perfil_empresa` (
 
 LOCK TABLES `perfil_empresa` WRITE;
 /*!40000 ALTER TABLE `perfil_empresa` DISABLE KEYS */;
+INSERT INTO `perfil_empresa` VALUES (1,2,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `perfil_empresa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -719,52 +791,6 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_postulacion_aceptada` AFTER UPDATE ON `postulaciones` FOR EACH ROW BEGIN
-  DECLARE v_empresa_id BIGINT;
-  DECLARE v_vacantes_totales INT;
-  DECLARE v_vacantes_ocupadas INT;
-
-  
-  IF OLD.estado = 'pendiente' AND NEW.estado = 'aceptada' THEN
-    
-    
-    SELECT empresa_id, vacantes INTO v_empresa_id, v_vacantes_totales 
-    FROM proyectos WHERE id = NEW.proyecto_id;
-
-    
-    IF NOT EXISTS (
-      SELECT 1 FROM contrataciones 
-      WHERE proyecto_id = NEW.proyecto_id AND desarrollador_id = NEW.desarrollador_id AND estado = 'activa'
-    ) THEN
-      INSERT INTO contrataciones (proyecto_id, desarrollador_id, empresa_id, fecha_inicio, estado)
-      VALUES (NEW.proyecto_id, NEW.desarrollador_id, v_empresa_id, CURDATE(), 'activa');
-    END IF;
-
-    
-    SELECT COUNT(*) INTO v_vacantes_ocupadas 
-    FROM contrataciones 
-    WHERE proyecto_id = NEW.proyecto_id AND estado = 'activa';
-
-    IF v_vacantes_ocupadas >= v_vacantes_totales THEN
-      UPDATE proyectos SET estado = 'en_desarrollo' WHERE id = NEW.proyecto_id;
-    END IF;
-
-  END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `proyectos`
@@ -796,7 +822,7 @@ CREATE TABLE `proyectos` (
   KEY `idx_estado_fecha` (`estado`,`fecha_publicacion`),
   CONSTRAINT `proyectos_ibfk_1` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `proyectos_ibfk_2` FOREIGN KEY (`aprobado_por_id`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -805,104 +831,9 @@ CREATE TABLE `proyectos` (
 
 LOCK TABLES `proyectos` WRITE;
 /*!40000 ALTER TABLE `proyectos` DISABLE KEYS */;
+INSERT INTO `proyectos` VALUES (8,2,'Pepsi','a','sitio_web','media',1,'finalizado','2026-03-29 20:35:01.922716',NULL,NULL,NULL),(9,2,'d','d','sitio_web','media',1,'inactivo','2026-03-29 20:39:30.597784',NULL,NULL,NULL),(10,2,'jko','jko','sitio_web','media',1,'en_desarrollo','2026-03-29 21:10:08.698961',NULL,NULL,NULL),(11,2,'mono','mono','sitio_web','media',2,'inactivo','2026-03-29 21:18:41.810446',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `proyectos` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_historial_inicial_proyecto` AFTER INSERT ON `proyectos` FOR EACH ROW BEGIN
-  
-  
-  INSERT INTO historial_estado_proyecto
-    (proyecto_id, estado_anterior, estado_nuevo, cambiado_por, fecha)
-  VALUES (NEW.id, NULL, NEW.estado, NEW.empresa_id, NOW());
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_historial_estado_proyecto` AFTER UPDATE ON `proyectos` FOR EACH ROW BEGIN
-  DECLARE v_responsable_id BIGINT;
-  
-  IF OLD.estado <> NEW.estado THEN
-    IF NEW.estado = 'en_revision' THEN
-      
-      SELECT desarrollador_id INTO v_responsable_id FROM avances
-      WHERE proyecto_id = NEW.id
-      ORDER BY fecha_hora DESC LIMIT 1;
-    ELSEIF NEW.estado = 'finalizado' THEN
-      SET v_responsable_id = NEW.empresa_id;
-    ELSEIF NEW.estado = 'publicado' THEN
-      SET v_responsable_id = NEW.empresa_id;
-    ELSE
-      SET v_responsable_id = NEW.empresa_id;
-    END IF;
-
-    INSERT INTO historial_estado_proyecto (proyecto_id, estado_anterior, estado_nuevo, cambiado_por, fecha)
-    VALUES (NEW.id, OLD.estado, NEW.estado, v_responsable_id, NOW());
-  END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notificar_finalizacion` AFTER UPDATE ON `proyectos` FOR EACH ROW BEGIN
-    DECLARE v_desarrollador_id BIGINT;
-    
-    
-    IF OLD.estado <> 'finalizado' AND NEW.estado = 'finalizado' THEN
-        
-        SELECT desarrollador_id INTO v_desarrollador_id 
-        FROM contrataciones 
-        WHERE proyecto_id = NEW.id AND estado = 'activa' 
-        LIMIT 1;
-
-        IF v_desarrollador_id IS NOT NULL THEN
-            
-            INSERT INTO notificaciones (usuario_id, tipo, mensaje)
-            VALUES (
-                v_desarrollador_id,
-                'aprobacion',
-                CONCAT('¡Felicidades! La empresa ha finalizado el proyecto: ', NEW.titulo)
-            );
-            
-            
-            UPDATE contrataciones SET estado = 'finalizada' 
-            WHERE proyecto_id = NEW.id AND desarrollador_id = v_desarrollador_id;
-        END IF;
-    END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `usuarios`
@@ -941,7 +872,7 @@ CREATE TABLE `usuarios` (
   KEY `idx_rol` (`rol`),
   KEY `idx_estado` (`estado`),
   KEY `idx_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -950,7 +881,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin_master','Admin Master',NULL,NULL,'admin@tem.com','pbkdf2_sha256$1200000$kJ4MmqW9gQrKXwUixhjgMJ$PHeLMLggWqeUarePItNuB4YGyqksc7/9nyQFcZ8vnhQ=','administrador','activo','2026-03-29 00:52:09','2026-03-29 00:53:00',NULL,NULL,0,NULL,1,1,1,'','','2026-03-29 00:52:09','2026-03-29 00:53:00'),(2,'empresa_tech','Tech Corp SAS',NULL,NULL,'contacto@techcorp.com','pbkdf2_sha256$1200000$s2MSdDRGR9t4E4gfcZE2Js$3TQYfJoJ6RUDIpOzz4gQGl3VexPKKTEG+i0F8Nq35ZU=','empresa','activo','2026-03-29 00:52:10',NULL,NULL,NULL,0,NULL,0,0,1,'','','2026-03-29 00:52:10',NULL),(3,'dev_expert','Juan Desarrollador',NULL,NULL,'dev@pro.com','pbkdf2_sha256$1200000$lRdby9qIK5Nv5Abl0xLDLN$pmH5D6I7Tvux2x2E/CxSFfHcAIMh7NvcRMFnCsLA0YQ=','desarrollador','activo','2026-03-29 00:52:11',NULL,NULL,NULL,0,NULL,0,0,1,'','','2026-03-29 00:52:11',NULL);
+INSERT INTO `usuarios` VALUES (1,'admin_master','Admin Master',NULL,NULL,'admin@tem.com','pbkdf2_sha256$1200000$kJ4MmqW9gQrKXwUixhjgMJ$PHeLMLggWqeUarePItNuB4YGyqksc7/9nyQFcZ8vnhQ=','administrador','activo','2026-03-29 00:52:09','2026-03-29 21:47:35',NULL,NULL,0,NULL,1,1,1,'','','2026-03-29 00:52:09','2026-03-29 21:47:35'),(2,'empresa_tech','Tech Corp SAS',NULL,NULL,'contacto@techcorp.com','pbkdf2_sha256$1200000$s2MSdDRGR9t4E4gfcZE2Js$3TQYfJoJ6RUDIpOzz4gQGl3VexPKKTEG+i0F8Nq35ZU=','empresa','activo','2026-03-29 00:52:10','2026-03-29 21:36:26',NULL,NULL,0,NULL,0,0,1,'','','2026-03-29 00:52:10','2026-03-29 21:36:26'),(3,'dev_expert','Juan Desarrollador',NULL,NULL,'dev@pro.com','pbkdf2_sha256$1200000$lRdby9qIK5Nv5Abl0xLDLN$pmH5D6I7Tvux2x2E/CxSFfHcAIMh7NvcRMFnCsLA0YQ=','desarrollador','activo','2026-03-29 00:52:11','2026-03-29 22:10:50',NULL,NULL,0,NULL,0,0,1,'','','2026-03-29 00:52:11','2026-03-29 22:10:51');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -1261,21 +1192,14 @@ SET @saved_cs_client     = @@character_set_client;
 /*!50001 CREATE VIEW `v_proyectos_en_desarrollo` AS SELECT 
  1 AS `proyecto_id`,
  1 AS `titulo`,
- 1 AS `descripcion`,
- 1 AS `tipo_solucion`,
- 1 AS `prioridad`,
- 1 AS `fecha_publicacion`,
- 1 AS `fecha_limite`,
  1 AS `empresa_nombre`,
- 1 AS `desarrolladores_nombres`,
- 1 AS `fecha_inicio`,
+ 1 AS `empresa_id`,
+ 1 AS `estado`,
  1 AS `fecha_fin_estimada`,
  1 AS `porcentaje_avance_promedio`,
  1 AS `ultimo_avance`,
- 1 AS `avances_individuales`,
  1 AS `desarrolladores_ids`,
- 1 AS `empresa_id`,
- 1 AS `estado`*/;
+ 1 AS `desarrolladores_nombres`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -1330,9 +1254,11 @@ CREATE TABLE `valoraciones` (
   `comentario` text,
   `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unica_valoracion_bi` (`proyecto_id`,`rol_evaluador`),
+  UNIQUE KEY `valoracion_miembro_proy` (`proyecto_id`,`desarrollador_id`,`rol_evaluador`),
   KEY `empresa_id` (`empresa_id`),
   KEY `desarrollador_id` (`desarrollador_id`),
+  KEY `idx_valoraciones_empresa` (`empresa_id`),
+  KEY `idx_valoraciones_dev` (`desarrollador_id`),
   CONSTRAINT `valoraciones_ibfk_1` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `valoraciones_ibfk_2` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   CONSTRAINT `valoraciones_ibfk_3` FOREIGN KEY (`desarrollador_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
@@ -1388,519 +1314,6 @@ DELIMITER ;;
         );
     END IF;
 END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
---
--- Dumping routines for database 'tem_dbv2'
---
-/*!50003 DROP PROCEDURE IF EXISTS `sp_aceptar_postulacion` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_aceptar_postulacion`(
-  IN p_postulacion_id BIGINT,
-  IN p_empresa_id BIGINT
-)
-BEGIN
-  DECLARE v_proyecto_id BIGINT;
-  DECLARE v_vacantes_totales INT;
-  DECLARE v_vacantes_ocupadas INT;
-  DECLARE v_success BOOLEAN DEFAULT FALSE;
-
-  
-  START TRANSACTION;
-
-    
-    
-    SELECT pr.id, pr.vacantes INTO v_proyecto_id, v_vacantes_totales
-    FROM postulaciones p
-    JOIN proyectos pr ON p.proyecto_id = pr.id
-    WHERE p.id = p_postulacion_id AND pr.empresa_id = p_empresa_id AND p.estado = 'pendiente'
-    FOR UPDATE;
-
-    IF v_proyecto_id IS NULL THEN
-      ROLLBACK;
-      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Postulación no válida o ya procesada.';
-    END IF;
-
-    
-    SELECT COUNT(*) INTO v_vacantes_ocupadas 
-    FROM contrataciones 
-    WHERE proyecto_id = v_proyecto_id AND estado = 'activa';
-
-    
-    IF v_vacantes_ocupadas >= v_vacantes_totales THEN
-      ROLLBACK;
-      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Límite de vacantes alcanzado para este proyecto.';
-    END IF;
-
-    
-    UPDATE postulaciones SET estado = 'aceptada' WHERE id = p_postulacion_id;
-    
-    
-    
-
-    SET v_success = TRUE;
-
-  COMMIT;
-
-  SELECT v_success AS success, 'Contratación realizada exitosamente' AS mensaje;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_actualizar_perfil_desarrollador` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_perfil_desarrollador`(
-  IN p_usuario_id INT,
-  IN p_programa_formacion VARCHAR(200),
-  IN p_ficha VARCHAR(50),
-  IN p_habilidades TEXT
-)
-BEGIN
-  UPDATE perfil_desarrollador
-  SET programa_formacion = IFNULL(p_programa_formacion, programa_formacion),
-      ficha = IFNULL(p_ficha, ficha),
-      habilidades = IFNULL(p_habilidades, habilidades)
-  WHERE usuario_id = p_usuario_id;
-
-  INSERT INTO logs_auditoria (usuario_id, accion, tabla_afectada, registro_id)
-  VALUES (p_usuario_id, 'Perfil desarrollador actualizado', 'perfil_desarrollador', p_usuario_id);
-
-  SELECT 'Perfil actualizado correctamente' AS mensaje, TRUE AS success;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_actualizar_perfil_empresa` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_perfil_empresa`(
-  IN p_usuario_id INT,
-  IN p_nombre_empresa VARCHAR(200),
-  IN p_nit VARCHAR(30),
-  IN p_sector VARCHAR(100),
-  IN p_telefono VARCHAR(20),
-  IN p_descripcion TEXT,
-  IN p_ciudad VARCHAR(100)
-)
-BEGIN
-  UPDATE perfil_empresa
-  SET nombre_empresa = IFNULL(p_nombre_empresa, nombre_empresa),
-      nit = IFNULL(p_nit, nit),
-      sector = IFNULL(p_sector, sector),
-      telefono = IFNULL(p_telefono, telefono),
-      descripcion = IFNULL(p_descripcion, descripcion),
-      ciudad = IFNULL(p_ciudad, ciudad)
-  WHERE usuario_id = p_usuario_id;
-
-  INSERT INTO logs_auditoria (usuario_id, accion, tabla_afectada, registro_id)
-  VALUES (p_usuario_id, 'Perfil empresa actualizado', 'perfil_empresa', p_usuario_id);
-
-  SELECT 'Perfil actualizado correctamente' AS mensaje, TRUE AS success;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_calificar_empresa` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_calificar_empresa`(
-  IN p_proyecto_id BIGINT,
-  IN p_desarrollador_id BIGINT,
-  IN p_empresa_id BIGINT,
-  IN p_puntuacion TINYINT,
-  IN p_comentario TEXT
-)
-BEGIN
-  
-  IF (SELECT estado FROM proyectos WHERE id = p_proyecto_id) != 'finalizado' THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Solo puedes calificar empresas en proyectos finalizados.';
-  END IF;
-
-  
-  INSERT INTO valoraciones (proyecto_id, empresa_id, desarrollador_id, rol_evaluador, puntuacion, comentario)
-  VALUES (p_proyecto_id, p_empresa_id, p_desarrollador_id, 'desarrollador', p_puntuacion, p_comentario);
-
-  SELECT 'Empresa calificada exitosamente' AS mensaje, TRUE AS success;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_calificar_proyecto` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_calificar_proyecto`(
-  IN p_proyecto_id      INT,
-  IN p_evaluador_id     INT,
-  IN p_evaluado_id      INT,
-  IN p_puntuacion       TINYINT,
-  IN p_comentario       TEXT,
-  IN p_rol_evaluador    ENUM('empresa', 'desarrollador')
-)
-BEGIN
-    
-    IF p_puntuacion < 1 OR p_puntuacion > 5 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La calificación debe estar entre 1 y 5';
-    END IF;
-
-    
-    IF EXISTS (SELECT 1 FROM valoraciones WHERE proyecto_id = p_proyecto_id AND rol_evaluador = p_rol_evaluador) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ya has calificado este proyecto';
-    END IF;
-
-    
-    IF p_rol_evaluador = 'empresa' THEN
-        INSERT INTO valoraciones (proyecto_id, empresa_id, desarrollador_id, puntuacion, comentario, rol_evaluador)
-        VALUES (p_proyecto_id, p_evaluador_id, p_evaluado_id, p_puntuacion, p_comentario, 'empresa');
-    ELSE
-        INSERT INTO valoraciones (proyecto_id, empresa_id, desarrollador_id, puntuacion, comentario, rol_evaluador)
-        VALUES (p_proyecto_id, p_evaluado_id, p_evaluador_id, p_puntuacion, p_comentario, 'desarrollador');
-    END IF;
-
-    
-    IF p_rol_evaluador = 'empresa' THEN
-        UPDATE proyectos SET estado = 'finalizado' WHERE id = p_proyecto_id;
-    END IF;
-
-    SELECT 'Calificación registrada exitosamente' AS mensaje, TRUE AS success;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_cancelar_contratacion` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_cancelar_contratacion`(
-  IN p_contratacion_id BIGINT,
-  IN p_empresa_id BIGINT
-)
-BEGIN
-  DECLARE v_proyecto_id BIGINT;
-  DECLARE v_vacantes_totales INT;
-  DECLARE v_vacantes_ocupadas INT;
-
-  
-  SELECT proyecto_id INTO v_proyecto_id 
-  FROM contrataciones 
-  WHERE id = p_contratacion_id AND empresa_id = p_empresa_id AND estado = 'activa';
-
-  IF v_proyecto_id IS NULL THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Contratación no encontrada o ya cancelada.';
-  END IF;
-
-  START TRANSACTION;
-
-    
-    UPDATE contrataciones SET estado = 'cancelada' WHERE id = p_contratacion_id;
-
-    
-    SELECT vacantes INTO v_vacantes_totales FROM proyectos WHERE id = v_proyecto_id;
-
-    
-    SELECT COUNT(*) INTO v_vacantes_ocupadas FROM contrataciones 
-    WHERE proyecto_id = v_proyecto_id AND estado = 'activa';
-
-    
-    IF v_vacantes_ocupadas < v_vacantes_totales THEN
-      UPDATE proyectos SET estado = 'publicado' WHERE id = v_proyecto_id;
-    END IF;
-
-  COMMIT;
-
-  SELECT TRUE AS success, 'Contratación cancelada y vacantes liberadas.' AS mensaje;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_marcar_notificaciones_leidas` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_marcar_notificaciones_leidas`(IN p_usuario_id BIGINT)
-BEGIN
-  UPDATE notificaciones SET leida = 1 WHERE usuario_id = p_usuario_id;
-  SELECT 'Notificaciones marcadas como leidas' AS mensaje, TRUE AS success;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_obtener_proyectos_disponibles` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_proyectos_disponibles`(IN p_usuario_id BIGINT)
-BEGIN
-  SELECT * FROM proyectos WHERE estado = 'publicado';
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_postularse` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_postularse`(
-  IN p_proyecto_id      BIGINT,
-  IN p_desarrollador_id BIGINT,
-  IN p_mensaje          TEXT
-)
-BEGIN
-  DECLARE v_count INT;
-  DECLARE v_activos INT;
-
-  SELECT COUNT(*) INTO v_count FROM postulaciones WHERE desarrollador_id = p_desarrollador_id AND estado = 'pendiente';
-  SELECT COUNT(*) INTO v_activos FROM contrataciones WHERE desarrollador_id = p_desarrollador_id AND estado = 'activa';
-
-  IF (v_count + v_activos) >= 3 THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Límite alcanzado: No puedes tener más de 3 postulaciones o proyectos activos.';
-  END IF;
-
-  IF EXISTS (SELECT 1 FROM postulaciones WHERE proyecto_id = p_proyecto_id AND desarrollador_id = p_desarrollador_id) THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ya te has postulado a este proyecto anteriormente.';
-  END IF;
-
-  INSERT INTO postulaciones (proyecto_id, desarrollador_id, mensaje) VALUES (p_proyecto_id, p_desarrollador_id, p_mensaje);
-
-  SELECT LAST_INSERT_ID() AS postulacion_id, 'Postulación registrada exitosamente' AS mensaje, TRUE AS success;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_registrar_usuario` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_registrar_usuario`(
-  IN p_username     VARCHAR(150),
-  IN p_nombre       VARCHAR(150),
-  IN p_email        VARCHAR(150),
-  IN p_password     VARCHAR(255),
-  IN p_rol          ENUM('empresa','desarrollador','administrador')
-)
-BEGIN
-  
-  DECLARE v_pass_django VARCHAR(255);
-  SET v_pass_django = CONCAT('plain$$', p_password);
-
-  INSERT INTO usuarios (
-    username, nombre, email, password, rol, 
-    estado, is_active, is_staff, is_superuser, date_joined
-  )
-  VALUES (
-    p_username, p_nombre, p_email, v_pass_django, p_rol, 
-    'activo', 1, 0, 0, NOW()
-  );
-  
-  SET @nuevo_id = LAST_INSERT_ID();
-  
-  IF p_rol = 'empresa' THEN
-    INSERT INTO perfil_empresa (usuario_id) VALUES (@nuevo_id);
-  ELSEIF p_rol = 'desarrollador' THEN
-    INSERT INTO perfil_desarrollador (usuario_id) VALUES (@nuevo_id);
-  END IF;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_reporte_admin` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_reporte_admin`()
-BEGIN
-  SELECT * FROM v_estadisticas_sistema;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_solicitar_recuperacion` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_solicitar_recuperacion`(IN p_email VARCHAR(150))
-BEGIN
-  IF EXISTS (SELECT 1 FROM usuarios WHERE email = p_email) THEN
-    UPDATE usuarios SET token_recuperacion = MD5(NOW()), token_expiracion = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE email = p_email;
-    SELECT 'Token generado' AS mensaje, TRUE AS success;
-  ELSE
-    SELECT 'Correo no encontrado' AS mensaje, FALSE AS success;
-  END IF;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_subir_avance` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_subir_avance`(
-  IN p_proyecto_id      INT,
-  IN p_desarrollador_id INT,
-  IN p_descripcion      TEXT,
-  IN p_archivo_url      VARCHAR(500),
-  IN p_porcentaje       TINYINT
-)
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM avances
-    WHERE proyecto_id      = p_proyecto_id
-      AND desarrollador_id = p_desarrollador_id
-      AND DATE(fecha_hora) = CURDATE()
-  ) THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Solo puedes registrar un avance por día en este proyecto';
-  END IF;
-
-  INSERT INTO avances (proyecto_id, desarrollador_id, descripcion, archivo_url, porcentaje)
-  VALUES (p_proyecto_id, p_desarrollador_id, p_descripcion, p_archivo_url, p_porcentaje);
-
-  SELECT LAST_INSERT_ID() AS avance_id, 
-         'Avance registrado correctamente' AS mensaje,
-         TRUE AS success;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `sp_toggle_favorito` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = latin1 */ ;
-/*!50003 SET character_set_results = latin1 */ ;
-/*!50003 SET collation_connection  = latin1_swedish_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_toggle_favorito`(
-  IN p_desarrollador_id BIGINT,
-  IN p_proyecto_id BIGINT
-)
-BEGIN
-  DECLARE v_existe BOOLEAN;
-  SELECT EXISTS(SELECT 1 FROM favoritos WHERE desarrollador_id = p_desarrollador_id AND proyecto_id = p_proyecto_id) INTO v_existe;
-  IF v_existe THEN
-    DELETE FROM favoritos WHERE desarrollador_id = p_desarrollador_id AND proyecto_id = p_proyecto_id;
-    SELECT 'Proyecto eliminado de favoritos' AS mensaje, FALSE AS es_favorito, TRUE AS success;
-  ELSE
-    INSERT INTO favoritos (desarrollador_id, proyecto_id) VALUES (p_desarrollador_id, p_proyecto_id);
-    SELECT 'Proyecto agregado a favoritos' AS mensaje, TRUE AS es_favorito, TRUE AS success;
-  END IF;
-END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2095,12 +1508,12 @@ DELIMITER ;
 /*!50001 SET @saved_cs_client          = @@character_set_client */;
 /*!50001 SET @saved_cs_results         = @@character_set_results */;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = latin1 */;
-/*!50001 SET character_set_results     = latin1 */;
-/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`emp`.`nombre` AS `empresa_nombre`,group_concat(distinct `dev`.`nombre` separator ', ') AS `desarrolladores_nombres`,min(`c`.`fecha_inicio`) AS `fecha_inicio`,max(`c`.`fecha_fin_estimada`) AS `fecha_fin_estimada`,coalesce(avg((select `a`.`porcentaje` from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`desarrollador_id` = `dev`.`id`)) order by `a`.`fecha_hora` desc limit 1)),0) AS `porcentaje_avance_promedio`,max((select `a`.`fecha_hora` from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`) order by `a`.`fecha_hora` desc limit 1)) AS `ultimo_avance`,group_concat(distinct concat(`dev`.`nombre`,': ',coalesce((select `a`.`porcentaje` from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`desarrollador_id` = `dev`.`id`)) order by `a`.`fecha_hora` desc limit 1),0),'%') separator ' | ') AS `avances_individuales`,group_concat(distinct `dev`.`id` separator ',') AS `desarrolladores_ids`,`emp`.`id` AS `empresa_id`,`p`.`estado` AS `estado` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where (`p`.`estado` in ('en_desarrollo','en_revision')) group by `p`.`id`,`p`.`titulo`,`p`.`descripcion`,`p`.`tipo_solucion`,`p`.`prioridad`,`p`.`fecha_publicacion`,`p`.`fecha_limite`,`emp`.`nombre`,`emp`.`id`,`p`.`estado` */;
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`emp`.`nombre` AS `empresa_nombre`,`emp`.`id` AS `empresa_id`,`p`.`estado` AS `estado`,`p`.`fecha_limite` AS `fecha_fin_estimada`,(select coalesce(((count((case when (`e`.`estado` = 'completado') then 1 end)) / nullif(count(0),0)) * 100),0) from `entregables` `e` where (`e`.`proyecto_id` = `p`.`id`)) AS `porcentaje_avance_promedio`,(select max(`a`.`fecha_hora`) from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`)) AS `ultimo_avance`,group_concat(distinct cast(`c`.`desarrollador_id` as char charset utf8mb4) separator ',') AS `desarrolladores_ids`,group_concat(distinct `u`.`username` separator ', ') AS `desarrolladores_nombres` from (((`proyectos` `p` join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) left join `contrataciones` `c` on(((`p`.`id` = `c`.`proyecto_id`) and (`c`.`estado` = 'activa')))) left join `usuarios` `u` on((`c`.`desarrollador_id` = `u`.`id`))) where (`p`.`estado` in ('publicado','en_desarrollo','en_revision')) group by `p`.`id`,`p`.`titulo`,`emp`.`nombre`,`emp`.`id`,`p`.`estado`,`p`.`fecha_limite` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -2150,4 +1563,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-29  0:57:05
+-- Dump completed on 2026-03-29 22:11:45

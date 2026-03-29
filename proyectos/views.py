@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
-from .models import Proyecto, Valoracion
+from .models import Proyecto, Valoracion, Entregable
 from usuarios.models import Usuario
 from contrataciones.models import Contratacion
 from favoritos.models import Favorito
@@ -78,8 +78,8 @@ def crear_proyecto(request):
                 prioridad=request.POST.get('prioridad', 'media'),
                 vacantes=int(request.POST.get('vacantes', 1)),
                 fecha_limite=request.POST.get('fecha_limite') or None,
-                estado='publicado', # Publicación directa sin intervención del administrador
-                aprobado_por_id=None # No se requiere aprobación del administrador
+                estado='publicado', 
+                aprobado_por_id=None 
             )
             proyecto.save()
             messages.success(request, f"¡Proyecto '{proyecto.titulo}' publicado exitosamente!")
@@ -97,20 +97,24 @@ def finalizar_proyecto(request, proyecto_id):
     
     proyecto = get_object_or_404(Proyecto, id=proyecto_id, empresa=request.user)
     
-    # Obtener todos los desarrolladores contratados que aún no han sido calificados por la empresa para este proyecto
+    # Buscamos quiénes faltan por calificar
     desarrolladores_pendientes = Usuario.objects.filter(
-        id__in=Contratacion.objects.filter(proyecto=proyecto, estado='activa').values_list('desarrollador_id', flat=True)
+        id__in=Contratacion.objects.filter(proyecto=proyecto).values_list('desarrollador_id', flat=True)
     ).exclude(
         id__in=Valoracion.objects.filter(proyecto=proyecto, rol_evaluador='empresa').values_list('desarrollador_id', flat=True)
     )
     
     if not desarrolladores_pendientes.exists():
+        # Si ya no hay pendientes, asegurarnos de que el proyecto esté finalizado
+        if proyecto.estado != 'finalizado':
+            proyecto.estado = 'finalizado'
+            proyecto.save()
         messages.info(request, "Ya has calificado a todos los desarrolladores de este proyecto.")
         return redirect('dashboard_empresa')
     
-    # Tomamos el primero de la lista para calificarlo ahora
+    # Tomamos el primero de la lista de pendientes
     desarrollador = desarrolladores_pendientes.first()
-    quedan_mas = desarrolladores_pendientes.count() > 1
+    es_el_ultimo = desarrolladores_pendientes.count() == 1
 
     if request.method == 'POST':
         try:
@@ -119,6 +123,7 @@ def finalizar_proyecto(request, proyecto_id):
 
             from django.db import connection
             with connection.cursor() as cursor:
+                # El SP ahora no debe finalizar el proyecto automáticamente si faltan más
                 cursor.callproc('sp_calificar_proyecto', [
                     proyecto.id,
                     request.user.id,
@@ -128,11 +133,30 @@ def finalizar_proyecto(request, proyecto_id):
                     'empresa'
                 ])
 
-            if quedan_mas:
-                messages.success(request, f"Has calificado a {desarrollador.username}. Ahora califica al siguiente desarrollador.")
+            if not es_el_ultimo:
+                messages.success(request, f"Has calificado a {desarrollador.username}. Por favor, califica al siguiente colaborador.")
                 return redirect('finalizar_proyecto', proyecto_id=proyecto.id)
             else:
-                messages.success(request, f"¡Todos los desarrolladores calificados! Proyecto '{proyecto.titulo}' finalizado.")
+                # Solo aquí finalizamos el proyecto oficialmente (Migrado de Triggers)
+                proyecto.estado = 'finalizado'
+                proyecto.save()
+
+                # Cerrar contrataciones y Notificar a todos los desarrolladores (Migrado de Trigger)
+                from notificaciones.models import Notificacion
+                
+                contratos_activos = Contratacion.objects.filter(proyecto=proyecto, estado='activa')
+                for contrato in contratos_activos:
+                    # 1. Notificar
+                    Notificacion.objects.create(
+                        usuario=contrato.desarrollador,
+                        tipo='aprobacion',
+                        mensaje=f"¡Felicidades! La empresa ha finalizado el proyecto: {proyecto.titulo}"
+                    )
+                    # 2. Cerrar contrato
+                    contrato.estado = 'finalizada'
+                    contrato.save()
+
+                messages.success(request, f"¡Excelente! Todos los desarrolladores calificados. Proyecto '{proyecto.titulo}' finalizado con éxito.")
                 return redirect('dashboard_empresa')
 
         except Exception as e:
@@ -177,6 +201,39 @@ def calificar_empresa(request, proyecto_id):
             messages.error(request, f"Error: {error_msg}")
             
     return render(request, 'proyectos/calificar_empresa.html', {'proyecto': proyecto})
+
+@login_required
+def gestionar_hitos(request, proyecto_id):
+    proyecto = get_object_or_404(Proyecto, id=proyecto_id, empresa=request.user)
+    hitos = Entregable.objects.filter(proyecto=proyecto).order_by('fecha_creacion')
+
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo')
+        descripcion = request.POST.get('descripcion')
+        if titulo:
+            Entregable.objects.create(
+                proyecto=proyecto,
+                titulo=titulo,
+                descripcion=descripcion
+            )
+            messages.success(request, f"Hito '{titulo}' añadido correctamente.")
+            return redirect('gestionar_hitos', proyecto_id=proyecto.id)
+
+    return render(request, 'proyectos/gestionar_hitos.html', {
+        'proyecto': proyecto,
+        'hitos': hitos
+    })
+
+@login_required
+def eliminar_hito(request, hito_id):
+    hito = get_object_or_404(Entregable, id=hito_id, proyecto__empresa=request.user)
+    proyecto_id = hito.proyecto.id
+    if hito.estado == 'pendiente':
+        hito.delete()
+        messages.success(request, "Hito eliminado.")
+    else:
+        messages.error(request, "No se puede eliminar un hito que ya ha sido completado.")
+    return redirect('gestionar_hitos', proyecto_id=proyecto_id)
 
 @login_required
 def desactivar_proyecto(request, proyecto_id):

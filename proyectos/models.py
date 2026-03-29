@@ -1,5 +1,6 @@
 from django.db import models
 from usuarios.models import Usuario
+from django.utils import timezone
 
 class Proyecto(models.Model):
     TIPO_SOLUCION = [
@@ -39,6 +40,40 @@ class Proyecto(models.Model):
     def __str__(self):
         return f"{self.titulo} ({self.get_estado_display()})"
 
+    def save(self, *args, **kwargs):
+        # 1. Detectar si es una actualización y si el estado cambió
+        if self.pk:
+            try:
+                old_instance = Proyecto.objects.get(pk=self.pk)
+                if old_instance.estado != self.estado:
+                    # Guardamos el cambio primero
+                    super().save(*args, **kwargs)
+                    # Registramos en el historial
+                    HistorialEstadoProyecto.objects.create(
+                        proyecto=self,
+                        estado_anterior=old_instance.estado,
+                        estado_nuevo=self.estado,
+                        cambiado_por=self.empresa, 
+                        fecha=timezone.now()
+                    )
+                    return
+            except Proyecto.DoesNotExist:
+                pass
+        
+        # 2. Guardado normal (Creación o sin cambio de estado)
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        # 3. Registro inicial (Migrado de trigger trg_historial_inicial_proyecto)
+        if is_new:
+            HistorialEstadoProyecto.objects.create(
+                proyecto=self,
+                estado_anterior=None,
+                estado_nuevo=self.estado,
+                cambiado_por=self.empresa,
+                fecha=timezone.now()
+            )
+
     class Meta:
         db_table = 'proyectos'
 
@@ -62,7 +97,7 @@ class Valoracion(models.Model):
 
 class HistorialEstadoProyecto(models.Model):
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='historial_estados', db_column='proyecto_id')
-    estado_anterior = models.CharField(max_length=50)
+    estado_anterior = models.CharField(max_length=50, null=True, blank=True)
     estado_nuevo = models.CharField(max_length=50)
     cambiado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, db_column='cambiado_por')
     fecha = models.DateTimeField(auto_now_add=True)
@@ -70,3 +105,20 @@ class HistorialEstadoProyecto(models.Model):
     class Meta:
         db_table = 'historial_estado_proyecto'
         verbose_name_plural = "Historiales de Estados"
+
+class Entregable(models.Model):
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('completado', 'Completado'),
+    ]
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='entregables', db_column='proyecto_id')
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'entregables'
+
+    def __str__(self):
+        return f"{self.titulo} - {self.proyecto.titulo}"

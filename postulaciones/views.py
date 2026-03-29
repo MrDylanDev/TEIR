@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.db import transaction
 from .models import Postulacion
 from proyectos.models import Proyecto
+from contrataciones.models import Contratacion
+from notificaciones.models import Notificacion
 from django.utils import timezone
 
 @login_required
@@ -39,7 +41,6 @@ def postularse_a_proyecto(request, proyecto_id):
     if request.user.rol != 'desarrollador':
         return redirect('inicio')
     
-    # En lugar de get_object_or_404, usamos filter para manejar el error amigablemente
     proyecto = Proyecto.objects.filter(id=proyecto_id).first()
 
     if not proyecto:
@@ -60,7 +61,6 @@ def postularse_a_proyecto(request, proyecto_id):
             messages.success(request, f"¡Te has postulado exitosamente al proyecto '{proyecto.titulo}'!")
             return redirect('dashboard_desarrollador')
         except Exception as e:
-            # Capturamos el mensaje de error del SIGNAL SQLSTATE '45000' de MySQL de forma robusta
             error_msg = e.args[1] if hasattr(e, 'args') and len(e.args) > 1 else str(e)
             
             if 'Límite alcanzado' in error_msg:
@@ -77,31 +77,55 @@ def postularse_a_proyecto(request, proyecto_id):
 @login_required
 def aceptar_postulacion(request, postulacion_id):
     if request.user.rol != 'empresa':
-        messages.error(request, "Acceso denegado. Solo empresas pueden aceptar postulaciones.")
+        messages.error(request, "Acceso denegado.")
         return redirect('inicio')
 
+    # Buscamos la postulación sin filtrar por estado 'pendiente' para dar un error personalizado si ya fue procesada
     postulacion = get_object_or_404(Postulacion, id=postulacion_id, proyecto__empresa=request.user)
-    proyecto_id = postulacion.proyecto.id
+    proyecto = postulacion.proyecto
 
     if request.method == 'POST':
         try:
-            from django.db import connection
-            
-            # Invocamos sp_aceptar_postulacion
-            
-            with connection.cursor() as cursor:
-                cursor.callproc('sp_aceptar_postulacion', [postulacion_id, request.user.id])
-                result = cursor.fetchone()
-                msg_exito = result[1] if result and len(result) > 1 else "Contratación realizada exitosamente."
-                
-            messages.success(request, msg_exito)
-        except Exception as e:
-            error_msg = e.args[1] if hasattr(e, 'args') and len(e.args) > 1 else str(e)
-            if 'Postulación no válida' in error_msg:
-                messages.warning(request, "La postulación ya no es válida o el proyecto ya no tiene vacantes.")
-            else:
-                messages.error(request, f"Error al procesar la contratación: {error_msg}")
-    else:
-        messages.warning(request, "Para contratar utiliza el botón de aceptar en la lista de postulaciones.")
+            if postulacion.estado != 'pendiente':
+                messages.warning(request, f"Esta postulación ya ha sido {postulacion.estado}.")
+                return redirect('ver_postulaciones_empresa', proyecto_id=proyecto.id)
 
-    return redirect('ver_postulaciones_empresa', proyecto_id=proyecto_id)
+            with transaction.atomic():
+                # 1. Verificar vacantes
+                vacantes_ocupadas = Contratacion.objects.filter(proyecto=proyecto, estado='activa').count()
+                if vacantes_ocupadas >= proyecto.vacantes:
+                    messages.warning(request, "Límite de vacantes alcanzado para este proyecto.")
+                    return redirect('ver_postulaciones_empresa', proyecto_id=proyecto.id)
+
+                # 2. Aceptar postulación
+                postulacion.estado = 'aceptada'
+                postulacion.save()
+
+                # 3. Crear Contratación (Migrado del Trigger)
+                Contratacion.objects.get_or_create(
+                    proyecto=proyecto,
+                    desarrollador=postulacion.desarrollador,
+                    empresa=request.user,
+                    estado='activa'
+                )
+
+                # 4. Actualizar estado del proyecto si se llenaron las vacantes
+                nueva_cuenta = Contratacion.objects.filter(proyecto=proyecto, estado='activa').count()
+                if nueva_cuenta >= proyecto.vacantes:
+                    proyecto.estado = 'en_desarrollo'
+                    proyecto.save()
+
+                # 5. Notificar al desarrollador
+                Notificacion.objects.create(
+                    usuario=postulacion.desarrollador,
+                    tipo='aprobacion',
+                    mensaje=f"¡Felicidades! Has sido contratado para el proyecto: {proyecto.titulo}"
+                )
+
+                messages.success(request, f"¡Contratación exitosa! {postulacion.desarrollador.username} ha sido vinculado.")
+        except Exception as e:
+            messages.error(request, f"Error al procesar: {str(e)}")
+    else:
+        messages.warning(request, "Acción no permitida.")
+
+    return redirect('ver_postulaciones_empresa', proyecto_id=proyecto.id)
