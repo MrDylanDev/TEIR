@@ -16,14 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `tem_dbv2`
---
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `tem_dbv2` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-
-USE `tem_dbv2`;
-
---
 -- Table structure for table `auth_group`
 --
 
@@ -90,7 +82,7 @@ CREATE TABLE `auth_permission` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `auth_permission_content_type_id_codename_01ab375a_uniq` (`content_type_id`,`codename`),
   CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,7 +91,6 @@ CREATE TABLE `auth_permission` (
 
 LOCK TABLES `auth_permission` WRITE;
 /*!40000 ALTER TABLE `auth_permission` DISABLE KEYS */;
-INSERT INTO `auth_permission` VALUES (1,'Can add log entry',1,'add_logentry'),(2,'Can change log entry',1,'change_logentry'),(3,'Can delete log entry',1,'delete_logentry'),(4,'Can view log entry',1,'view_logentry'),(5,'Can add permission',3,'add_permission'),(6,'Can change permission',3,'change_permission'),(7,'Can delete permission',3,'delete_permission'),(8,'Can view permission',3,'view_permission'),(9,'Can add group',2,'add_group'),(10,'Can change group',2,'change_group'),(11,'Can delete group',2,'delete_group'),(12,'Can view group',2,'view_group'),(13,'Can add content type',4,'add_contenttype'),(14,'Can change content type',4,'change_contenttype'),(15,'Can delete content type',4,'delete_contenttype'),(16,'Can view content type',4,'view_contenttype'),(17,'Can add session',5,'add_session'),(18,'Can change session',5,'change_session'),(19,'Can delete session',5,'delete_session'),(20,'Can view session',5,'view_session'),(21,'Can add usuario',8,'add_usuario'),(22,'Can change usuario',8,'change_usuario'),(23,'Can delete usuario',8,'delete_usuario'),(24,'Can view usuario',8,'view_usuario'),(25,'Can add perfil empresa',7,'add_perfilempresa'),(26,'Can change perfil empresa',7,'change_perfilempresa'),(27,'Can delete perfil empresa',7,'delete_perfilempresa'),(28,'Can view perfil empresa',7,'view_perfilempresa'),(29,'Can add perfil desarrollador',6,'add_perfildesarrollador'),(30,'Can change perfil desarrollador',6,'change_perfildesarrollador'),(31,'Can delete perfil desarrollador',6,'delete_perfildesarrollador'),(32,'Can view perfil desarrollador',6,'view_perfildesarrollador'),(33,'Can add proyecto',10,'add_proyecto'),(34,'Can change proyecto',10,'change_proyecto'),(35,'Can delete proyecto',10,'delete_proyecto'),(36,'Can view proyecto',10,'view_proyecto'),(37,'Can add valoracion',11,'add_valoracion'),(38,'Can change valoracion',11,'change_valoracion'),(39,'Can delete valoracion',11,'delete_valoracion'),(40,'Can view valoracion',11,'view_valoracion'),(41,'Can add historial estado proyecto',9,'add_historialestadoproyecto'),(42,'Can change historial estado proyecto',9,'change_historialestadoproyecto'),(43,'Can delete historial estado proyecto',9,'delete_historialestadoproyecto'),(44,'Can view historial estado proyecto',9,'view_historialestadoproyecto'),(45,'Can add postulacion',12,'add_postulacion'),(46,'Can change postulacion',12,'change_postulacion'),(47,'Can delete postulacion',12,'delete_postulacion'),(48,'Can view postulacion',12,'view_postulacion'),(49,'Can add contratacion',13,'add_contratacion'),(50,'Can change contratacion',13,'change_contratacion'),(51,'Can delete contratacion',13,'delete_contratacion'),(52,'Can view contratacion',13,'view_contratacion'),(53,'Can add avance',14,'add_avance'),(54,'Can change avance',14,'change_avance'),(55,'Can delete avance',14,'delete_avance'),(56,'Can view avance',14,'view_avance'),(57,'Can add mensaje',15,'add_mensaje'),(58,'Can change mensaje',15,'change_mensaje'),(59,'Can delete mensaje',15,'delete_mensaje'),(60,'Can view mensaje',15,'view_mensaje'),(61,'Can add notificacion',16,'add_notificacion'),(62,'Can change notificacion',16,'change_notificacion'),(63,'Can delete notificacion',16,'delete_notificacion'),(64,'Can view notificacion',16,'view_notificacion'),(65,'Can add favorito',17,'add_favorito'),(66,'Can change favorito',17,'change_favorito'),(67,'Can delete favorito',17,'delete_favorito'),(68,'Can view favorito',17,'view_favorito'),(69,'Can add log auditoria',19,'add_logauditoria'),(70,'Can change log auditoria',19,'change_logauditoria'),(71,'Can delete log auditoria',19,'delete_logauditoria'),(72,'Can view log auditoria',19,'view_logauditoria'),(73,'Can add copia seguridad',18,'add_copiaseguridad'),(74,'Can change copia seguridad',18,'change_copiaseguridad'),(75,'Can delete copia seguridad',18,'delete_copiaseguridad'),(76,'Can view copia seguridad',18,'view_copiaseguridad');
 /*!40000 ALTER TABLE `auth_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -196,11 +187,11 @@ DELIMITER ;;
   DECLARE v_titulo_proy VARCHAR(200);
   DECLARE v_avance_total DECIMAL(5,2);
 
-  -- Obtener datos para la notificación
+  
   SELECT empresa_id, titulo INTO v_empresa_id, v_titulo_proy FROM proyectos WHERE id = NEW.proyecto_id;
   SELECT COALESCE(nombre, username) INTO v_nombre_dev FROM usuarios WHERE id = NEW.desarrollador_id;
 
-  -- Insertar notificación para la empresa
+  
   INSERT INTO notificaciones (usuario_id, tipo, mensaje)
   VALUES (
     v_empresa_id,
@@ -208,8 +199,8 @@ DELIMITER ;;
     CONCAT(v_nombre_dev, ' registro un avance del ', NEW.porcentaje, '% en ', v_titulo_proy)
   );
 
-  -- Calcular el avance promedio real del proyecto considerando a todos los desarrolladores contratados
-  -- Tomamos el último porcentaje de cada desarrollador y lo promediamos
+  
+  
   SELECT COALESCE(AVG(ultimo_p), 0) INTO v_avance_total
   FROM (
     SELECT c.desarrollador_id, 
@@ -221,7 +212,7 @@ DELIMITER ;;
     WHERE c.proyecto_id = NEW.proyecto_id AND c.estado = 'activa'
   ) as avances_por_dev;
 
-  -- Solo si el promedio de todos los desarrolladores es 100%, pasamos a revisión
+  
   IF v_avance_total >= 100 THEN
     UPDATE proyectos SET estado = 'en_revision' WHERE id = NEW.proyecto_id;
   END IF;
@@ -346,7 +337,7 @@ CREATE TABLE `django_content_type` (
   `model` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `django_content_type_app_label_model_76bd3d3b_uniq` (`app_label`,`model`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -355,7 +346,6 @@ CREATE TABLE `django_content_type` (
 
 LOCK TABLES `django_content_type` WRITE;
 /*!40000 ALTER TABLE `django_content_type` DISABLE KEYS */;
-INSERT INTO `django_content_type` VALUES (1,'admin','logentry'),(2,'auth','group'),(3,'auth','permission'),(14,'avances','avance'),(4,'contenttypes','contenttype'),(13,'contrataciones','contratacion'),(17,'favoritos','favorito'),(18,'logs','copiaseguridad'),(19,'logs','logauditoria'),(15,'mensajes','mensaje'),(16,'notificaciones','notificacion'),(12,'postulaciones','postulacion'),(9,'proyectos','historialestadoproyecto'),(10,'proyectos','proyecto'),(11,'proyectos','valoracion'),(5,'sessions','session'),(6,'usuarios','perfildesarrollador'),(7,'usuarios','perfilempresa'),(8,'usuarios','usuario');
 /*!40000 ALTER TABLE `django_content_type` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -372,7 +362,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -381,7 +371,6 @@ CREATE TABLE `django_migrations` (
 
 LOCK TABLES `django_migrations` WRITE;
 /*!40000 ALTER TABLE `django_migrations` DISABLE KEYS */;
-INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2026-03-25 23:24:20.044461'),(2,'contenttypes','0002_remove_content_type_name','2026-03-25 23:24:20.064523'),(3,'auth','0001_initial','2026-03-25 23:24:20.069910'),(4,'auth','0002_alter_permission_name_max_length','2026-03-25 23:24:20.074597'),(5,'auth','0003_alter_user_email_max_length','2026-03-25 23:24:20.081037'),(6,'auth','0004_alter_user_username_opts','2026-03-25 23:24:20.085945'),(7,'auth','0005_alter_user_last_login_null','2026-03-25 23:24:20.090384'),(8,'auth','0006_require_contenttypes_0002','2026-03-25 23:24:20.095736'),(9,'auth','0007_alter_validators_add_error_messages','2026-03-25 23:24:20.099796'),(10,'auth','0008_alter_user_username_max_length','2026-03-25 23:24:20.103779'),(11,'auth','0009_alter_user_last_name_max_length','2026-03-25 23:24:20.108394'),(12,'auth','0010_alter_group_name_max_length','2026-03-25 23:24:20.112199'),(13,'auth','0011_update_proxy_permissions','2026-03-25 23:24:20.115697'),(14,'auth','0012_alter_user_first_name_max_length','2026-03-25 23:24:20.120669'),(15,'usuarios','0001_initial','2026-03-25 23:24:20.126477'),(16,'admin','0001_initial','2026-03-25 23:24:20.131270'),(17,'admin','0002_logentry_remove_auto_add','2026-03-25 23:24:20.136080'),(18,'admin','0003_logentry_add_action_flag_choices','2026-03-25 23:24:20.140602'),(19,'proyectos','0001_initial','2026-03-25 23:24:20.145723'),(20,'avances','0001_initial','2026-03-25 23:24:20.149352'),(21,'avances','0002_alter_avance_table','2026-03-25 23:24:20.153203'),(22,'avances','0003_alter_avance_archivo_url_alter_avance_table','2026-03-25 23:24:20.156499'),(23,'proyectos','0002_proyecto_vacantes_alter_proyecto_estado_and_more','2026-03-25 23:24:20.159891'),(24,'contrataciones','0001_initial','2026-03-25 23:24:20.163336'),(25,'contrataciones','0002_alter_contratacion_proyecto','2026-03-25 23:24:20.167758'),(26,'contrataciones','0003_alter_contratacion_table','2026-03-25 23:24:20.170970'),(27,'contrataciones','0004_alter_contratacion_table','2026-03-25 23:24:20.174309'),(28,'favoritos','0001_initial','2026-03-25 23:24:20.178256'),(29,'favoritos','0002_alter_favorito_table','2026-03-25 23:24:20.182850'),(30,'favoritos','0003_alter_favorito_table','2026-03-25 23:24:20.187095'),(31,'logs','0001_initial','2026-03-25 23:24:20.192639'),(32,'logs','0002_alter_copiaseguridad_table_alter_logauditoria_table','2026-03-25 23:24:20.196981'),(33,'logs','0003_alter_logauditoria_registro_id_and_more','2026-03-25 23:24:20.201583'),(34,'proyectos','0003_alter_historialestadoproyecto_table_and_more','2026-03-25 23:24:20.207430'),(35,'proyectos','0004_valoracion_rol_evaluador_and_more','2026-03-25 23:24:20.212837'),(36,'mensajes','0001_initial','2026-03-25 23:24:20.217833'),(37,'mensajes','0002_alter_mensaje_table','2026-03-25 23:24:20.222881'),(38,'mensajes','0003_alter_mensaje_proyecto_alter_mensaje_table','2026-03-25 23:24:20.226350'),(39,'notificaciones','0001_initial','2026-03-25 23:24:20.230105'),(40,'notificaciones','0002_alter_notificacion_table','2026-03-25 23:24:20.234069'),(41,'notificaciones','0003_alter_notificacion_options_and_more','2026-03-25 23:24:20.237687'),(42,'postulaciones','0001_initial','2026-03-25 23:24:20.241161'),(43,'postulaciones','0002_alter_postulacion_table','2026-03-25 23:24:20.246220'),(44,'postulaciones','0003_alter_postulacion_table','2026-03-25 23:24:20.249776'),(45,'sessions','0001_initial','2026-03-25 23:24:20.253307'),(46,'usuarios','0002_usuario_fecha_nacimiento_and_more','2026-03-25 23:24:20.256592'),(47,'usuarios','0003_alter_usuario_options_usuario_nombre_and_more','2026-03-25 23:24:20.260139'),(48,'usuarios','0004_alter_usuario_options_usuario_nombre_and_more','2026-03-25 23:24:20.263989'),(49,'logs','0004_alter_copiaseguridad_ejecutado_por','2026-03-26 00:00:00.101983'),(50,'proyectos','0005_alter_historialestadoproyecto_cambiado_por_and_more','2026-03-26 00:00:00.113848');
 /*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -407,6 +396,7 @@ CREATE TABLE `django_session` (
 
 LOCK TABLES `django_session` WRITE;
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
+INSERT INTO `django_session` VALUES ('ca0edjkfixwhsixww9g5680i28ibvqd8','.eJxVjMsOwiAUBf-FtSGlXAVcuu83ELgPqRqalHZl_HfbpAvdnpk5bxXTupS4Np7jSOqqjDr9bjnhk-sO6JHqfdI41WUes94VfdCmh4n4dTvcv4OSWtlqAQwWOnRwseQc2mTo7EEyoUuW2XdsJEifTQ_iQyYSsN44BDZb5NXnC_AdOEM:1w6eOh:YPShgpKMd4DJfcYL962-_LZubXp7HevyzPVJfkTmR34','2026-03-29 01:52:59.957916');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -491,7 +481,7 @@ CREATE TABLE `logs_auditoria` (
   KEY `idx_fecha` (`fecha_hora`),
   KEY `idx_tabla` (`tabla_afectada`),
   CONSTRAINT `logs_auditoria_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -500,6 +490,7 @@ CREATE TABLE `logs_auditoria` (
 
 LOCK TABLES `logs_auditoria` WRITE;
 /*!40000 ALTER TABLE `logs_auditoria` DISABLE KEYS */;
+INSERT INTO `logs_auditoria` VALUES (1,1,'Inicio de sesiÃ³n registrado','usuarios',1,NULL,'2026-03-29 00:52:59');
 /*!40000 ALTER TABLE `logs_auditoria` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -627,7 +618,6 @@ CREATE TABLE `perfil_desarrollador` (
 
 LOCK TABLES `perfil_desarrollador` WRITE;
 /*!40000 ALTER TABLE `perfil_desarrollador` DISABLE KEYS */;
-INSERT INTO `perfil_desarrollador` (`usuario_id`, `programa_formacion`, `ficha`, `habilidades`, `calificacion_promedio`, `num_proyectos_completados`) VALUES (2, 'ADSO', '2560664', 'Python, MySQL, Django', 0.00, 0);
 /*!40000 ALTER TABLE `perfil_desarrollador` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -851,7 +841,7 @@ DELIMITER ;;
   
   IF OLD.estado <> NEW.estado THEN
     IF NEW.estado = 'en_revision' THEN
-      -- Tomamos al desarrollador que subió el último avance registrado para este proyecto
+      
       SELECT desarrollador_id INTO v_responsable_id FROM avances
       WHERE proyecto_id = NEW.id
       ORDER BY fecha_hora DESC LIMIT 1;
@@ -950,7 +940,7 @@ CREATE TABLE `usuarios` (
   KEY `idx_rol` (`rol`),
   KEY `idx_estado` (`estado`),
   KEY `idx_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -959,10 +949,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` (`id`, `username`, `nombre`, `cedula`, `fecha_nacimiento`, `email`, `password`, `rol`, `estado`, `fecha_registro`, `ultimo_acceso`, `token_recuperacion`, `token_expiracion`, `intentos_fallidos`, `bloqueado_hasta`, `is_staff`, `is_superuser`, `is_active`, `first_name`, `last_name`, `date_joined`, `last_login`) VALUES 
-(1,'admin_tem','Super Admin TEM',NULL,NULL,'admin@tem.com','pbkdf2_sha256$1200000$harIyw7rnE1703jbH6Le6l$G2RVI59/PzDgUogX3JptCmR/hLRpmayv/mo5GGljl0w=','administrador','activo',NOW(),NULL,NULL,NULL,0,NULL,1,1,1,'','',NOW(),NULL),
-(2,'dev_tem','Desarrollador de Prueba',NULL,NULL,'dev@tem.com','pbkdf2_sha256$1200000$nAxlcoTDsnBgf6Gz7ZxpqF$1OgGp/xHXnkmpegSkTNDnB4cKnLqb57jHlu/n0a4Rrs=','desarrollador','activo',NOW(),NULL,NULL,NULL,0,NULL,0,0,1,'','',NOW(),NULL),
-(3,'emp_tem','Empresa de Prueba',NULL,NULL,'emp@tem.com','pbkdf2_sha256$1200000$YUCjjGDH3J4gSGw5lbd1aS$gAwXFsncAbIHgYEjqSp6ntBhzRcvaz2Dk8Cs2HU7f9s=','empresa','activo',NOW(),NULL,NULL,NULL,0,NULL,0,0,1,'','',NOW(),NULL);
+INSERT INTO `usuarios` VALUES (1,'admin_master','Admin Master',NULL,NULL,'admin@tem.com','pbkdf2_sha256$1200000$kJ4MmqW9gQrKXwUixhjgMJ$PHeLMLggWqeUarePItNuB4YGyqksc7/9nyQFcZ8vnhQ=','administrador','activo','2026-03-29 00:52:09','2026-03-29 00:53:00',NULL,NULL,0,NULL,1,1,1,'','','2026-03-29 00:52:09','2026-03-29 00:53:00'),(2,'empresa_tech','Tech Corp SAS',NULL,NULL,'contacto@techcorp.com','pbkdf2_sha256$1200000$s2MSdDRGR9t4E4gfcZE2Js$3TQYfJoJ6RUDIpOzz4gQGl3VexPKKTEG+i0F8Nq35ZU=','empresa','activo','2026-03-29 00:52:10',NULL,NULL,NULL,0,NULL,0,0,1,'','','2026-03-29 00:52:10',NULL),(3,'dev_expert','Juan Desarrollador',NULL,NULL,'dev@pro.com','pbkdf2_sha256$1200000$lRdby9qIK5Nv5Abl0xLDLN$pmH5D6I7Tvux2x2E/CxSFfHcAIMh7NvcRMFnCsLA0YQ=','desarrollador','activo','2026-03-29 00:52:11',NULL,NULL,NULL,0,NULL,0,0,1,'','','2026-03-29 00:52:11',NULL);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -1284,6 +1271,7 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `fecha_fin_estimada`,
  1 AS `porcentaje_avance_promedio`,
  1 AS `ultimo_avance`,
+ 1 AS `avances_individuales`,
  1 AS `desarrolladores_ids`,
  1 AS `empresa_id`,
  1 AS `estado`*/;
@@ -1919,12 +1907,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Current Database: `tem_dbv2`
---
-
-USE `tem_dbv2`;
-
---
 -- Final view structure for view `v_calificacion_desarrolladores`
 --
 
@@ -2115,7 +2097,9 @@ USE `tem_dbv2`;
 /*!50001 SET character_set_client      = latin1 */;
 /*!50001 SET character_set_results     = latin1 */;
 /*!50001 SET collation_connection      = latin1_swedish_ci */;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`emp`.`nombre` AS `empresa_nombre`,group_concat(distinct `dev`.`nombre` separator ', ') AS `desarrolladores_nombres`,min(`c`.`fecha_inicio`) AS `fecha_inicio`,max(`c`.`fecha_fin_estimada`) AS `fecha_fin_estimada`,coalesce(avg((select `a`.`porcentaje` from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`desarrollador_id` = `dev`.`id`)) order by `a`.`fecha_hora` desc limit 1)),0) AS `porcentaje_avance_promedio`,max((select `a`.`fecha_hora` from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`) order by `a`.`fecha_hora` desc limit 1)) AS `ultimo_avance`,group_concat(distinct concat(`dev`.`nombre`, ': ', coalesce((select `a`.`porcentaje` from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`desarrollador_id` = `dev`.`id`)) order by `a`.`fecha_hora` desc limit 1), 0), '%') separator ' | ') AS `avances_individuales`,group_concat(distinct `dev`.`id` separator ',') AS `desarrolladores_ids`,`emp`.`id` AS `empresa_id`,`p`.`estado` AS `estado` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where (`p`.`estado` in ('en_desarrollo','en_revision')) group by `p`.`id`,`p`.`titulo`,`p`.`descripcion`,`p`.`tipo_solucion`,`p`.`prioridad`,`p`.`fecha_publicacion`,`p`.`fecha_limite`,`emp`.`nombre`,`emp`.`id`,`p`.`estado`;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`emp`.`nombre` AS `empresa_nombre`,group_concat(distinct `dev`.`nombre` separator ', ') AS `desarrolladores_nombres`,min(`c`.`fecha_inicio`) AS `fecha_inicio`,max(`c`.`fecha_fin_estimada`) AS `fecha_fin_estimada`,coalesce(avg((select `a`.`porcentaje` from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`desarrollador_id` = `dev`.`id`)) order by `a`.`fecha_hora` desc limit 1)),0) AS `porcentaje_avance_promedio`,max((select `a`.`fecha_hora` from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`) order by `a`.`fecha_hora` desc limit 1)) AS `ultimo_avance`,group_concat(distinct concat(`dev`.`nombre`,': ',coalesce((select `a`.`porcentaje` from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`desarrollador_id` = `dev`.`id`)) order by `a`.`fecha_hora` desc limit 1),0),'%') separator ' | ') AS `avances_individuales`,group_concat(distinct `dev`.`id` separator ',') AS `desarrolladores_ids`,`emp`.`id` AS `empresa_id`,`p`.`estado` AS `estado` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where (`p`.`estado` in ('en_desarrollo','en_revision')) group by `p`.`id`,`p`.`titulo`,`p`.`descripcion`,`p`.`tipo_solucion`,`p`.`prioridad`,`p`.`fecha_publicacion`,`p`.`fecha_limite`,`emp`.`nombre`,`emp`.`id`,`p`.`estado` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -2165,4 +2149,4 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed
+-- Dump completed on 2026-03-29  0:57:05
