@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Inicio Global
+    path('', views.inicio, name='inicio'),
+
     # Dashboards y Acciones Administrativas
     path('admin/dashboard/', views.dashboard_admin, name='dashboard_admin'),
     path('admin/usuario/toggle/<int:usuario_id>/', views.admin_toggle_usuario, name='admin_toggle_usuario'),

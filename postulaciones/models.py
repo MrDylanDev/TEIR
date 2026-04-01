@@ -11,7 +11,7 @@ class Postulacion(models.Model):
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
     desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, limit_choices_to={'rol': 'desarrollador'})
     mensaje = models.TextField(blank=True, null=True)
-    estado = models.CharField(max_length=10, choices=ESTADO, default='pendiente')
+    estado = models.CharField(max_length=25, choices=ESTADO, default='pendiente')
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:

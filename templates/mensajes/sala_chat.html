@@ -7,8 +7,16 @@
     <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
     <style>
         body { background: #000; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
+        .sidebar { width: 260px; background: #0a0a0a; border-right: 1px solid #1a1a1a; display: flex; flex-direction: column; padding: 20px; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: #000; }
         .chat-header { background: #111; padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
         .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .participant-link { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; color: #ccc; text-decoration: none; font-size: 14px; transition: 0.3s; margin-bottom: 5px; }
+        .participant-link:hover { background: #1a1a1a; color: #fff; }
+        .participant-link.active { background: #4CAF50; color: white; }
+        .role-tag { font-size: 9px; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: #222; opacity: 0.6; }
         .mensaje { max-width: 70%; padding: 12px 18px; border-radius: 15px; font-size: 15px; line-height: 1.4; position: relative; }
         .enviado { align-self: flex-end; background: #4CAF50; color: white; border-bottom-right-radius: 2px; }
         .recibido { align-self: flex-start; background: #222; color: white; border-bottom-left-radius: 2px; border: 1px solid #333; }
@@ -46,36 +54,73 @@
         {% endif %}
     </div>
 
-    <div class="chat-container" id="chat-container">
-        {% for msg in mensajes_chat %}
-            <div class="mensaje {% if msg.remitente == request.user %}enviado{% else %}recibido{% endif %}">
-                {% if es_grupal and msg.remitente != request.user %}
-                    <small style="display: block; font-weight: bold; font-size: 10px; margin-bottom: 5px; color: #4CAF50;">
-                        {{ msg.remitente.username }} ({% if msg.remitente.rol == 'empresa' %}Empresa{% else %}Dev{% endif %})
-                    </small>
-                {% endif %}
-                {{ msg.cuerpo }}
-                <span class="meta">{{ msg.fecha_envio|date:"H:i" }}</span>
-            </div>
-        {% empty %}
-            <div style="text-align: center; margin-top: 50px; opacity: 0.4;">
-                <p>No hay mensajes previos en este chat. ¡Di hola!</p>
-            </div>
-        {% endfor %}
-    </div>
+    <div class="main-layout">
+        {% if es_grupal or proyecto %}
+        <div class="sidebar">
+            <h4 style="font-size: 12px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">Participantes</h4>
+            
+            <!-- Chat Grupal -->
+            {% if proyecto %}
+            <a href="{% url 'sala_chat_grupal' proyecto.id %}" class="participant-link {% if es_grupal %}active{% endif %}">
+                <span>🚀</span> Espacio Grupal
+            </a>
+            {% endif %}
 
-    <div class="chat-input">
-        {% if proyecto and proyecto.estado == 'finalizado' %}
-            <div style="text-align: center; padding: 15px; background: #1a1a1a; border-radius: 10px; color: #ff9800; border: 1px solid #333;">
-                🔒 Este proyecto ha finalizado. El chat es ahora de solo lectura.
-            </div>
-        {% else %}
-            <form method="post" class="input-group">
-                {% csrf_token %}
-                <input type="text" name="cuerpo" placeholder="Escribe un mensaje..." required autocomplete="off">
-                <button type="submit" class="btn-enviar">Enviar</button>
-            </form>
+            <div style="margin: 20px 0; border-top: 1px solid #1a1a1a;"></div>
+
+            <!-- Empresa -->
+            {% if proyecto and request.user != proyecto.empresa %}
+            <a href="{% url 'sala_chat' proyecto.empresa.id proyecto.id %}" class="participant-link {% if receptor.id == proyecto.empresa.id %}active{% endif %}">
+                <div style="width: 8px; height: 8px; background: #4CAF50; border-radius: 50%;"></div>
+                {{ proyecto.empresa.username }} <span class="role-tag">Empresa</span>
+            </a>
+            {% endif %}
+
+            <!-- Desarrolladores -->
+            {% for comp in companeros %}
+                {% if comp != request.user %}
+                <a href="{% url 'sala_chat' comp.id proyecto.id %}" class="participant-link {% if receptor.id == comp.id %}active{% endif %}">
+                    <div style="width: 8px; height: 8px; background: #2196F3; border-radius: 50%;"></div>
+                    {{ comp.username }} <span class="role-tag">Dev</span>
+                </a>
+                {% endif %}
+            {% endfor %}
+        </div>
         {% endif %}
+
+        <div class="chat-area">
+            <div class="chat-container" id="chat-container">
+                {% for msg in mensajes_chat %}
+                    <div class="mensaje {% if msg.remitente == request.user %}enviado{% else %}recibido{% endif %}">
+                        {% if es_grupal and msg.remitente != request.user %}
+                            <small style="display: block; font-weight: bold; font-size: 10px; margin-bottom: 5px; color: #4CAF50;">
+                                {{ msg.remitente.username }} ({% if msg.remitente.rol == 'empresa' %}Empresa{% else %}Dev{% endif %})
+                            </small>
+                        {% endif %}
+                        {{ msg.contenido }}
+                        <span class="meta">{{ msg.fecha_envio|date:"H:i" }}</span>
+                    </div>
+                {% empty %}
+                    <div style="text-align: center; margin-top: 50px; opacity: 0.4;">
+                        <p>No hay mensajes previos en este chat. ¡Di hola!</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="chat-input">
+                {% if proyecto and proyecto.estado == 'finalizado' %}
+                    <div style="text-align: center; padding: 15px; background: #1a1a1a; border-radius: 10px; color: #ff9800; border: 1px solid #333;">
+                        🔒 Este proyecto ha finalizado. El chat es ahora de solo lectura.
+                    </div>
+                {% else %}
+                    <form method="post" class="input-group">
+                        {% csrf_token %}
+                        <input type="text" name="contenido" placeholder="Escribe un mensaje..." required autocomplete="off">
+                        <button type="submit" class="btn-enviar">Enviar</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
     <script>

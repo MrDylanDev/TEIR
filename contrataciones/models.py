@@ -11,13 +11,16 @@ class Contratacion(models.Model):
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='contrataciones')
     desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='contrataciones_dev')
     empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='contrataciones_emp')
-    asignado_por = models.ForeignKey(Usuario, null=True, blank=True, on_delete=models.SET_NULL)
-    fecha_inicio = models.DateField(null=True, blank=True)
-    fecha_fin_estimada = models.DateField(null=True, blank=True)
-    estado = models.CharField(max_length=10, choices=ESTADO, default='activa')
+    fecha_inicio = models.DateField(auto_now_add=True, null=True)
+    estado = models.CharField(max_length=25, choices=ESTADO, default='activa')
 
     class Meta:
         db_table = 'contrataciones'
+        unique_together = ('proyecto', 'desarrollador')
+        indexes = [
+            models.Index(fields=['proyecto', 'desarrollador', 'estado'], name='idx_proy_dev_est'),
+            models.Index(fields=['empresa'], name='idx_empresa_contratos'),
+        ]
 
     def __str__(self):
         return f"Contrato: {self.proyecto.titulo}"

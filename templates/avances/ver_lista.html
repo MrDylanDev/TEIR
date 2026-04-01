@@ -37,11 +37,14 @@
                         <strong>Panel de Moderación:</strong><br>
                         ¿La empresa solicitó reactivar?
                     </div>
-                    <a href="{% url 'admin_reactivar_proyecto' proyecto.id %}" 
-                       onclick="return confirm('¿Estás seguro de reactivar este proyecto y sus contratos? Todos los involucrados serán notificados.')"
-                       style="background: #ff9800; color: white; border: none; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px;">
-                       ♻️ Reactivar Proyecto
-                    </a>
+                    <form method="post" action="{% url 'admin_reactivar_proyecto' proyecto.id %}">
+                        {% csrf_token %}
+                        <button type="submit" 
+                           onclick="return confirm('¿Estás seguro de reactivar este proyecto y sus contratos? Todos los involucrados serán notificados.')"
+                           style="background: #ff9800; color: white; border: none; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; cursor: pointer;">
+                           ♻️ Reactivar Proyecto
+                        </button>
+                    </form>
                 </div>
             {% endif %}
         </div>
@@ -49,17 +52,45 @@
 
     <div class="avances-timeline">
       {% for avance in avances %}
-        <div style="background: #111; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #4CAF50;">
+        <div style="background: #111; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid {% if avance.estado == 'aceptado' %}#4CAF50{% elif avance.estado == 'rechazado' %}#f44336{% else %}#ff9800{% endif %};">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span style="font-weight: bold; color: #4CAF50;">🚀 {{ avance.entregable.titulo|default:"Avance de Hito" }}</span>
+                <span style="font-weight: bold; color: {% if avance.estado == 'aceptado' %}#4CAF50{% elif avance.estado == 'rechazado' %}#f44336{% else %}#ff9800{% endif %};">
+                    🚀 {{ avance.entregable.titulo|default:"Avance General" }} 
+                    <small style="opacity: 0.6; font-weight: normal; margin-left: 10px;">({{ avance.get_estado_display|upper }})</small>
+                </span>
                 <span style="opacity: 0.5; font-size: 13px;">{{ avance.fecha_hora|date:"d M Y, H:i" }}</span>
             </div>
+            
             <p style="margin-bottom: 15px;">{{ avance.descripcion }}</p>
+
+            {% if avance.comentario_revision %}
+                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #64b4ff;">
+                    <small style="opacity: 0.5; display: block; margin-bottom: 5px;">Feedback de la Empresa:</small>
+                    <p style="margin: 0; font-size: 13px; font-style: italic;">"{{ avance.comentario_revision }}"</p>
+                </div>
+            {% endif %}
+
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <small style="opacity: 0.7;">Reportado por: <strong>{{ avance.desarrollador.username }}</strong></small>
-                {% if avance.archivo_url %}
-                    <a href="{{ avance.archivo_url }}" target="_blank" style="color: #64b4ff; text-decoration: none; font-size: 14px;">Ver evidencia 🔗</a>
-                {% endif %}
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    {% if avance.archivo_url %}
+                        <a href="{{ avance.archivo_url }}" target="_blank" style="color: #64b4ff; text-decoration: none; font-size: 14px;">Ver evidencia 🔗</a>
+                    {% endif %}
+
+                    {% if request.user.rol == 'empresa' and avance.estado == 'pendiente' %}
+                        <div style="margin-left: 15px; border-left: 1px solid #333; padding-left: 15px;">
+                            <form method="post" action="{% url 'revisar_avance' avance.id %}" style="display: flex; flex-direction: column; gap: 10px;">
+                                {% csrf_token %}
+                                <textarea name="comentario" placeholder="Escribe tus observaciones aquí..." style="background: #000; color: white; border: 1px solid #333; border-radius: 6px; padding: 8px; font-size: 12px; min-width: 250px;"></textarea>
+                                <div style="display: flex; gap: 5px;">
+                                    <button type="submit" name="accion" value="aceptar" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Aceptar Hito</button>
+                                    <button type="submit" name="accion" value="rechazar" style="flex: 1; background: #f44336; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Rechazar</button>
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
       {% empty %}

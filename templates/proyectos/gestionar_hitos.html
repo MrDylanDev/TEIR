@@ -24,13 +24,33 @@
     {% endif %}
 
     <div style="background: #111; padding: 30px; border-radius: 16px; border: 1px solid #222; margin-bottom: 40px;">
-        <h2 style="margin-top: 0; font-weight: 300;">{{ proyecto.titulo }}</h2>
-        <p style="opacity: 0.6; margin-bottom: 25px;">Define los objetivos o tareas que los desarrolladores deben cumplir para completar el proyecto.</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+            <div>
+                <h2 style="margin-top: 0; font-weight: 300;">{{ proyecto.titulo }}</h2>
+                <p style="opacity: 0.6;">Define los objetivos o tareas que los desarrolladores deben cumplir.</p>
+            </div>
+            {% if proyecto.contrataciones.all.count >= 2 %}
+                <a href="{% url 'gestionar_equipos' proyecto.id %}" style="background: rgba(33, 150, 243, 0.1); color: #2196F3; border: 1px solid #2196F3; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;">👥 Gestionar Grupos</a>
+            {% endif %}
+        </div>
         
         <form method="post" style="display: flex; flex-direction: column; gap: 15px;">
             {% csrf_token %}
             <input type="text" name="titulo" placeholder="Nombre del hito (ej: Implementar Login)" required style="padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; font-size: 15px;">
             <textarea name="descripcion" placeholder="Descripción de lo que se espera en esta entrega..." style="padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; min-height: 80px; font-size: 14px;"></textarea>
+            
+            {% if proyecto.contrataciones.all.count >= 2 %}
+            <div>
+                <label style="display: block; font-size: 12px; opacity: 0.5; margin-bottom: 5px;">Asignar a Equipo (Opcional):</label>
+                <select name="equipo_id" style="width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px;">
+                    <option value="">-- Todo el Proyecto (General) --</option>
+                    {% for equipo in equipos %}
+                        <option value="{{ equipo.id }}">{{ equipo.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
             <button type="submit" style="background: #2196F3; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;">+ Agregar Hito</button>
         </form>
     </div>
@@ -45,6 +65,13 @@
                         {% if hito.estado == 'completado' %} <small style="background: #4CAF50; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: 10px;">COMPLETADO</small> {% endif %}
                     </h4>
                     <p style="font-size: 13px; opacity: 0.6; margin-top: 8px;">{{ hito.descripcion|default:"Sin descripción adicional." }}</p>
+                    {% if proyecto.contrataciones.all.count >= 2 %}
+                        {% if hito.equipo %}
+                            <p style="font-size: 11px; color: #64b4ff; margin-top: 10px; font-weight: bold;">👥 Asignado a: {{ hito.equipo.nombre }}</p>
+                        {% else %}
+                            <p style="font-size: 11px; opacity: 0.4; margin-top: 10px;">🌐 Hito General</p>
+                        {% endif %}
+                    {% endif %}
                 </div>
                 {% if hito.estado == 'pendiente' %}
                     <a href="{% url 'eliminar_hito' hito.id %}" style="color: #f44336; text-decoration: none; font-size: 12px; border: 1px solid #f44336; padding: 5px 10px; border-radius: 6px;">Eliminar</a>

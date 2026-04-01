@@ -8,7 +8,7 @@ from usuarios.models import Usuario, PerfilDesarrollador, PerfilEmpresa
 
 @login_required
 def reporte_proyectos_csv(request):
-    """Generar reporte de todos los proyectos en CSV (Excel)"""
+    """Generar reporte detallado de proyectos en Excel"""
     if request.user.rol != 'administrador':
         return redirect('inicio')
 
@@ -16,16 +16,28 @@ def reporte_proyectos_csv(request):
     response['Content-Disposition'] = 'attachment; filename="reporte_proyectos_tem.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['Título', 'Empresa', 'Tipo', 'Prioridad', 'Estado', 'Fecha Publicación'])
+    # Encabezados simplificados
+    writer.writerow(['Título', 'Empresa', 'Tipo', 'Prioridad', 'Estado', 'Desarrolladores', 'Vacantes Totales', 'Fecha Publicación'])
 
-    proyectos = Proyecto.objects.all().order_by('-fecha_publicacion')
+    from django.db.models import Count, Q
+    # Traemos proyectos con su empresa y calculamos métricas en una sola ráfaga SQL
+    proyectos = Proyecto.objects.select_related('empresa').annotate(
+        num_devs=Count('contrataciones', filter=Q(contrataciones__estado='activa'))
+    ).order_by('-fecha_publicacion')
+
     for p in proyectos:
+        # Intentar obtener nombre comercial de la empresa si existe
+        nombre_empresa = getattr(p.empresa, 'perfil_empresa', None)
+        empresa_display = nombre_empresa.nombre_empresa if nombre_empresa and nombre_empresa.nombre_empresa else p.empresa.nombre
+
         writer.writerow([
             p.titulo, 
-            p.empresa.username, 
+            empresa_display, 
             p.get_tipo_solucion_display(), 
             p.get_prioridad_display(), 
             p.get_estado_display(), 
+            p.num_devs,
+            p.vacantes,
             p.fecha_publicacion.strftime('%d/%m/%Y %H:%M')
         ])
     return response
@@ -44,12 +56,15 @@ def reporte_aprendices_csv(request):
 
     aprendices = PerfilDesarrollador.objects.select_related('usuario').all()
     for a in aprendices:
+        # Calcular promedio real de estrellas recibidas de empresas
+        promedio = Valoracion.objects.filter(desarrollador=a.usuario, rol_evaluador='empresa').aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+        
         writer.writerow([
             a.usuario.username,
             a.usuario.nombre,
             a.programa_formacion or '-',
             a.ficha or '-',
-            a.calificacion_promedio,
+            round(promedio, 2),
             a.num_proyectos_completados
         ])
     return response

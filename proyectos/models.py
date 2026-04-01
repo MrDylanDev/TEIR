@@ -1,6 +1,7 @@
 from django.db import models
 from usuarios.models import Usuario
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Proyecto(models.Model):
     TIPO_SOLUCION = [
@@ -34,48 +35,27 @@ class Proyecto(models.Model):
     estado = models.CharField(max_length=25, choices=ESTADO, default='publicado')
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
     fecha_limite = models.DateField(null=True, blank=True)
-    aprobado_por = models.ForeignKey(Usuario, null=True, blank=True, on_delete=models.SET_NULL, related_name='proyectos_aprobados')
-    fecha_aprobacion = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.titulo} ({self.get_estado_display()})"
 
-    def save(self, *args, **kwargs):
-        # 1. Detectar si es una actualización y si el estado cambió
-        if self.pk:
-            try:
-                old_instance = Proyecto.objects.get(pk=self.pk)
-                if old_instance.estado != self.estado:
-                    # Guardamos el cambio primero
-                    super().save(*args, **kwargs)
-                    # Registramos en el historial
-                    HistorialEstadoProyecto.objects.create(
-                        proyecto=self,
-                        estado_anterior=old_instance.estado,
-                        estado_nuevo=self.estado,
-                        cambiado_por=self.empresa, 
-                        fecha=timezone.now()
-                    )
-                    return
-            except Proyecto.DoesNotExist:
-                pass
-        
-        # 2. Guardado normal (Creación o sin cambio de estado)
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-
-        # 3. Registro inicial (Migrado de trigger trg_historial_inicial_proyecto)
-        if is_new:
-            HistorialEstadoProyecto.objects.create(
-                proyecto=self,
-                estado_anterior=None,
-                estado_nuevo=self.estado,
-                cambiado_por=self.empresa,
-                fecha=timezone.now()
-            )
+    def registrar_cambio_estado(self, nuevo_estado, usuario, estado_anterior=None):
+        """Registra una entrada en el historial de estados."""
+        HistorialEstadoProyecto.objects.create(
+            proyecto=self,
+            estado_anterior=estado_anterior or self.estado,
+            estado_nuevo=nuevo_estado,
+            cambiado_por=usuario
+        )
 
     class Meta:
         db_table = 'proyectos'
+        indexes = [
+            models.Index(fields=['estado'], name='idx_estado'),
+            models.Index(fields=['tipo_solucion'], name='idx_proy_tipo'),
+            models.Index(fields=['prioridad'], name='idx_proy_prio'),
+            models.Index(fields=['fecha_publicacion'], name='idx_fecha_publicacion'),
+        ]
 
 class Valoracion(models.Model):
     ROL_EVALUADOR = [
@@ -86,7 +66,7 @@ class Valoracion(models.Model):
     empresa = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_como_empresa', db_column='empresa_id')
     desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='valoraciones_como_dev', db_column='desarrollador_id')
     rol_evaluador = models.CharField(max_length=20, choices=ROL_EVALUADOR, default='empresa')
-    puntuacion = models.PositiveSmallIntegerField()
+    puntuacion = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comentario = models.TextField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
 
@@ -109,9 +89,11 @@ class HistorialEstadoProyecto(models.Model):
 class Entregable(models.Model):
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente'),
+        ('en_revision', 'En Revisión'),
         ('completado', 'Completado'),
     ]
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='entregables', db_column='proyecto_id')
+    equipo = models.ForeignKey('Equipo', on_delete=models.SET_NULL, null=True, blank=True, related_name='hitos', db_column='equipo_id')
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
@@ -119,6 +101,22 @@ class Entregable(models.Model):
 
     class Meta:
         db_table = 'entregables'
+        indexes = [
+            models.Index(fields=['estado'], name='idx_entregables_estado'),
+            models.Index(fields=['fecha_creacion'], name='idx_entregables_fecha'),
+        ]
 
     def __str__(self):
         return f"{self.titulo} - {self.proyecto.titulo}"
+
+class Equipo(models.Model):
+    nombre = models.CharField(max_length=100)
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='equipos', db_column='proyecto_id')
+    miembros = models.ManyToManyField(Usuario, related_name='mis_equipos')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'equipos'
+
+    def __str__(self):
+        return f"{self.nombre} (Proyecto: {self.proyecto.titulo})"

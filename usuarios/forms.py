@@ -4,6 +4,27 @@ from .models import Usuario, PerfilEmpresa, PerfilDesarrollador
 from datetime import date
 
 class RegistroUsuarioForm(UserCreationForm):
+    nombre = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre Completo'}),
+        label="Nombre Completo"
+    )
+    tipo_documento = forms.ChoiceField(
+        choices=[
+            ('cedula', 'Cédula de Ciudadanía'),
+            ('nit', 'NIT (Número de Identificación Tributaria)'),
+        ],
+        required=True,
+        initial='cedula',
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_tipo_documento'})
+    )
+    identificacion = forms.CharField(
+        max_length=20,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de documento'}),
+        label="Número de Identificación"
+    )
     email = forms.EmailField(required=True)
     fecha_nacimiento = forms.DateField(
         required=True,
@@ -14,15 +35,24 @@ class RegistroUsuarioForm(UserCreationForm):
         choices=[
             ('desarrollador', 'Desarrollador'),
             ('empresa', 'Empresa'),
-            ('administrador', 'Administrador'),
         ],
         required=True
     )
     
     class Meta:
         model = Usuario
-        fields = ('username', 'email', 'fecha_nacimiento', 'rol')
+        fields = ('username', 'nombre', 'identificacion', 'email', 'fecha_nacimiento', 'rol')
     
+    def clean(self):
+        cleaned_data = super().clean()
+        rol = cleaned_data.get('rol')
+        tipo_doc = cleaned_data.get('tipo_documento')
+
+        if rol == 'desarrollador' and tipo_doc == 'nit':
+            self.add_error('tipo_documento', "Un desarrollador solo puede registrarse con Cédula.")
+        
+        return cleaned_data
+
     def clean_fecha_nacimiento(self):
         fecha = self.cleaned_data.get('fecha_nacimiento')
         if fecha:
@@ -35,17 +65,19 @@ class RegistroUsuarioForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
+        user.nombre = self.cleaned_data['nombre']
+        user.identificacion = self.cleaned_data['identificacion']
         user.rol = self.cleaned_data['rol']
         user.fecha_nacimiento = self.cleaned_data['fecha_nacimiento']
-        if not user.nombre:
-            user.nombre = user.username
         
         if commit:
             user.save()
             
             # Crear perfil según el rol seleccionado
             if user.rol == 'empresa':
-                PerfilEmpresa.objects.get_or_create(usuario=user)
+                perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=user)
+                perfil.nit = user.identificacion # Sincronizamos NIT con el documento ingresado
+                perfil.save()
             elif user.rol == 'desarrollador':
                 PerfilDesarrollador.objects.get_or_create(usuario=user)
         
@@ -54,10 +86,9 @@ class RegistroUsuarioForm(UserCreationForm):
 class PerfilEmpresaForm(forms.ModelForm):
     class Meta:
         model = PerfilEmpresa
-        fields = ['nombre_empresa', 'nit', 'sector', 'telefono', 'ciudad', 'descripcion']
+        fields = ['nombre_empresa', 'sector', 'telefono', 'ciudad', 'descripcion']
         widgets = {
             'nombre_empresa': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la empresa'}),
-            'nit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'NIT'}),
             'sector': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Sector (ej: Tecnología)'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
             'ciudad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ciudad'}),

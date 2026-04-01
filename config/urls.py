@@ -2,12 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from usuarios import views
 
 urlpatterns = [
-    # Inicio Global
-    path('', views.inicio, name='inicio'),
-    
     # Módulos de Aplicación (Modularizados)
     path('', include('usuarios.urls')), 
     path('proyectos/', include('proyectos.urls')),

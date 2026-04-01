@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mensaje: {{ mensaje.asunto }} | TEM</title>
+  <title>Mensaje: {{ mensaje.titulo }} | TEM</title>
   <link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
 </head>
 <body style="background: #0f0f0f; color: white; display: block; padding: 40px;">
@@ -11,7 +11,7 @@
   <div style="max-width: 800px; margin: 0 auto; background: #111; padding: 35px; border-radius: 12px; border: 1px solid #222;">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 20px;">
         <div>
-            <h1 style="font-weight: 300; font-size: 24px; margin-bottom: 5px;">{{ mensaje.asunto|default:"(Sin asunto)" }}</h1>
+            <h1 style="font-weight: 300; font-size: 24px; margin-bottom: 5px;">{{ mensaje.titulo|default:"(Sin título)" }}</h1>
             <p style="opacity: 0.7;">De: <strong>{{ mensaje.remitente.username }}</strong> para <strong>{{ mensaje.receptor.username }}</strong></p>
             {% if mensaje.proyecto %}
                 <p style="font-size: 13px; color: #4CAF50; margin-top: 5px;">Proyecto: {{ mensaje.proyecto.titulo }}</p>
@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div style="min-height: 250px; line-height: 1.8; font-size: 16px; white-space: pre-wrap;">{{ mensaje.cuerpo }}</div>
+    <div style="min-height: 250px; line-height: 1.8; font-size: 16px; white-space: pre-wrap;">{{ mensaje.contenido }}</div>
 
     <div style="display: flex; gap: 15px; margin-top: 40px; border-top: 1px solid #222; padding-top: 30px;">
         {% if mensaje.receptor == user %}

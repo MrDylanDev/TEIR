@@ -96,7 +96,10 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3 style="margin: 0;">🔔 Actividad Reciente</h3>
                         {% if notificaciones_pendientes_count > 0 %}
-                            <a href="{% url 'marcar_notificaciones_leidas' %}" style="font-size: 11px; color: #4CAF50; text-decoration: none; border: 1px solid #4CAF50; padding: 4px 8px; border-radius: 4px;">Marcar leídas</a>
+                            <form action="{% url 'marcar_notificaciones_leidas' %}" method="POST" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background: none; border: 1px solid #4CAF50; color: #4CAF50; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Marcar leídas</button>
+                            </form>
                         {% endif %}
                     </div>
                     <ul style="list-style: none; padding: 0;">
@@ -187,18 +190,27 @@
                         <div>
                             <h3 style="margin: 0;">{{ proyecto.titulo }}</h3>
                             <p style="font-size: 14px; opacity: 0.6; margin-top: 5px;">Desarrolladores: <strong>{{ proyecto.desarrolladores }}</strong></p>
-                            <p style="font-size: 11px; opacity: 0.4; margin-top: 5px;">Última actividad: {{ proyecto.ultimo_avance|date:"d M"|default:"Sin avances" }}</p>
+                            <div style="margin-top: 8px;">
+                                <span style="font-size: 11px; padding: 4px 8px; background: rgba(33, 150, 243, 0.1); color: #2196F3; border-radius: 4px; border: 1px solid rgba(33, 150, 243, 0.2);">
+                                    📅 Entrega: {{ proyecto.fecha_fin|date:"d M, Y"|default:"Sin fecha" }}
+                                </span>
+                                <span style="font-size: 11px; opacity: 0.4; margin-left: 10px;">
+                                    Última actividad: {{ proyecto.ultimo_avance|date:"d M"|default:"Sin avances" }}
+                                </span>
+                            </div>
                         </div>
-                        <!-- SECCION: EN DESARROLLO (Actualizada) -->
+                        <!-- Sección: En Desarrollo (Actualizada) -->
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <a href="{% url 'gestionar_hitos' proyecto.proyecto_id %}" style="background: #222; color: #ff9800; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid #ff9800;">⚙️ Gestionar Hitos</a>
                             <div style="display: flex; gap: 12px;">
                                 <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="background: #4CAF50; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; flex: 1; text-align: center;">👁️ Ver Avances</a>
-                                {% if proyecto.ultimo_avance %}
+                                
+                                <!-- Habilitado solo cuando todos los hitos están completados -->
+                                {% if proyecto.hitos_completados == proyecto.hitos_totales and proyecto.hitos_totales > 0 %}
                                     <a href="{% url 'finalizar_proyecto' proyecto.proyecto_id %}" style="background: #2196F3; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; flex: 1; text-align: center;">🏁 Finalizar</a>
                                 {% else %}
-                                    <button disabled title="Se requiere al menos un avance para finalizar" style="background: #333; color: #666; padding: 10px 20px; border-radius: 8px; border: 1px solid #444; font-weight: bold; font-size: 13px; flex: 1; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 5px;">
-                                        <span style="font-size: 10px;">⏳</span> Finalizar
+                                    <button disabled title="Debes completar todos los hitos definidos para finalizar el proyecto" style="background: #333; color: #666; padding: 10px 20px; border-radius: 8px; border: 1px solid #444; font-weight: bold; font-size: 13px; flex: 1; cursor: not-allowed;">
+                                        🏁 Finalizar
                                     </button>
                                 {% endif %}
                             </div>
@@ -271,7 +283,7 @@
                             {% endif %}
 
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                {% for contratacion in proyecto.contrataciones %}
+                                {% for contratacion in proyecto.contrataciones.all %}
                                     <a href="{% url 'sala_chat' contratacion.desarrollador.id proyecto.id %}" style="background: #111; color: #aaa; text-align: center; padding: 8px; border-radius: 8px; text-decoration: none; border: 1px solid #222; font-size: 11px;">
                                         💬 Chat con {{ contratacion.desarrollador.username }}
                                     </a>
@@ -321,6 +333,12 @@
             <option value="aplicacion_movil">Aplicación Móvil</option>
             <option value="automatizacion">Automatización</option>
         </select>
+        
+        <div class="form-group">
+            <label style="font-size: 12px; color: #888; margin-bottom: 5px; display: block;">Fecha Límite de Entrega</label>
+            <input type="date" name="fecha_limite" required style="width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box;">
+        </div>
+
         <input type="number" name="vacantes" value="1" min="1" max="10" style="padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px;">
         <div style="display: flex; gap: 10px; margin-top: 10px;">
             <button type="button" onclick="cerrarModal()" style="flex: 1; padding: 12px; background: #222; color: white; border: none; border-radius: 8px; cursor: pointer;">Cancelar</button>

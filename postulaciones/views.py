@@ -1,12 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db import transaction
+from django.db import transaction, connection
 from .models import Postulacion
 from proyectos.models import Proyecto
 from contrataciones.models import Contratacion
 from notificaciones.models import Notificacion
-from django.utils import timezone
 
 @login_required
 def ver_postulaciones_empresa(request, proyecto_id):
@@ -14,7 +13,6 @@ def ver_postulaciones_empresa(request, proyecto_id):
     
     # --- DESPERTANDO v_postulaciones_activas ---
     postulaciones = []
-    from django.db import connection
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT id, desarrollador_nombre, calificacion_promedio, num_proyectos_completados, habilidades, mensaje, fecha 
@@ -54,11 +52,10 @@ def postularse_a_proyecto(request, proyecto_id):
     if request.method == 'POST':
         mensaje = request.POST.get('mensaje')
         try:
-            from django.db import connection
             with connection.cursor() as cursor:
                 cursor.callproc('sp_postularse', [proyecto.id, request.user.id, mensaje])
                 
-            messages.success(request, f"¡Te has postulado exitosamente al proyecto '{proyecto.titulo}'!")
+            messages.success(request, f"¡Te has postulado al proyecto '{proyecto.titulo}'!")
             return redirect('dashboard_desarrollador')
         except Exception as e:
             error_msg = e.args[1] if hasattr(e, 'args') and len(e.args) > 1 else str(e)
@@ -80,52 +77,21 @@ def aceptar_postulacion(request, postulacion_id):
         messages.error(request, "Acceso denegado.")
         return redirect('inicio')
 
-    # Buscamos la postulación sin filtrar por estado 'pendiente' para dar un error personalizado si ya fue procesada
+    # VALIDACIÓN DE PROPIEDAD: Aseguramos que la postulación pertenece a un proyecto de esta empresa
     postulacion = get_object_or_404(Postulacion, id=postulacion_id, proyecto__empresa=request.user)
-    proyecto = postulacion.proyecto
+    proyecto_id = postulacion.proyecto.id
 
     if request.method == 'POST':
         try:
-            if postulacion.estado != 'pendiente':
-                messages.warning(request, f"Esta postulación ya ha sido {postulacion.estado}.")
-                return redirect('ver_postulaciones_empresa', proyecto_id=proyecto.id)
-
-            with transaction.atomic():
-                # 1. Verificar vacantes
-                vacantes_ocupadas = Contratacion.objects.filter(proyecto=proyecto, estado='activa').count()
-                if vacantes_ocupadas >= proyecto.vacantes:
-                    messages.warning(request, "Límite de vacantes alcanzado para este proyecto.")
-                    return redirect('ver_postulaciones_empresa', proyecto_id=proyecto.id)
-
-                # 2. Aceptar postulación
-                postulacion.estado = 'aceptada'
-                postulacion.save()
-
-                # 3. Crear Contratación (Migrado del Trigger)
-                Contratacion.objects.get_or_create(
-                    proyecto=proyecto,
-                    desarrollador=postulacion.desarrollador,
-                    empresa=request.user,
-                    estado='activa'
-                )
-
-                # 4. Actualizar estado del proyecto si se llenaron las vacantes
-                nueva_cuenta = Contratacion.objects.filter(proyecto=proyecto, estado='activa').count()
-                if nueva_cuenta >= proyecto.vacantes:
-                    proyecto.estado = 'en_desarrollo'
-                    proyecto.save()
-
-                # 5. Notificar al desarrollador
-                Notificacion.objects.create(
-                    usuario=postulacion.desarrollador,
-                    tipo='aprobacion',
-                    mensaje=f"¡Felicidades! Has sido contratado para el proyecto: {proyecto.titulo}"
-                )
-
-                messages.success(request, f"¡Contratación exitosa! {postulacion.desarrollador.username} ha sido vinculado.")
+            with connection.cursor() as cursor:
+                # Delegamos la lógica pesada al procedimiento almacenado
+                cursor.callproc('sp_aceptar_postulacion', [postulacion_id, request.user.id])
+                
+            messages.success(request, "¡Contratación exitosa! El desarrollador ha sido vinculado al proyecto.")
         except Exception as e:
-            messages.error(request, f"Error al procesar: {str(e)}")
+            error_msg = str(e).split(",")[1].replace("'", "").strip() if "," in str(e) else str(e)
+            messages.error(request, f"Error al procesar: {error_msg}")
     else:
         messages.warning(request, "Acción no permitida.")
 
-    return redirect('ver_postulaciones_empresa', proyecto_id=proyecto.id)
+    return redirect('ver_postulaciones_empresa', proyecto_id=proyecto_id)

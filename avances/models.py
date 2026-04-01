@@ -3,15 +3,22 @@ from usuarios.models import Usuario
 from proyectos.models import Proyecto
 
 class Avance(models.Model):
+    ESTADOS = [
+        ('pendiente', 'Pendiente de Revisión'),
+        ('aceptado', 'Aceptado'),
+        ('rechazado', 'Rechazado'),
+    ]
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
     desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, limit_choices_to={'rol': 'desarrollador'})
-    entregable = models.ForeignKey('proyectos.Entregable', on_delete=models.SET_NULL, null=True, db_column='entregable_id')
+    entregable = models.ForeignKey('proyectos.Entregable', on_delete=models.CASCADE, db_column='entregable_id')
     descripcion = models.TextField()
     archivo_url = models.CharField(max_length=500, blank=True, null=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
+    comentario_revision = models.TextField(blank=True, null=True)
 
     class Meta:
         db_table = 'avances'
 
     def __str__(self):
-        return f"Avance: {self.entregable.titulo if self.entregable else 'General'} - {self.proyecto.titulo}"
+        return f"Avance: {self.entregable.titulo} - {self.proyecto.titulo}"

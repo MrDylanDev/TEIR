@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q
 from .models import Mensaje
 from usuarios.models import Usuario
+from usuarios.utils import get_admin_ids
 from proyectos.models import Proyecto
 from contrataciones.models import Contratacion
 
@@ -28,24 +30,24 @@ def sala_chat_grupal(request, proyecto_id):
             messages.error(request, "No se pueden enviar mensajes a proyectos finalizados.")
             return redirect('sala_chat_grupal', proyecto_id=proyecto.id)
 
-        cuerpo = request.POST.get('cuerpo')
-        if cuerpo:
+        contenido = request.POST.get('cuerpo') or request.POST.get('contenido')
+        if contenido:
             try:
                 Mensaje.objects.create(
                     remitente=request.user,
                     receptor=None, # Mensaje grupal
-                    asunto=f"Espacio de Trabajo: {proyecto.titulo}",
-                    cuerpo=cuerpo,
+                    titulo=f"Espacio de Trabajo: {proyecto.titulo}",
+                    contenido=contenido,
                     proyecto=proyecto
                 )
                 return redirect('sala_chat_grupal', proyecto_id=proyecto_id)
             except Exception as e:
                 messages.error(request, f"Error al enviar: {e}")
 
-    # Lista de compañeros (todos los que estuvieron en el proyecto)
+    # Lista de compañeros (Optimizado con JOIN inverso)
     companeros = Usuario.objects.filter(
-        id__in=Contratacion.objects.filter(proyecto=proyecto).values_list('desarrollador_id', flat=True)
-    )
+        contrataciones_dev__proyecto=proyecto
+    ).distinct()
 
     return render(request, 'mensajes/sala_chat.html', {
         'proyecto': proyecto,
@@ -58,34 +60,28 @@ def sala_chat_grupal(request, proyecto_id):
 def sala_chat(request, receptor_id, proyecto_id=None):
     """Vista de chat fluido unificada (Soporte Admin compartido y Chat Privado)"""
     # Si receptor_id es 0, redirigir al chat grupal si hay proyecto
-    if int(receptor_id) == 0 and proyecto_id:
-        return redirect('sala_chat_grupal', proyecto_id=proyecto_id)
+    try:
+        if int(receptor_id) == 0 and proyecto_id:
+            return redirect('sala_chat_grupal', proyecto_id=proyecto_id)
+    except (ValueError, TypeError):
+        return redirect('inicio')
 
     receptor = get_object_or_404(Usuario, id=receptor_id)
     proyecto = get_object_or_404(Proyecto, id=proyecto_id) if proyecto_id else None
 
-    from django.db.models import Q
+    admin_ids = get_admin_ids()
 
-    
-    admin_ids = Usuario.objects.filter(rol='administrador').values_list('id', flat=True)
+    # Filtro de participantes: Remitente -> Receptor O Receptor -> Remitente
+    mensajes_chat = Mensaje.objects.filter(
+        (Q(remitente=request.user, receptor=receptor) | Q(remitente=receptor, receptor=request.user))
+    )
 
-    if request.user.rol == 'administrador' or receptor.rol == 'administrador':
-        cliente_id = receptor_id if request.user.rol == 'administrador' else request.user.id
-        mensajes_chat = Mensaje.objects.filter(
-            (Q(remitente_id=cliente_id, receptor_id__in=admin_ids) | Q(remitente_id__in=admin_ids, receptor_id=cliente_id))
-        )
-    else:
-        # Filtro base de participantes
-        mensajes_chat = Mensaje.objects.filter(
-            (Q(remitente=request.user, receptor=receptor) | Q(remitente=receptor, receptor=request.user))
-        )
-
-    # AISLAMIENTO POR PROYECTO
-    # Si estamos en el contexto de un proyecto, solo mostramos mensajes de ESE proyecto.
-    # Si no hay proyecto, mostramos solo mensajes generales (sin proyecto_id).
+    # Aislmiento flexible por proyecto
+    # Si hay proyecto, mostramos los de ese proyecto + los generales (sin proyecto)
     if proyecto:
-        mensajes_chat = mensajes_chat.filter(proyecto=proyecto)
+        mensajes_chat = mensajes_chat.filter(Q(proyecto=proyecto) | Q(proyecto__isnull=True))
     else:
+        # En chat general, solo mostramos los que no tienen proyecto asignado
         mensajes_chat = mensajes_chat.filter(proyecto__isnull=True)
 
     mensajes_chat = mensajes_chat.order_by('fecha_envio')
@@ -99,14 +95,14 @@ def sala_chat(request, receptor_id, proyecto_id=None):
             messages.error(request, "No se pueden enviar mensajes a proyectos finalizados.")
             return redirect('sala_chat', receptor_id=receptor_id, proyecto_id=proyecto_id if proyecto_id else 0)
 
-        cuerpo = request.POST.get('cuerpo')
-        if cuerpo:
+        contenido = request.POST.get('contenido')
+        if contenido:
             try:
                 Mensaje.objects.create(
                     remitente=request.user,
                     receptor=receptor,
-                    asunto=f"Chat: {proyecto.titulo if proyecto else 'General'}",
-                    cuerpo=cuerpo,
+                    titulo=f"Chat: {proyecto.titulo if proyecto else 'General'}",
+                    contenido=contenido,
                     proyecto=proyecto
                 )
                 return redirect('sala_chat', receptor_id=receptor_id, proyecto_id=proyecto_id if proyecto_id else 0)

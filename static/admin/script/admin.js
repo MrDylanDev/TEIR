@@ -1,7 +1,7 @@
-// ===== VARIABLES GLOBALES =====
+// ===== Variables globales =====
 let usuarioEditandoId = null;
 
-// ===== CARGAR USUARIOS AL INICIAR =====
+// ===== Cargar usuarios al iniciar =====
 document.addEventListener('DOMContentLoaded', function() {
     cargarUsuarios();
     
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 
-// ===== CARGAR USUARIOS DESDE LA BD =====
+// ===== Cargar usuarios desde la Base Dde datos =====
 function cargarUsuarios() {
     fetch('/api/usuarios/')
         .then(response => response.json())
@@ -32,7 +32,7 @@ function cargarUsuarios() {
                 tbody.innerHTML += `
                     <tr>
                         <td>${u.username}</td>
-                        <td>${u.cedula || '-'}</td>
+                        <td>${u.identificacion || '-'}</td>
                         <td>${u.email}</td>
                         <td>${rolTexto}</td>
                         <td>${fecha}</td>
@@ -50,7 +50,7 @@ function cargarUsuarios() {
         });
 }
 
-// ===== FILTRO DE USUARIOS =====
+// ===== Filtro de usuarios =====
 function filterUsers() {
     const searchText = document.getElementById('searchInput').value.toLowerCase();
     const rows = document.querySelectorAll('#userTable tr');
@@ -61,7 +61,7 @@ function filterUsers() {
     });
 }
 
-// ===== MODAL =====
+// ===== Modal =====
 function openModal(usuario = null) {
     const modal = document.getElementById('userModal');
     modal.style.display = 'block';
@@ -73,7 +73,7 @@ function openModal(usuario = null) {
         // Modo edición
         usuarioEditandoId = usuario.id;
         document.getElementById('name').value = usuario.username;
-        document.getElementById('cedula').value = usuario.cedula || '';
+        document.getElementById('cedula').value = usuario.identificacion || '';
         document.getElementById('email').value = usuario.email;
         document.getElementById('role').value = usuario.rol;
         document.querySelector('.modal h2').textContent = 'Editar Usuario';
@@ -98,7 +98,7 @@ function closeModal() {
     document.getElementById('userModal').style.display = 'none';
 }
 
-// ===== GUARDAR USUARIO (CREAR) =====
+// ===== Guardar usuario (Crear) =====
 function addUser() {
     // Validar campos
     const username = document.getElementById('name').value.trim();
@@ -112,7 +112,7 @@ function addUser() {
     
     const usuarioData = {
         username: username,
-        cedula: document.getElementById('cedula').value.trim(),
+        identificacion: document.getElementById('cedula').value.trim(),
         email: email,
         rol: rol,
         password: document.getElementById('password').value.trim() || 'temporal123'
@@ -142,13 +142,13 @@ function addUser() {
     });
 }
 
-// ===== ACTUALIZAR USUARIO (EDITAR) =====
+// ===== Actualizar usuario (Editar) =====
 function actualizarUsuario() {
     if (!usuarioEditandoId) return;
     
     const usuarioData = {
         username: document.getElementById('name').value.trim(),
-        cedula: document.getElementById('cedula').value.trim(),
+        identificacion: document.getElementById('cedula').value.trim(),
         email: document.getElementById('email').value.trim(),
         rol: document.getElementById('role').value
     };
@@ -183,7 +183,7 @@ function actualizarUsuario() {
     });
 }
 
-// ===== EDITAR USUARIO =====
+// ===== Editar usuario =====
 function editarUsuario(id) {
     fetch(`/api/usuarios/${id}/`)
         .then(response => response.json())
@@ -196,7 +196,7 @@ function editarUsuario(id) {
         });
 }
 
-// ===== ELIMINAR USUARIO =====
+// ===== Eliminar usuario =====
 function eliminarUsuario(id) {
     if (confirm('¿Estás seguro de eliminar este usuario?')) {
         fetch(`/api/usuarios/${id}/eliminar/`, {
@@ -221,7 +221,7 @@ function eliminarUsuario(id) {
     }
 }
 
-// ===== FUNCIÓN PARA OBTENER CSRF TOKEN =====
+// ===== Función para obtener CSRF token =====
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -237,7 +237,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// ===== CAMBIAR ENTRE SECCIONES =====
+// ===== Cambiar entre secciones =====
 function showSection(sectionId, element) {
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');

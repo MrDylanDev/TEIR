@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import connection
 from .models import Contratacion
 from proyectos.models import Proyecto
-from notificaciones.models import Notificacion
 
 @login_required
 def listar_contrataciones_empresa(request):
@@ -33,7 +33,6 @@ def cancelar_contratacion(request, contratacion_id):
         
     contrato = get_object_or_404(Contratacion, id=contratacion_id, empresa=request.user)
     
-    from django.db import connection
     try:
         with connection.cursor() as cursor:
             # Invocar la lógica atómica de la base de datos

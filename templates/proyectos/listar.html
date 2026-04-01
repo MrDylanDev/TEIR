@@ -94,14 +94,23 @@
                   <span style="font-size: 11px; opacity: 0.4; margin-left: 10px;">{{ proyecto.num_postulaciones }} postulaciones</span>
               </div>
 
-              <div class="card-footer">
-                  <div class="company-info">
-                      <div style="width: 20px; height: 20px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">🏢</div>
-                      {{ proyecto.empresa_nombre }}
+                  <div class="card-footer">
+                      <div class="company-info" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                              <div style="width: 20px; height: 20px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">🏢</div>
+                              <span style="font-weight: bold; color: #fff;">{{ proyecto.empresa_nombre }}</span>
+                          </div>
+                          {% if proyecto.empresa_reputacion > 0 %}
+                              <div style="color: #FFD700; font-size: 11px;">
+                                  ⭐ {{ proyecto.empresa_reputacion|floatformat:1 }}
+                              </div>
+                          {% else %}
+                              <div style="opacity: 0.3; font-size: 10px;">Sin calificación aún</div>
+                          {% endif %}
+                      </div>
+                      
+                      <a href="{% url 'postularse_a_proyecto' proyecto.id %}" class="btn-apply">Postularse</a>
                   </div>
-                  
-                  <a href="{% url 'postularse_a_proyecto' proyecto.id %}" class="btn-apply">Postularse</a>
-              </div>
           </div>
         {% empty %}
           <div style="grid-column: 1 / -1; text-align: center; padding: 80px; background: #0a0a0a; border-radius: 20px; border: 1px dashed #1a1a1a;">

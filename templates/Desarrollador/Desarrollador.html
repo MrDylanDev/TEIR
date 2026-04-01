@@ -42,7 +42,7 @@
       <a href="{% url 'listar_proyectos' %}" style="text-decoration: none;"><button class="btn-nav">🔍 Explorar Proyectos</button></a>
       <button class="btn-nav" onclick="verSeccion('postulaciones', this)">📝 Mis Postulaciones</button>
       <button class="btn-nav" onclick="verSeccion('activos', this)">🚀 Trabajo Actual</button>
-      <button class="btn-nav" onclick="verSeccion('completados', this)">🏆 Historial de Proyectos</button>
+      <button class="btn-nav" onclick="verSeccion('completados', this)">🏆 Proyectos finalizados</button>
       <button class="btn-nav" onclick="verSeccion('favoritos', this)">❤️ Favoritos</button>
 
       <div style="margin: 20px 0 10px 20px; font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;">Cuenta</div>
@@ -54,7 +54,7 @@
   <main>
     <section class="contenido">
       
-      <!-- MENSAJES GLOBALES DE DJANGO -->
+      <!-- Mensajes globales de Django -->
       {% if messages %}
           <div style="margin-bottom: 25px;">
               {% for message in messages %}
@@ -65,7 +65,7 @@
           </div>
       {% endif %}
       
-      <!-- SECCION: INICIO -->
+      <!-- Sección: Inicio -->
       <div id="inicio" class="seccion-v activa">
           <h1>Resumen de Actividad</h1>
           <p style="opacity: 0.7;">Bienvenido de nuevo, {{ request.user.nombre|default:request.user.username }}.</p>
@@ -81,7 +81,10 @@
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                       <h3 style="margin: 0;">🔔 Notificaciones Recientes</h3>
                       {% if notificaciones_pendientes_count > 0 %}
-                        <a href="{% url 'marcar_notificaciones_leidas' %}" style="font-size: 11px; color: #4CAF50; text-decoration: none; border: 1px solid #4CAF50; padding: 4px 8px; border-radius: 4px;">Marcar leídas</a>
+                        <form action="{% url 'marcar_notificaciones_leidas' %}" method="POST" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: 1px solid #4CAF50; color: #4CAF50; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Marcar leídas</button>
+                        </form>
                       {% endif %}
                   </div>
                   <ul style="list-style: none; padding: 0;">
@@ -96,7 +99,7 @@
       </div>
 
 
-      <!-- SECCION: CHAT -->
+      <!-- Sección: Chat -->
       <div id="centro-chat" class="seccion-v">
           <h1>Centro de Mensajes</h1>
           <p style="opacity: 0.7; margin-bottom: 30px;">Conversaciones con empresas y soporte.</p>
@@ -116,7 +119,7 @@
           </div>
       </div>
 
-      <!-- SECCION: POSTULACIONES -->
+      <!-- Sección: Postulaciones -->
       <div id="postulaciones" class="seccion-v">
           <h1>Mis Postulaciones</h1>
           <p style="opacity: 0.7; margin-bottom: 30px;">Seguimiento de las solicitudes enviadas.</p>
@@ -135,7 +138,7 @@
           </div>
       </div>
 
-      <!-- SECCION: TRABAJO ACTUAL -->
+      <!-- Sección: Trabajo Actual -->
       <div id="activos" class="seccion-v">
           
           <h1>Proyectos en Desarrollo</h1>
@@ -145,6 +148,9 @@
                 <div class="card-p">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <h3 style="margin-bottom: 10px; color: #4CAF50;">{{ proyecto.titulo }}</h3>
+                        <span style="font-size: 11px; padding: 4px 8px; background: rgba(76, 175, 80, 0.1); color: #4CAF50; border-radius: 4px; border: 1px solid rgba(76, 175, 80, 0.2);">
+                            📅 Plazo: {{ proyecto.fecha_fin|date:"d M, Y"|default:"Sin fecha" }}
+                        </span>
                     </div>
                     
                     <!-- Lista de Hitos en el Dashboard -->
@@ -172,7 +178,7 @@
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div style="display: flex; gap: 10px;">
                             <a href="{% url 'registrar_avance' proyecto.proyecto_id %}" style="flex: 1; background: white; color: black; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">Registrar Avance</a>
-                            <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;">Historial</a>
+                            <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;"> Historial de Avances</a>
                         </div>
                         {% if proyecto.num_desarrolladores >= 2 %}
                         <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid rgba(76, 175, 80, 0.3);">🚀 Abrir Espacio de Trabajo</a>

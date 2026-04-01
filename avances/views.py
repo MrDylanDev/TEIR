@@ -1,64 +1,150 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db import connection, transaction
+from django.db.models import Q
 from .models import Avance
-from proyectos.models import Proyecto
+from proyectos.models import Proyecto, Entregable
 from contrataciones.models import Contratacion
+from notificaciones.models import Notificacion
 
 @login_required
 def registrar_avance(request, proyecto_id):
     if request.user.rol != 'desarrollador':
         messages.error(request, "Solo los desarrolladores pueden registrar avances.")
-        return redirect('dashboard_desarrollador' if request.user.rol == 'desarrollador' else 'inicio')
+        return redirect('inicio')
     
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     
     # 1. Verificar el estado del proyecto: Solo se permiten avances en proyectos 'en_desarrollo'
     if proyecto.estado != 'en_desarrollo':
-        messages.warning(request, "Ya no puedes subir más avances para este proyecto, pues ya se encuentra al 100% y en proceso de revisión.")
-        return redirect('/desarrollador/dashboard/?section=activos')
+        messages.warning(request, f"Ya no puedes subir más avances para el proyecto '{proyecto.titulo}', pues ya no se encuentra en estado de desarrollo.")
+        return redirect(reverse('dashboard_desarrollador') + '?section=activos')
 
     # 2. Verificar que el desarrollador está contratado para este proyecto
     contratado = Contratacion.objects.filter(proyecto=proyecto, desarrollador=request.user, estado='activa').exists()
     if not contratado:
         messages.error(request, "No tienes un contrato activo para este proyecto.")
-        return redirect('/desarrollador/dashboard/?section=activos')
+        return redirect(reverse('dashboard_desarrollador') + '?section=activos')
 
     if request.method == 'POST':
         try:
             descripcion = request.POST.get('descripcion')
             archivo_url = request.POST.get('archivo_url')
-            entregable_id = request.POST.get('entregable_id') # Nuevo campo
+            entregable_id = request.POST.get('entregable_id')
             
             if not entregable_id:
                 messages.error(request, "Debes seleccionar un hito para registrar el avance.")
                 return redirect('registrar_avance', proyecto_id=proyecto.id)
 
-            from django.db import connection
-            with connection.cursor() as cursor:
-                cursor.callproc('sp_subir_avance', [
-                    proyecto.id, 
-                    request.user.id, 
-                    entregable_id, # Enviamos el ID del hito
-                    descripcion, 
-                    archivo_url
-                ])
-                cursor.fetchone()
-            
-            messages.success(request, "¡Hito completado y avance registrado exitosamente!")
-            return redirect('/desarrollador/dashboard/?section=activos')
-        except Exception as e:
-            error_msg = str(e)
-            messages.error(request, f"Error al registrar avance: {error_msg}")
+            entregable = get_object_or_404(Entregable, id=entregable_id, proyecto=proyecto)
 
-    # Obtener hitos pendientes para el select del formulario
-    from proyectos.models import Entregable
-    hitos_pendientes = Entregable.objects.filter(proyecto=proyecto, estado='pendiente')
+            with transaction.atomic():
+                # 1. Crear el Avance
+                avance = Avance.objects.create(
+                    proyecto=proyecto,
+                    desarrollador=request.user,
+                    entregable=entregable,
+                    descripcion=descripcion,
+                    archivo_url=archivo_url,
+                    estado='pendiente'
+                )
+
+                # 2. Actualizar el Hito
+                entregable.estado = 'en_revision'
+                entregable.save()
+
+                # 3. Notificar a la Empresa
+                Notificacion.objects.create(
+                    usuario=proyecto.empresa,
+                    proyecto=proyecto,
+                    tipo='avance',
+                    mensaje=f"{request.user.nombre or request.user.username} completó el hito '{entregable.titulo}' en el proyecto: {proyecto.titulo}"
+                )
+
+                # 4. Verificar si quedan hitos pendientes para cierre automático del proyecto
+                hitos_restantes = Entregable.objects.filter(proyecto=proyecto, estado='pendiente').count()
+                
+                if hitos_restantes == 0:
+                    estado_anterior = proyecto.estado
+                    proyecto.estado = 'en_revision'
+                    proyecto.save()
+                    # Auditoría de estado
+                    proyecto.registrar_cambio_estado('en_revision', request.user, estado_anterior=estado_anterior)
+                    messages.info(request, "¡Felicidades! Has enviado el último hito. El proyecto ha pasado a Revisión Final.")
+
+            messages.success(request, "¡Hito completado y avance registrado exitosamente!")
+            return redirect(reverse('dashboard_desarrollador') + '?section=activos')
+        except Exception as e:
+            messages.error(request, f"Error al registrar avance: {str(e)}")
+
+    # Obtener hitos pendientes filtrados por equipo o generales
+    hitos_pendientes = Entregable.objects.filter(
+        Q(proyecto=proyecto) & 
+        Q(estado='pendiente') & 
+        (Q(equipo__miembros=request.user) | Q(equipo__isnull=True))
+    ).distinct()
 
     return render(request, 'avances/registrar.html', {
         'proyecto': proyecto,
         'hitos_pendientes': hitos_pendientes
     })
+
+@login_required
+def revisar_avance(request, avance_id):
+    if request.user.rol != 'empresa':
+        messages.error(request, "Solo las empresas pueden revisar avances.")
+        return redirect('inicio')
+    
+    avance = get_object_or_404(Avance, id=avance_id, proyecto__empresa=request.user)
+    accion = request.POST.get('accion') 
+    comentario = request.POST.get('comentario', '') 
+    
+    if request.method == 'POST' and accion in ['aceptar', 'rechazar']:
+        try:
+            with transaction.atomic():
+                if accion == 'aceptar':
+                    avance.estado = 'aceptado'
+                    avance.comentario_revision = comentario
+                    avance.save()
+                    
+                    # Marcar hito como COMPLETADO
+                    avance.entregable.estado = 'completado'
+                    avance.entregable.save()
+                    
+                    # Notificar al desarrollador
+                    Notificacion.objects.create(
+                        usuario=avance.desarrollador,
+                        proyecto=avance.proyecto,
+                        tipo='aprobacion',
+                        mensaje=f"Tu avance en el hito '{avance.entregable.titulo}' ha sido ACEPTADO."
+                    )
+                    messages.success(request, f"Hito '{avance.entregable.titulo}' aceptado.")
+                else:
+                    avance.estado = 'rechazado'
+                    avance.comentario_revision = comentario
+                    avance.save()
+                    
+                    # Devolver hito a PENDIENTE
+                    avance.entregable.estado = 'pendiente'
+                    avance.entregable.save()
+                    
+                    # Notificar al desarrollador
+                    Notificacion.objects.create(
+                        usuario=avance.desarrollador,
+                        proyecto=avance.proyecto,
+                        tipo='alerta',
+                        mensaje=f"Tu avance en el hito '{avance.entregable.titulo}' ha sido RECHAZADO. Revisa los comentarios."
+                    )
+                    messages.warning(request, f"Avance rechazado. Se ha notificado al desarrollador.")
+            
+            return redirect('ver_avances', proyecto_id=avance.proyecto.id)
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
+            return redirect('ver_avances', proyecto_id=avance.proyecto.id)
+    
+    return redirect('ver_avances', proyecto_id=avance.proyecto.id)
 
 @login_required
 def ver_avances(request, proyecto_id):
@@ -80,19 +166,22 @@ def ver_avances(request, proyecto_id):
             return redirect('dashboard_empresa')
         return redirect('inicio')
         
-    avances = Avance.objects.filter(proyecto=proyecto).order_by('-fecha_hora')
+    # Consulta de avances optimizada con select_related
+    avances = Avance.objects.filter(proyecto=proyecto).select_related('desarrollador', 'entregable').order_by('-fecha_hora')
     
     # Obtener el progreso total desde la vista SQL
-    individuales = 0
-    from django.db import connection
+    hitos_completados = 0
+    hitos_totales = 0
     with connection.cursor() as cursor:
-        cursor.execute("SELECT porcentaje_avance_promedio FROM v_proyectos_en_desarrollo WHERE proyecto_id = %s", [proyecto.id])
+        cursor.execute("SELECT hitos_completados, hitos_totales FROM v_proyectos_en_desarrollo WHERE proyecto_id = %s", [proyecto.id])
         row = cursor.fetchone()
         if row:
-            individuales = row[0]
+            hitos_completados = row[0]
+            hitos_totales = row[1]
 
     return render(request, 'avances/ver_lista.html', {
         'proyecto': proyecto, 
         'avances': avances,
-        'individuales': individuales
+        'hitos_completados': hitos_completados,
+        'hitos_totales': hitos_totales
     })

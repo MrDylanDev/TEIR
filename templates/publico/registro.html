@@ -176,6 +176,62 @@
         {% endif %}
       </div>
 
+      <!-- Campo Nombre Completo -->
+      <div class="form-group {% if form.nombre.errors %}error{% endif %}">
+        <label>Nombre Completo</label>
+        <input type="text" name="nombre" value="{{ form.nombre.value|default:'' }}" placeholder="Ej: Alejandro Pérez" required>
+        {% if form.nombre.errors %}
+          <ul class="errorlist">
+            {% for error in form.nombre.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <!-- Campo Rol -->
+      <div class="form-group {% if form.rol.errors %}error{% endif %}">
+        <label>Selecciona tu rol</label>
+        <select name="rol" id="id_rol" required>
+          <option value="" disabled {% if not form.rol.value %}selected{% endif %}>-- Selecciona un rol --</option>
+          <option value="empresa" {% if form.rol.value == 'empresa' %}selected{% endif %}>Empresa</option>
+          <option value="desarrollador" {% if form.rol.value == 'desarrollador' %}selected{% endif %}>Desarrollador</option>
+        </select>
+        {% if form.rol.errors %}
+          <ul class="errorlist">
+            {% for error in form.rol.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <!-- Campo Tipo de Documento (Dinámico) -->
+      <div class="form-group" id="container_tipo_documento" style="display: none;">
+        <label>Registrarse con:</label>
+        {{ form.tipo_documento }}
+        {% if form.tipo_documento.errors %}
+          <ul class="errorlist">
+            {% for error in form.tipo_documento.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <!-- Campo Identificación (Cédula/NIT) -->
+      <div class="form-group {% if form.identificacion.errors %}error{% endif %}">
+        <label id="label_cedula">Número de Identificación</label>
+        <input type="text" name="identificacion" value="{{ form.identificacion.value|default:'' }}" placeholder="Ej: 123456789" required>
+        {% if form.identificacion.errors %}
+          <ul class="errorlist">
+            {% for error in form.identificacion.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
       <!-- Campo Email -->
       <div class="form-group {% if form.email.errors %}error{% endif %}">
         <label>Correo electrónico</label>
@@ -201,23 +257,6 @@
           </ul>
         {% else %}
           <small>Debes ser mayor de 18 años.</small>
-        {% endif %}
-      </div>
-
-      <!-- Campo Rol -->
-      <div class="form-group {% if form.rol.errors %}error{% endif %}">
-        <label>Selecciona tu rol</label>
-        <select name="rol" required>
-          <option value="" disabled {% if not form.rol.value %}selected{% endif %}>-- Selecciona un rol --</option>
-          <option value="empresa" {% if form.rol.value == 'empresa' %}selected{% endif %}>Empresa</option>
-          <option value="desarrollador" {% if form.rol.value == 'desarrollador' %}selected{% endif %}>Desarrollador</option>
-        </select>
-        {% if form.rol.errors %}
-          <ul class="errorlist">
-            {% for error in form.rol.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
         {% endif %}
       </div>
 
@@ -258,6 +297,26 @@
   </div>
 
   <script>
+    const rolSelect = document.getElementById('id_rol');
+    const typeDocContainer = document.getElementById('container_tipo_documento');
+    const typeDocSelect = document.getElementById('id_tipo_documento');
+    const labelCedula = document.getElementById('label_cedula');
+
+    function updateDocFields() {
+      const rol = rolSelect.value;
+      if (rol === 'empresa') {
+        typeDocContainer.style.display = 'block';
+        labelCedula.innerText = 'Número de Identificación';
+      } else {
+        typeDocContainer.style.display = 'none';
+        typeDocSelect.value = 'cedula'; // Forzamos cédula para desarrolladores
+        labelCedula.innerText = 'Cédula de Ciudadanía';
+      }
+    }
+
+    rolSelect.addEventListener('change', updateDocFields);
+    window.addEventListener('load', updateDocFields); // Ejecutar al cargar por si hay errores de validación
+
     // Validación simple en cliente
     document.querySelector('form').addEventListener('submit', function(e) {
       const username = document.querySelector('input[name="username"]').value;
