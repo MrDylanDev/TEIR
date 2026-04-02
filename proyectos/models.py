@@ -109,6 +109,16 @@ class Entregable(models.Model):
     def __str__(self):
         return f"{self.titulo} - {self.proyecto.titulo}"
 
+    def save(self, *args, **kwargs):
+        
+        if self.estado == 'pendiente' and self.proyecto.estado == 'en_revision':
+            proyecto = self.proyecto
+            estado_anterior = proyecto.estado
+            proyecto.estado = 'en_desarrollo'
+            proyecto.save()
+            
+        super().save(*args, **kwargs)
+
 class Equipo(models.Model):
     nombre = models.CharField(max_length=100)
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='equipos', db_column='proyecto_id')

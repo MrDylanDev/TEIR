@@ -17,8 +17,17 @@ def registrar_avance(request, proyecto_id):
     
     proyecto = get_object_or_404(Proyecto, id=proyecto_id)
     
-    # 1. Verificar el estado del proyecto: Solo se permiten avances en proyectos 'en_desarrollo'
-    if proyecto.estado != 'en_desarrollo':
+    # 1. Verificar el estado del proyecto: 
+    # Solo se permiten avances en proyectos 'en_desarrollo' o 'en_revision' (si hay hitos pendientes)
+    hitos_pendientes_count = Entregable.objects.filter(proyecto=proyecto, estado='pendiente').count()
+
+    if proyecto.estado == 'en_revision' and hitos_pendientes_count > 0:
+        # Corrección automática: El proyecto está en revisión pero tiene trabajo pendiente
+        estado_anterior = proyecto.estado
+        proyecto.estado = 'en_desarrollo'
+        proyecto.save()
+        proyecto.registrar_cambio_estado('en_desarrollo', request.user, estado_anterior=estado_anterior)
+    elif proyecto.estado != 'en_desarrollo':
         messages.warning(request, f"Ya no puedes subir más avances para el proyecto '{proyecto.titulo}', pues ya no se encuentra en estado de desarrollo.")
         return redirect(reverse('dashboard_desarrollador') + '?section=activos')
 
@@ -130,6 +139,14 @@ def revisar_avance(request, avance_id):
                     avance.entregable.estado = 'pendiente'
                     avance.entregable.save()
                     
+                    # Si el proyecto estaba en revisión, Devolverlo a en desarrollo
+                    # Esto permite que el desarrollador pueda volver a subir avances.
+                    if avance.proyecto.estado == 'en_revision':
+                        estado_anterior = avance.proyecto.estado
+                        avance.proyecto.estado = 'en_desarrollo'
+                        avance.proyecto.save()
+                        avance.proyecto.registrar_cambio_estado('en_desarrollo', request.user, estado_anterior=estado_anterior)
+
                     # Notificar al desarrollador
                     Notificacion.objects.create(
                         usuario=avance.desarrollador,
@@ -137,7 +154,7 @@ def revisar_avance(request, avance_id):
                         tipo='alerta',
                         mensaje=f"Tu avance en el hito '{avance.entregable.titulo}' ha sido RECHAZADO. Revisa los comentarios."
                     )
-                    messages.warning(request, f"Avance rechazado. Se ha notificado al desarrollador.")
+                    messages.warning(request, f"Avance rechazado. Se ha notificado al desarrollador y el proyecto ha vuelto a 'En Desarrollo'.")
             
             return redirect('ver_avances', proyecto_id=avance.proyecto.id)
         except Exception as e:

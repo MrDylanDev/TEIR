@@ -86,15 +86,19 @@ def login_view(request):
 
         # 2. Autenticación normal
         user = authenticate(username=username, password=password)
-        
+
         if user is not None:
-            # Login exitoso: Entramos con el ROL REAL de la base de datos
+            # 3. Validación de rol: El rol real debe coincidir con el seleccionado en el frontend
+            if user.rol != rol_seleccionado:
+                messages.error(request, f"No tienes permisos de '{rol_seleccionado}' con esta cuenta.")
+                return render(request, 'publico/inicio_sesion.html')
+
+            # Login exitoso: Entramos con el rol real de la base de datos
             login(request, user)
-            
+
             if user.rol == 'administrador': return redirect('dashboard_admin')
             if user.rol == 'empresa': return redirect('dashboard_empresa')
-            return redirect('dashboard_desarrollador')
-            
+            return redirect('dashboard_desarrollador')            
         # Error genérico para contraseñas inválidas
         messages.error(request, "Usuario o contraseña incorrectos.")
     return render(request, 'publico/inicio_sesion.html')
