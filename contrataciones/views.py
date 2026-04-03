@@ -35,13 +35,14 @@ def cancelar_contratacion(request, contratacion_id):
     
     try:
         with connection.cursor() as cursor:
-            # Invocar la lógica atómica de la base de datos
-            cursor.callproc('sp_cancelar_contratacion', [contrato.id, request.user.id])
+            # Invocar la lógica atómica de la base de datos mediante CALL
+            # sp_cancelar_contratacion devuelve un ResultSet con (success, mensaje)
+            cursor.execute("CALL sp_cancelar_contratacion(%s, %s)", [contrato.id, request.user.id])
             
             # Capturar el resultado del SP
             row = cursor.fetchone()
-            if row and len(row) > 1:
-                messages.warning(request, row[1]) # Mensaje dinámico desde la DB
+            if row:
+                messages.warning(request, row[1]) # Mensaje dinámico desde la DB (segunda columna)
             else:
                 messages.warning(request, "Contrato cancelado exitosamente.")
                 

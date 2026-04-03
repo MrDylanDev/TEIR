@@ -75,9 +75,7 @@ class RegistroUsuarioForm(UserCreationForm):
             
             # Crear perfil según el rol seleccionado
             if user.rol == 'empresa':
-                perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=user)
-                perfil.nit = user.identificacion # Sincronizamos NIT con el documento ingresado
-                perfil.save()
+                PerfilEmpresa.objects.get_or_create(usuario=user)
             elif user.rol == 'desarrollador':
                 PerfilDesarrollador.objects.get_or_create(usuario=user)
         

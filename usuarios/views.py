@@ -75,10 +75,11 @@ def login_view(request):
         password = request.POST.get('password')
         rol_seleccionado = request.POST.get('rol_seleccionado')
         
-        # 1. Verificación preventiva de bloqueo (General para todos los roles)
+        # 1. Verificación preventiva de bloqueo y obtención del objeto usuario
+        user_to_check = None
         try:
-            user_check = Usuario.objects.get(username=username)
-            if user_check.estado in ['suspendido', 'inactivo']:
+            user_to_check = Usuario.objects.get(username=username)
+            if user_to_check.estado in ['suspendido', 'inactivo']:
                 messages.error(request, "Tu cuenta ha sido suspendida o está inactiva. Por favor, comunícate con el administrador para más información.")
                 return redirect('inicio')
         except Usuario.DoesNotExist:
@@ -93,15 +94,33 @@ def login_view(request):
                 messages.error(request, f"No tienes permisos de '{rol_seleccionado}' con esta cuenta.")
                 return redirect('inicio')
 
-            # Login exitoso: Entramos con el rol real de la base de datos
+            # Login exitoso: Resetear intentos fallidos si tenía alguno
+            if user.intentos_fallidos > 0:
+                user.intentos_fallidos = 0
+                user.save(update_fields=['intentos_fallidos'])
+
             login(request, user)
 
             if user.rol == 'administrador': return redirect('dashboard_admin')
             if user.rol == 'empresa': return redirect('dashboard_empresa')
             return redirect('dashboard_desarrollador')            
-        # Error genérico para contraseñas inválidas
-        messages.error(request, "Usuario o contraseña incorrectos.")
+        
+        # 4. Manejo de intentos fallidos si el usuario existe
+        if user_to_check:
+            user_to_check.intentos_fallidos += 1
+            if user_to_check.intentos_fallidos >= 5:
+                user_to_check.estado = 'suspendido'
+                user_to_check.save(update_fields=['intentos_fallidos', 'estado'])
+                messages.error(request, "Tu cuenta ha sido suspendida por exceso de intentos fallidos. Contacta a soporte.")
+            else:
+                user_to_check.save(update_fields=['intentos_fallidos'])
+                messages.error(request, f"Usuario o contraseña incorrectos. Intento {user_to_check.intentos_fallidos} de 5.")
+        else:
+            # Error genérico para usuarios que no existen
+            messages.error(request, "Usuario o contraseña incorrectos.")
+            
         return redirect('inicio')
+            
     return render(request, 'publico/inicio_sesion.html')
 
 def logout_view(request):
@@ -121,6 +140,11 @@ def registro_view(request):
     return render(request, 'publico/registro.html', {'form': form})
 
 def recuperar_view(request):
+    if request.method == 'POST':
+        # Placeholder: Solo mostramos el mensaje sin realizar ninguna acción en la DB
+        messages.success(request, "Se han enviado instrucciones de recuperación a dev@pro.com")
+        return redirect('login')
+            
     return render(request, 'publico/recuperarcon.html')
 
 @login_required

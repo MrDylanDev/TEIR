@@ -405,11 +405,13 @@
                     <i class="fa fa-users"></i> Chat Grupal
                   </a>
                 {% endif %}
-                {% for contratacion in proyecto.contrataciones.all %}
-                  <a href="{% url 'sala_chat' contratacion.desarrollador.id proyecto.id %}" class="btn btn-secondary btn-sm">
-                    <i class="fa fa-comments"></i> {{ contratacion.desarrollador.username }}
-                  </a>
-                {% endfor %}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  {% for contratacion in proyecto.contrataciones.all %}
+                    <a href="{% url 'sala_chat' contratacion.desarrollador.id proyecto.id %}" class="btn btn-secondary btn-sm" style="font-size:11px;padding:8px 4px;">
+                      <i class="fa fa-comments"></i> {{ contratacion.desarrollador.username }}
+                    </a>
+                  {% endfor %}
+                </div>
               </div>
             </div>
           {% empty %}
@@ -435,7 +437,7 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
             <div>
               <div class="form-label">NIT</div>
-              <div style="font-size:14px;">{{ perfil.nit|default:"—" }}</div>
+              <div style="font-size:14px;">{{ request.user.identificacion|default:"—" }}</div>
             </div>
             <div>
               <div class="form-label">Sector</div>

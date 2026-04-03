@@ -36,10 +36,16 @@ class Usuario(AbstractUser):
     token_expiracion = models.DateTimeField(null=True, blank=True)
     intentos_fallidos = models.PositiveSmallIntegerField(default=0)
 
+    def save(self, *args, **kwargs):
+        # Sincronizar is_superuser con el rol de administrador
+        if self.rol == 'administrador':
+            self.is_superuser = True
+        super().save(*args, **kwargs)
+
     @property
     def is_staff(self):
-        """Redefinimos is_staff para que dependa del rol y no de una columna física."""
-        return self.rol == 'administrador' or self.is_superuser
+        """Django Admin requiere is_staff=True. Lo mapeamos al is_superuser existente."""
+        return self.is_superuser
 
     REQUIRED_FIELDS = ['email', 'nombre', 'rol']
 

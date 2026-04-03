@@ -76,7 +76,7 @@ def sala_chat(request, receptor_id, proyecto_id=None):
         (Q(remitente=request.user, receptor=receptor) | Q(remitente=receptor, receptor=request.user))
     )
 
-    # Aislmiento flexible por proyecto
+    # Aislamiento flexible por proyecto
     # Si hay proyecto, mostramos los de ese proyecto + los generales (sin proyecto)
     if proyecto:
         mensajes_chat = mensajes_chat.filter(Q(proyecto=proyecto) | Q(proyecto__isnull=True))

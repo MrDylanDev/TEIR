@@ -135,22 +135,32 @@ def finalizar_proyecto(request, proyecto_id):
                     messages.info(request, f"El proyecto '{proyecto_locked.titulo}' ya ha sido finalizado anteriormente.")
                     return redirect('dashboard_empresa')
 
+                # 1. Finalizar todas las contrataciones asociadas (Bulk Update)
+                contratos = Contratacion.objects.filter(proyecto=proyecto_locked, estado='activa')
+                
+                # 2. Preparar notificaciones para todo el equipo (Bulk Create)
+                notificaciones = [
+                    Notificacion(
+                        usuario=c.desarrollador,
+                        proyecto=proyecto_locked,
+                        tipo='aprobacion',
+                        mensaje=f"El proyecto '{proyecto_locked.titulo}' ha finalizado. ¡Gracias por tu trabajo!"
+                    ) for c in contratos
+                ]
+                
+                if notificaciones:
+                    Notificacion.objects.bulk_create(notificaciones)
+                
+                # 3. Actualizar contratos a 'finalizada'
+                # IMPORTANTE: Se hace antes de guardar el proyecto para que el Trigger SQL funcione correctamente.
+                contratos.update(estado='finalizada')
+
+                # 4. Finalizar el proyecto oficialmente
                 proyecto_locked.estado = 'finalizado'
                 proyecto_locked.save()
                 
-                # Cerramos todas las contrataciones y notificamos
-                contratos = Contratacion.objects.filter(proyecto=proyecto_locked, estado='activa')
-                for c in contratos:
-                    Notificacion.objects.create(
-                        usuario=c.desarrollador,
-                        tipo='aprobacion',
-                        mensaje=f"El proyecto '{proyecto_locked.titulo}' ha finalizado. ¡Gracias por tu trabajo!"
-                    )
-                    c.estado = 'finalizada'
-                    c.save()
-                    
-                    # Actualización de estadísticas: Eliminada lógica redundante. 
-                    # El conteo se calcula en tiempo real vía Vistas SQL.
+                # Actualización de estadísticas: Eliminada lógica redundante. 
+                # El conteo se calcula en tiempo real vía Vistas SQL.
 
             messages.success(request, f"¡Excelente! Has calificado a todo el equipo y el proyecto '{proyecto.titulo}' ha finalizado.")
             return redirect('dashboard_empresa')

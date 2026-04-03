@@ -2,7 +2,7 @@ import csv
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg
+from django.db.models import Avg, Count, Q
 from proyectos.models import Proyecto, Valoracion
 from usuarios.models import Usuario, PerfilDesarrollador, PerfilEmpresa
 
@@ -19,7 +19,6 @@ def reporte_proyectos_csv(request):
     # Encabezados simplificados
     writer.writerow(['Título', 'Empresa', 'Tipo', 'Prioridad', 'Estado', 'Desarrolladores', 'Vacantes Totales', 'Fecha Publicación'])
 
-    from django.db.models import Count, Q
     # Traemos proyectos con su empresa y calculamos métricas en una sola ráfaga SQL
     proyectos = Proyecto.objects.select_related('empresa').annotate(
         num_devs=Count('contrataciones', filter=Q(contrataciones__estado='activa'))
@@ -103,7 +102,7 @@ def reporte_empresas_csv(request):
         
         writer.writerow([
             e.nombre_empresa or e.usuario.username,
-            e.nit or '-',
+            e.usuario.identificacion or '-',
             e.sector or '-',
             e.ciudad or '-',
             e.telefono or '-',

@@ -110,12 +110,15 @@ class Entregable(models.Model):
         return f"{self.titulo} - {self.proyecto.titulo}"
 
     def save(self, *args, **kwargs):
+        usuario = kwargs.pop('cambiado_por', None)
         
         if self.estado == 'pendiente' and self.proyecto.estado == 'en_revision':
             proyecto = self.proyecto
             estado_anterior = proyecto.estado
             proyecto.estado = 'en_desarrollo'
             proyecto.save()
+            # Registrar el cambio de estado para la auditoría
+            proyecto.registrar_cambio_estado('en_desarrollo', usuario, estado_anterior=estado_anterior)
             
         super().save(*args, **kwargs)
 
