@@ -3,87 +3,129 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Gestionar Hitos | TEM</title>
-  <link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Gestionar Hitos</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
 </head>
-<body style="background: #0f0f0f; color: white; padding: 40px;">
+<body>
+<div class="app-layout">
 
-  <div style="max-width: 800px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-        <h1>⚙️ Hitos del Proyecto</h1>
-        <a href="{% url 'dashboard_empresa' %}?section=ofertas" style="background: #333; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver al Panel</a>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Gestión de Hitos</div>
+      </div>
     </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item" href="{% url 'dashboard_empresa' %}?section=ofertas"><i class="fa fa-arrow-left"></i><span>Volver al Panel</span></a>
+      {% if proyecto.contrataciones.all.count >= 2 %}
+        <a class="nav-item" href="{% url 'gestionar_equipos' proyecto.id %}"><i class="fa fa-users"></i><span>Gestionar Grupos</span></a>
+      {% endif %}
+    </div>
+  </aside>
 
-    <!-- Mostrar Mensajes -->
-    {% if messages %}
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">Hitos <span>/ {{ proyecto.titulo }}</span></div>
+      {% if proyecto.contrataciones.all.count >= 2 %}
+        <a href="{% url 'gestionar_equipos' proyecto.id %}" class="btn btn-secondary btn-sm">
+          <i class="fa fa-users"></i> Grupos
+        </a>
+      {% endif %}
+    </header>
+    <main class="main-content">
+
+      {% if messages %}
         {% for message in messages %}
-            <div style="padding: 15px; border-radius: 8px; margin-bottom: 20px; background: {% if message.tags == 'success' %}#4CAF50{% else %}#f44336{% endif %}; color: white; font-weight: bold;">
-                {{ message }}
-            </div>
+          <div class="{% if message.tags == 'success' %}msg-success{% else %}msg-error{% endif %}" style="margin-bottom:16px;">
+            {{ message }}
+          </div>
         {% endfor %}
-    {% endif %}
+      {% endif %}
 
-    <div style="background: #111; padding: 30px; border-radius: 16px; border: 1px solid #222; margin-bottom: 40px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
-            <div>
-                <h2 style="margin-top: 0; font-weight: 300;">{{ proyecto.titulo }}</h2>
-                <p style="opacity: 0.6;">Define los objetivos o tareas que los desarrolladores deben cumplir.</p>
-            </div>
-            {% if proyecto.contrataciones.all.count >= 2 %}
-                <a href="{% url 'gestionar_equipos' proyecto.id %}" style="background: rgba(33, 150, 243, 0.1); color: #2196F3; border: 1px solid #2196F3; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;">👥 Gestionar Grupos</a>
-            {% endif %}
+      <div class="page-header">
+        <div>
+          <div class="page-title"><i class="fa fa-flag-checkered" style="margin-right:10px; color:var(--text-muted);"></i>Hitos del Proyecto</div>
+          <div class="page-subtitle">Define los objetivos y tareas que los desarrolladores deben cumplir</div>
         </div>
-        
-        <form method="post" style="display: flex; flex-direction: column; gap: 15px;">
-            {% csrf_token %}
-            <input type="text" name="titulo" placeholder="Nombre del hito (ej: Implementar Login)" required style="padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; font-size: 15px;">
-            <textarea name="descripcion" placeholder="Descripción de lo que se espera en esta entrega..." style="padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; min-height: 80px; font-size: 14px;"></textarea>
-            
-            {% if proyecto.contrataciones.all.count >= 2 %}
-            <div>
-                <label style="display: block; font-size: 12px; opacity: 0.5; margin-bottom: 5px;">Asignar a Equipo (Opcional):</label>
-                <select name="equipo_id" style="width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px;">
-                    <option value="">-- Todo el Proyecto (General) --</option>
-                    {% for equipo in equipos %}
-                        <option value="{{ equipo.id }}">{{ equipo.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% endif %}
+      </div>
 
-            <button type="submit" style="background: #2196F3; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s;">+ Agregar Hito</button>
+      <!-- Formulario nuevo hito -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+          <div class="card-title"><i class="fa fa-plus" style="margin-right:8px;"></i>Agregar Nuevo Hito</div>
+        </div>
+        <form method="post" style="display:flex; flex-direction:column; gap:14px;">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">Nombre del Hito</label>
+            <input type="text" name="titulo" placeholder="Ej: Implementar módulo de Login" required style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción <span style="font-weight:400; color:var(--text-muted);">(Opcional)</span></label>
+            <textarea name="descripcion" placeholder="Describe qué se espera en esta entrega..." style="width:100%; min-height:80px; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit; resize:vertical; outline:none;"></textarea>
+          </div>
+          {% if proyecto.contrataciones.all.count >= 2 %}
+            <div class="form-group">
+              <label class="form-label">Asignar a Equipo <span style="font-weight:400; color:var(--text-muted);">(Opcional)</span></label>
+              <select name="equipo_id" style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit;">
+                <option value="">-- Todo el Proyecto (General) --</option>
+                {% for equipo in equipos %}<option value="{{ equipo.id }}">{{ equipo.nombre }}</option>{% endfor %}
+              </select>
+            </div>
+          {% endif %}
+          <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i> Agregar Hito</button>
         </form>
-    </div>
+      </div>
 
-    <h3>Lista de Hitos Actuales</h3>
-    <div style="display: flex; flex-direction: column; gap: 15px;">
+      <!-- Lista de hitos -->
+      <div class="card-title" style="margin-bottom:14px; font-size:15px; font-weight:600;">Hitos Configurados</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
         {% for hito in hitos %}
-            <div style="background: #111; padding: 20px; border-radius: 12px; border: 1px solid #222; display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <h4 style="margin: 0; color: {% if hito.estado == 'completado' %}#4CAF50{% else %}#ff9800{% endif %};">
-                        {{ hito.titulo }} 
-                        {% if hito.estado == 'completado' %} <small style="background: #4CAF50; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: 10px;">COMPLETADO</small> {% endif %}
-                    </h4>
-                    <p style="font-size: 13px; opacity: 0.6; margin-top: 8px;">{{ hito.descripcion|default:"Sin descripción adicional." }}</p>
-                    {% if proyecto.contrataciones.all.count >= 2 %}
-                        {% if hito.equipo %}
-                            <p style="font-size: 11px; color: #64b4ff; margin-top: 10px; font-weight: bold;">👥 Asignado a: {{ hito.equipo.nombre }}</p>
-                        {% else %}
-                            <p style="font-size: 11px; opacity: 0.4; margin-top: 10px;">🌐 Hito General</p>
-                        {% endif %}
-                    {% endif %}
+          <div class="card" style="border-left:4px solid {% if hito.estado == 'completado' %}var(--success){% elif hito.estado == 'en_revision' %}var(--warning){% else %}var(--border){% endif %}; padding:16px 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+              <div style="flex:1;">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                  <span style="font-size:15px; font-weight:600; color:var(--text-primary);">{{ hito.titulo }}</span>
+                  {% if hito.estado == 'completado' %}
+                    <span class="badge badge-success">Completado</span>
+                  {% elif hito.estado == 'en_revision' %}
+                    <span class="badge badge-warning">En Revisión</span>
+                  {% else %}
+                    <span class="badge badge-gray">Pendiente</span>
+                  {% endif %}
                 </div>
-                {% if hito.estado == 'pendiente' %}
-                    <a href="{% url 'eliminar_hito' hito.id %}" style="color: #f44336; text-decoration: none; font-size: 12px; border: 1px solid #f44336; padding: 5px 10px; border-radius: 6px;">Eliminar</a>
+                <p style="font-size:13px; color:var(--text-secondary); margin:0;">{{ hito.descripcion|default:"Sin descripción adicional." }}</p>
+                {% if proyecto.contrataciones.all.count >= 2 %}
+                  <div style="margin-top:8px; font-size:11px;">
+                    {% if hito.equipo %}
+                      <span style="color:var(--info); font-weight:600;"><i class="fa fa-users" style="margin-right:4px;"></i>{{ hito.equipo.nombre }}</span>
+                    {% else %}
+                      <span style="color:var(--text-muted);"><i class="fa fa-globe" style="margin-right:4px;"></i>Hito General</span>
+                    {% endif %}
+                  </div>
                 {% endif %}
+              </div>
+              {% if hito.estado == 'pendiente' %}
+                <a href="{% url 'eliminar_hito' hito.id %}" class="btn btn-danger btn-sm">
+                  <i class="fa fa-trash"></i>
+                </a>
+              {% endif %}
             </div>
+          </div>
         {% empty %}
-            <div style="text-align: center; padding: 40px; background: #0a0a0a; border-radius: 12px; border: 1px dashed #333;">
-                <p style="opacity: 0.4;">No has definido hitos para este proyecto todavía.</p>
-            </div>
+          <div class="empty-state">
+            <i class="fa fa-flag"></i>
+            <p>No has definido hitos para este proyecto todavía.</p>
+          </div>
         {% endfor %}
-    </div>
+      </div>
+    </main>
   </div>
-
+</div>
 </body>
 </html>

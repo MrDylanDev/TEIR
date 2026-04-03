@@ -80,7 +80,7 @@ def login_view(request):
             user_check = Usuario.objects.get(username=username)
             if user_check.estado in ['suspendido', 'inactivo']:
                 messages.error(request, "Tu cuenta ha sido suspendida o está inactiva. Por favor, comunícate con el administrador para más información.")
-                return render(request, 'publico/inicio_sesion.html')
+                return redirect('inicio')
         except Usuario.DoesNotExist:
             pass
 
@@ -91,7 +91,7 @@ def login_view(request):
             # 3. Validación de rol: El rol real debe coincidir con el seleccionado en el frontend
             if user.rol != rol_seleccionado:
                 messages.error(request, f"No tienes permisos de '{rol_seleccionado}' con esta cuenta.")
-                return render(request, 'publico/inicio_sesion.html')
+                return redirect('inicio')
 
             # Login exitoso: Entramos con el rol real de la base de datos
             login(request, user)
@@ -101,6 +101,7 @@ def login_view(request):
             return redirect('dashboard_desarrollador')            
         # Error genérico para contraseñas inválidas
         messages.error(request, "Usuario o contraseña incorrectos.")
+        return redirect('inicio')
     return render(request, 'publico/inicio_sesion.html')
 
 def logout_view(request):
@@ -191,7 +192,7 @@ def dashboard_empresa(request):
         empresa=request.user, 
         estado='activa',
         proyecto__estado='en_desarrollo'
-    ).select_related('desarrollador', 'proyecto')
+    ).select_related('desarrollador__perfil_desarrollador', 'proyecto')
 
     # --- Historial detallado para Empresa (Optimizado con anotación) ---
     historial_v = Proyecto.objects.filter(
@@ -596,11 +597,11 @@ def admin_reactivar_proyecto(request, proyecto_id):
 def editar_perfil(request):
     if request.user.rol == 'empresa':
         perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=request.user)
-        form = PerfilEmpresaForm(request.POST or None, instance=perfil)
+        form = PerfilEmpresaForm(request.POST or None, request.FILES or None, instance=perfil)
         redirect_to = 'dashboard_empresa'
     elif request.user.rol == 'desarrollador':
         perfil, _ = PerfilDesarrollador.objects.get_or_create(usuario=request.user)
-        form = PerfilDesarrolladorForm(request.POST or None, instance=perfil)
+        form = PerfilDesarrolladorForm(request.POST or None, request.FILES or None, instance=perfil)
         redirect_to = 'dashboard_desarrollador'
     else: return redirect('inicio')
 

@@ -114,3 +114,117 @@ def sala_chat(request, receptor_id, proyecto_id=None):
         'proyecto': proyecto,
         'mensajes_chat': mensajes_chat
     })
+
+
+# =============================================
+#  MENSAJERÍA DIRECTA (Inbox / Sent / Redactar)
+# =============================================
+
+@login_required
+def mensajeria_inbox(request):
+    """Bandeja de entrada: mensajes directos recibidos (con receptor != None)"""
+    mensajes_recibidos = Mensaje.objects.filter(
+        receptor=request.user
+    ).select_related('remitente', 'proyecto').order_by('-fecha_envio')
+    return render(request, 'mensajes/inbox.html', {
+        'mensajes': mensajes_recibidos
+    })
+
+
+@login_required
+def mensajeria_sent(request):
+    """Mensajes enviados directamente (con receptor != None)"""
+    mensajes_enviados = Mensaje.objects.filter(
+        remitente=request.user,
+        receptor__isnull=False
+    ).select_related('receptor', 'proyecto').order_by('-fecha_envio')
+    return render(request, 'mensajes/sent.html', {
+        'mensajes': mensajes_enviados
+    })
+
+
+@login_required
+def mensajeria_redactar(request):
+    """Redactar y enviar un mensaje directo a otro usuario"""
+    # Construir lista de usuarios disponibles según el rol
+    if request.user.rol == 'administrador':
+        usuarios_disponibles = Usuario.objects.exclude(id=request.user.id).order_by('nombre')
+    elif request.user.rol == 'empresa':
+        # Empresa puede escribir a desarrolladores contratados y a admins
+        contratados_ids = Contratacion.objects.filter(
+            proyecto__empresa=request.user
+        ).values_list('desarrollador_id', flat=True)
+        admins_ids = Usuario.objects.filter(rol='administrador').values_list('id', flat=True)
+        combined_ids = list(contratados_ids) + list(admins_ids)
+        usuarios_disponibles = Usuario.objects.filter(id__in=combined_ids).exclude(id=request.user.id).order_by('nombre')
+    else:
+        # Desarrollador puede escribir a empresas con quienes tiene contrato y a admins
+        empresas_ids = Contratacion.objects.filter(
+            desarrollador=request.user
+        ).values_list('proyecto__empresa_id', flat=True)
+        admins_ids = Usuario.objects.filter(rol='administrador').values_list('id', flat=True)
+        combined_ids = list(empresas_ids) + list(admins_ids)
+        usuarios_disponibles = Usuario.objects.filter(id__in=combined_ids).exclude(id=request.user.id).order_by('nombre')
+
+    # Proyectos visibles para el usuario actual
+    if request.user.rol == 'empresa':
+        proyectos_disponibles = Proyecto.objects.filter(empresa=request.user)
+    elif request.user.rol == 'desarrollador':
+        proyectos_disponibles = Proyecto.objects.filter(
+            contrataciones__desarrollador=request.user
+        ).distinct()
+    else:
+        proyectos_disponibles = Proyecto.objects.all()
+
+    if request.method == 'POST':
+        receptor_id = request.POST.get('receptor')
+        proyecto_id = request.POST.get('proyecto')
+        titulo = request.POST.get('titulo', '').strip()
+        contenido = request.POST.get('contenido', '').strip()
+
+        if not receptor_id or not contenido:
+            messages.error(request, 'Debes seleccionar un destinatario y escribir un mensaje.')
+        else:
+            try:
+                receptor = get_object_or_404(Usuario, id=receptor_id)
+                proyecto = Proyecto.objects.filter(id=proyecto_id).first() if proyecto_id else None
+                Mensaje.objects.create(
+                    remitente=request.user,
+                    receptor=receptor,
+                    titulo=titulo or f'Mensaje de {request.user.nombre or request.user.username}',
+                    contenido=contenido,
+                    proyecto=proyecto
+                )
+                messages.success(request, f'Mensaje enviado a {receptor.nombre or receptor.username}.')
+                return redirect('mensajeria_sent')
+            except Exception as e:
+                messages.error(request, f'Error al enviar el mensaje: {e}')
+
+    return render(request, 'mensajes/redactar.html', {
+        'usuarios': usuarios_disponibles,
+        'proyectos': proyectos_disponibles,
+        'para_id': int(request.GET.get('para', 0)),
+        'proyecto_pre': int(request.GET.get('proyecto', 0)),
+    })
+
+
+@login_required
+def ver_mensaje(request, mensaje_id):
+    """Ver el detalle de un mensaje. Solo el remitente o receptor pueden verlo."""
+    mensaje = get_object_or_404(
+        Mensaje,
+        id=mensaje_id
+    )
+    # Control de acceso: solo emisor o receptor pueden ver el mensaje
+    if request.user != mensaje.remitente and request.user != mensaje.receptor:
+        messages.error(request, 'No tienes permiso para ver este mensaje.')
+        return redirect('mensajeria_inbox')
+
+    # Marcar como leído si el usuario actual es el receptor
+    if request.user == mensaje.receptor and not mensaje.leido:
+        mensaje.leido = True
+        mensaje.save(update_fields=['leido'])
+
+    return render(request, 'mensajes/detalle.html', {
+        'mensaje': mensaje
+    })

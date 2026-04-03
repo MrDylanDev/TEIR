@@ -3,59 +3,90 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Registrar Avance | TEM</title>
-  <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Registrar Avance</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
 </head>
-<body style="background: #000; color: white; display: block; padding: 40px;">
+<body>
+<div class="app-layout">
 
-  <div style="max-width: 600px; margin: 0 auto; background: #0a0a0a; padding: 30px; border-radius: 12px; border: 1px solid #222;">
-    
-    <!-- MENSAJES DE ERROR O EXITO -->
-    {% if messages %}
-        <div style="margin-bottom: 25px;">
-            {% for message in messages %}
-                <div style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: {% if message.tags == 'error' %}#f44336{% elif message.tags == 'warning' %}#ff9800{% else %}#4CAF50{% endif %}; color: white; font-weight: bold; border-left: 5px solid rgba(0,0,0,0.2);">
-                    {{ message }}
-                </div>
-            {% endfor %}
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Avances</div>
+      </div>
+    </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item" href="{% url 'dashboard_desarrollador' %}">
+        <i class="fa fa-arrow-left"></i><span>Volver al Panel</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">Registrar Avance <span>/ {{ proyecto.titulo }}</span></div>
+    </header>
+    <main class="main-content" style="display:flex; justify-content:center;">
+      <div style="max-width:600px; width:100%;">
+        <div class="page-header">
+          <div>
+            <div class="page-title"><i class="fa fa-rocket" style="margin-right:10px; color:var(--text-muted);"></i>Nuevo Avance</div>
+            <div class="page-subtitle">Reporta el progreso de un hito para <strong>{{ proyecto.titulo }}</strong></div>
+          </div>
         </div>
-    {% endif %}
 
-    <h1 style="font-weight: 300;">Registrar Avance</h1>
-    <p style="opacity: 0.7; margin-bottom: 20px;">Proyecto: <strong>{{ proyecto.titulo }}</strong></p>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}" style="margin-bottom:16px;">
+              <i class="fa {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
 
-    <form method="post">
-      {% csrf_token %}
-      
-      <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px;">Descripción del progreso</label>
-          <textarea name="descripcion" required placeholder="¿Qué has hecho hoy?" style="width: 100%; min-height: 120px; background: #111; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;"></textarea>
-      </div>
+        <div class="card">
+          <form method="post" style="display:flex; flex-direction:column; gap:18px;">
+            {% csrf_token %}
 
-      <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px;">Hito a completar</label>
-          <select name="entregable_id" required style="width: 100%; background: #111; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 14px;">
-              <option value="">-- Selecciona el hito que has terminado --</option>
-              {% for hito in hitos_pendientes %}
+            <div class="form-group">
+              <label class="form-label"><i class="fa fa-list-check" style="margin-right:6px;"></i>Hito a Completar</label>
+              <select name="entregable_id" required style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit;">
+                <option value="">-- Selecciona el hito que completaste --</option>
+                {% for hito in hitos_pendientes %}
                   <option value="{{ hito.id }}">{{ hito.titulo }}</option>
-              {% empty %}
-                  <option value="" disabled>⚠️ No hay hitos pendientes definidos por la empresa.</option>
-              {% endfor %}
-          </select>
-          <small style="opacity: 0.5; margin-top: 5px; display: block;">Al guardar, este hito se marcará como terminado automáticamente.</small>
-      </div>
+                {% empty %}
+                  <option value="" disabled>⚠️ No hay hitos pendientes definidos.</option>
+                {% endfor %}
+              </select>
+              <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">Al guardar, este hito se marcará como completado automáticamente.</small>
+            </div>
 
-      <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px;">URL de evidencia (Opcional)</label>
-          <input type="url" name="archivo_url" placeholder="https://github.com/... o Google Drive" style="width: 100%; background: #111; color: white; border: 1px solid #333; padding: 10px; border-radius: 8px;">
-      </div>
+            <div class="form-group">
+              <label class="form-label"><i class="fa fa-align-left" style="margin-right:6px;"></i>Descripción del Progreso</label>
+              <textarea name="descripcion" required placeholder="¿Qué implementaste? ¿Cómo lo hiciste?" style="width:100%; min-height:130px; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit; resize:vertical; outline:none;"></textarea>
+            </div>
 
-      <div style="display: flex; gap: 15px; margin-top: 30px;">
-          <button type="submit" style="background: white; color: black; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer;">Guardar Avance</button>
-          <a href="{% url 'dashboard_desarrollador' %}" style="background: #222; color: white; border: 1px solid #333; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; text-align: center;">Cancelar</a>
+            <div class="form-group">
+              <label class="form-label"><i class="fa fa-link" style="margin-right:6px;"></i>URL de Evidencia <span style="font-weight:400; color:var(--text-muted);">(Opcional)</span></label>
+              <input type="url" name="archivo_url" placeholder="https://github.com/... o enlace a Google Drive" style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit;">
+            </div>
+
+            <div style="border-top:1px solid var(--border); padding-top:20px; display:flex; gap:12px;">
+              <a href="{% url 'dashboard_desarrollador' %}" class="btn btn-secondary" style="flex:1; justify-content:center;">Cancelar</a>
+              <button type="submit" class="btn btn-primary" style="flex:2; justify-content:center;">
+                <i class="fa fa-paper-plane"></i> Enviar Avance
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </form>
+    </main>
   </div>
-
+</div>
 </body>
 </html>

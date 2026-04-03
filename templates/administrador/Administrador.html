@@ -1,533 +1,762 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
-    <meta charset="UTF-8">
-    <title>TEM | Panel Admin</title>
-    <link rel="stylesheet" href="{% static 'admin/css/admin.css' %}">
-    <style>
-        .section-v {
-            display: none;
-        }
-
-        .section-v.active {
-            display: block;
-        }
-
-        .sidebar ul li {
-            cursor: pointer;
-            transition: 0.3s;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 5px;
-            list-style: none;
-            color: #aaa;
-        }
-
-        .sidebar ul li:hover {
-            background: #111;
-            color: white;
-        }
-
-        .sidebar ul li.active {
-            background: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-
-        .card-m {
-            background: #111;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #222;
-            text-align: center;
-        }
-
-        .log-row:nth-child(even) {
-            background: #0a0a0a;
-        }
-
-        .badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .badge-empresa {
-            background: #2196F3;
-            color: white;
-        }
-
-        .badge-dev {
-            background: #9C27B0;
-            color: white;
-        }
-
-        .badge-admin {
-            background: #4CAF50;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Panel Administrador</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}?v=2">
 </head>
-
 <body>
+<div class="app-layout">
 
-    <div class="dashboard">
-
-        <aside class="sidebar" style="background: #000; border-right: 1px solid #222; padding: 20px;">
-            <div style="text-align: center; margin-bottom: 40px;">
-                <img src="{% static 'IMG/Logo.jpg' %}" alt="Logo" style="width: 70px; border-radius: 50%;">
-                <h2 style="margin-top: 15px; font-size: 18px; color: white;">Panel Maestro</h2>
-            </div>
-            <ul style="padding: 0;">
-                <li onclick="showSection('statsSection', this)" class="active">
-                    📊 Estadísticas
-                    {% if notificaciones_pendientes_count > 0 %}
-                        <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">{{ notificaciones_pendientes_count }}</span>
-                    {% endif %}
-                </li>
-                <li onclick="showSection('chatSection', this)" style="color: #4CAF50;">
-                    💬 Chat Central 
-                    {% if mensajes_no_leidos_admin > 0 %}
-                        <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">{{ mensajes_no_leidos_admin }}</span>
-                    {% endif %}
-                </li>
-                <li onclick="showSection('usersSection', this)">👥 Gestión Usuarios</li>
-                <li onclick="showSection('projectsSection', this)">🏗️ Monitor Proyectos</li>
-                <li onclick="showSection('auditSection', this)">📜 Auditoría (Logs)</li>
-                <li onclick="showSection('reportsSection', this)">📁 Reportes</li>
-                <hr style="border: 0; border-top: 1px solid #222; margin: 20px 0;">
-                <li><a href="{% url 'logout' %}" style="color: #ff5555; text-decoration: none;">🚪 Cerrar Sesión</a>
-                </li>
-            </ul>
-        </aside>
-
-        <main class="content" style="background: #050505; padding: 40px; overflow-y: auto;">
-
-            <!-- SECCION: ESTADÍSTICAS -->
-            <section id="statsSection" class="section-v active">
-                <h1>Estado Global del Sistema</h1>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px;">
-                    <div class="card-m">
-                        <h3>Usuarios Registrados</h3>
-                        <p style="font-size: 32px;">{{ total_usuarios }}</p>
-                    </div>
-                    <div class="card-m">
-                        <h3>Empresas Activas</h3>
-                        <p style="font-size: 32px; color: #2196F3;">{{ total_empresas }}</p>
-                    </div>
-                    <div class="card-m">
-                        <h3>Desarrolladores</h3>
-                        <p style="font-size: 32px; color: #9C27B0;">{{ total_devs }}</p>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
-                    <div style="background: #111; padding: 10px; border-radius: 8px; border-left: 4px solid #4CAF50;">
-                        <span style="font-size: 11px; opacity: 0.6;"> Proyectos finalizados</span>
-                        <h4 style="margin: 5px 0 0 0;">{{ p_fin }}</h4>
-                    </div>
-                    <div style="background: #111; padding: 10px; border-radius: 8px; border-left: 4px solid #2196F3;">
-                        <span style="font-size: 11px; opacity: 0.6;"> Proyectos en desarrollo</span>
-                        <h4 style="margin: 5px 0 0 0;">{{ p_des }}</h4>
-                    </div>
-                    <div style="background: #111; padding: 10px; border-radius: 8px; border-left: 4px solid #FF9800;">
-                        <span style="font-size: 11px; opacity: 0.6;"> Proyectos disponibles</span>
-                        <h4 style="margin: 5px 0 0 0;">{{ p_pub }}</h4>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
-                    <div style="background: #111; padding: 10px; border-radius: 8px; border-bottom: 2px solid #9C27B0;">
-                        <span style="font-size: 11px; opacity: 0.6;"> Postulaciones pendientes</span>
-                        <h4 style="margin: 5px 0 0 0; color: #9C27B0;">{{ post_pen }}</h4>
-                    </div>
-                    <div style="background: #111; padding: 10px; border-radius: 8px; border-bottom: 2px solid #FFD700;">
-                        <span style="font-size: 11px; opacity: 0.6;"> Calificación global</span>
-                        <h4 style="margin: 5px 0 0 0; color: #FFD700;">{{ promedio_global }}</h4>
-                    </div>
-                    <div style="background: #111; padding: 10px; border-radius: 8px; border-bottom: 2px solid #f44336;">
-                        <span style="font-size: 11px; opacity: 0.6;"> Proyectos en retraso</span>
-                        <h4 style="margin: 5px 0 0 0; color: #f44336;">{{ p_ret }}</h4>
-                    </div>
-                </div>
-
-                <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                    <div class="card-m" style="text-align: left;">
-                        <h3> Notificaciones recientes</h3>
-                        <ul style="list-style: none; padding: 0; margin-top: 20px;">
-                            {% for notif in notificaciones %}
-                                <li style="padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; opacity: 0.8;">
-                                    <strong>{{ notif.get_tipo_display }}:</strong> {{ notif.mensaje }}
-                                    <br><small style="opacity: 0.5;">{{ notif.fecha|date:"d/m H:i" }}</small>
-                                </li>
-                            {% empty %}
-                                <li style="opacity: 0.4;">Sin notificaciones nuevas.</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="card-m" style="text-align: left;">
-                        <h3> Últimos proyectos publicados</h3>
-                        <table style="width: 100%; margin-top: 20px; font-size: 14px;">
-                            {% for p in proyectos_todos|slice:":5" %}
-                            <tr style="border-bottom: 1px solid #222;">
-                                <td style="padding: 10px 0;">{{ p.titulo }}</td>
-                                <td style="opacity: 0.5;">{{ p.empresa.username }}</td>
-                                <td><span class="badge" style="background: #222;">{{ p.get_estado_display }}</span></td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    <div class="card-m" style="text-align: left;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 style="margin: 0;"> Desempeño del talento</h3>
-                        </div>
-                        
-                        <h4 style="font-size: 11px; opacity: 0.4; text-transform: uppercase; margin-bottom: 10px;">Mejores calificados</h4>
-                        <table style="width: 100%; font-size: 13px; margin-bottom: 25px;">
-                            {% for dev in ranking_talento %}
-                            <tr style="border-bottom: 1px solid #222;">
-                                <td style="padding: 8px 0;">{{ dev.0 }}</td>
-                                <td style="text-align: center;"><span style="color: #FFD700;">★</span> {{ dev.2 }}</td>
-                                <td style="text-align: right; opacity: 0.3; font-size: 10px;"></td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="3" style="opacity: 0.4; padding: 10px 0;">Sin datos.</td></tr>
-                            {% endfor %}
-                        </table>
-
-                        <h4 style="font-size: 11px; color: #ff5555; text-transform: uppercase; margin-bottom: 10px;"> Talento en alerta (Bajo)</h4>
-                        <table style="width: 100%; font-size: 13px;">
-                            {% for dev in ranking_bajo %}
-                            <tr style="border-bottom: 1px solid #222;">
-                                <td style="padding: 8px 0;">{{ dev.0 }}</td>
-                                <td style="text-align: center; color: #ff5555;">★ {{ dev.2 }}</td>
-                                <td style="text-align: right;">
-                                    <a href="{% url 'sala_chat' dev.3 0 %}" title="Contactar para soporte" style="background: #f44336; color: white; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-size: 10px; font-weight: bold;">INTERVENIR</a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="3" style="opacity: 0.4; padding: 10px 0;">No hay talentos con baja calificación.</td></tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    <div class="card-m" style="text-align: left;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h3 style="margin: 0;">Desempeño de empresas</h3>
-                        </div>
-
-                        <h4 style="font-size: 11px; opacity: 0.4; text-transform: uppercase; margin-bottom: 10px;"> Mejores Calificados </h4>
-                        <table style="width: 100%; font-size: 13px; margin-bottom: 25px;">
-                            {% for emp in ranking_empresas %}
-                            <tr style="border-bottom: 1px solid #222;">
-                                <td style="padding: 8px 0;">{{ emp.1|default:emp.0 }}</td>
-                                <td style="text-align: center;"><span style="color: #2196F3;">★</span> {{ emp.2 }}</td>
-                                <td style="text-align: right;">
-                                    <a href="{% url 'sala_chat' emp.4 0 %}" title="Chatear" style="text-decoration: none; font-size: 14px;">💬</a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="3" style="opacity: 0.4; padding: 10px 0;">Sin datos.</td></tr>
-                            {% endfor %}
-                        </table>
-
-                        <h4 style="font-size: 11px; color: #ff9800; text-transform: uppercase; margin-bottom: 10px;"> Empresas en Bajo</h4>
-                        <table style="width: 100%; font-size: 13px;">
-                            {% for emp in ranking_empresas_bajo %}
-                            <tr style="border-bottom: 1px solid #222;">
-                                <td style="padding: 8px 0;">{{ emp.1|default:emp.0 }}</td>
-                                <td style="text-align: center; color: #ff9800;">★ {{ emp.2 }}</td>
-                                <td style="text-align: right;">
-                                    <a href="{% url 'sala_chat' emp.4 0 %}" title="Contactar para mediación" style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-size: 10px; font-weight: bold;">MEDIAR</a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="3" style="opacity: 0.4; padding: 10px 0;">No hay empresas con baja calificación.</td></tr>
-                            {% endfor %}
-                        </table>
-                    </div>
-                    <div class="card-m" style="text-align: left; grid-column: span 2;">
-                        <h3>Historial de Reseñas </h3>
-                        <p style="font-size: 12px; opacity: 0.6; margin-bottom: 15px;">Monitor de comentarios entre Empresas y Desarrolladores.</p>
-                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                            <thead style="opacity: 0.5; font-size: 11px; text-transform: uppercase;">
-                                <tr style="border-bottom: 1px solid #333;">
-                                    <th style="text-align: left; padding: 8px;">Evaluador</th>
-                                    <th style="text-align: left;">Evaluado</th>
-                                    <th>Nota</th>
-                                    <th style="text-align: left;">Comentario</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for r in resenas_auditoria %}
-                                <tr style="border-bottom: 1px solid #222;">
-                                    <td style="padding: 10px 0;">{{ r.0 }} <span style="font-size: 9px; opacity: 0.5;">({{ r.4|upper }})</span></td>
-                                    <td>{{ r.1 }}</td>
-                                    <td style="text-align: center;"><strong>{{ r.2 }}</strong></td>
-                                    <td style="opacity: 0.8; font-style: italic;">"{{ r.3|truncatechars:60 }}"</td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="4" style="padding: 20px 0; opacity: 0.4;">No hay reseñas registradas aún.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SECCION: PROYECTOS -->
-            <section id="projectsSection" class="section-v">
-                <h1>Monitor Maestro de Proyectos</h1>
-                <div style="background: #111; border-radius: 12px; margin-top: 30px; overflow: hidden;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <thead style="background: #1a1a1a; color: #666;">
-                            <tr>
-                                <th style="padding: 15px; text-align: left;">Título</th>
-                                <th>Empresa</th>
-                                <th>Estado</th>
-                                <th>Desarrolladores (Hitos)</th>
-                                <th>Moderación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in proyectos_todos %}
-                            <tr class="log-row" style="text-align: center;">
-                                <td style="padding: 15px; text-align: left;">
-                                    <strong>{{ p.titulo }}</strong>
-                                    <br><small style="opacity: 0.5;">Vacantes: {{ p.vacantes }}</small>
-                                </td>
-                                <td>{{ p.empresa.username }}</td>
-                                <td><span class="badge" style="background: #222;">{{ p.get_estado_display|upper }}</span></td>
-                                <td style="padding: 10px;">
-                                    {% if p.contratos_activos %}
-                                        <div style="display: flex; flex-direction: column; gap: 5px; text-align: left; font-size: 12px;">
-                                        {% for contrato in p.contratos_activos %}
-                                            <div style="background: #1a1a1a; padding: 5px 10px; border-radius: 4px; border-left: 3px solid #4CAF50;">
-                                                <span style="font-weight: bold;">{{ contrato.desarrollador.nombre|default:contrato.desarrollador.username }}</span>
-                                                <span style="float: right; color: #4CAF50;">{{ contrato.hitos_completados }}/{{ contrato.total_hitos }} Hitos</span>
-                                            </div>
-                                        {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        <span style="opacity: 0.4; font-style: italic;">Sin desarrolladores</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 5px; justify-content: center;">
-                                        <a href="{% url 'sala_chat' p.empresa.id 0 %}" class="badge"
-                                            style="background: #2196F3; text-decoration: none; color: white; font-size: 10px;">
-                                            💬 Contactar
-                                        </a>
-                                        <a href="{% url 'ver_avances' p.id %}" class="badge"
-                                            style="background: #444; text-decoration: none; color: white; font-size: 10px;">
-                                            👁️ Auditar
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- ALERTAS DE INACTIVIDAD (INTEGRADAS) -->
-                {% if alertas_retraso %}
-                <div style="margin-top: 50px;">
-                    <h2 style="color: #ff5555; font-size: 18px;">⚠️ Proyectos con Alerta de Inactividad</h2>
-                    <p style="opacity: 0.7; font-size: 13px; margin-bottom: 20px;">Estos proyectos requieren atención inmediata por falta de avances (más de 15 días).</p>
-                    <div style="background: #111; border-radius: 12px; overflow: hidden; border: 1px solid #f44336;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                            <thead style="background: #2a1010; color: #ff5555; text-transform: uppercase; font-size: 11px;">
-                                <tr>
-                                    <th style="padding: 12px; text-align: left;">Proyecto</th>
-                                    <th>Empresa</th>
-                                    <th>Desarrollador</th>
-                                    <th>Inactividad</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for alerta in alertas_retraso %}
-                                <tr class="log-row" style="text-align: center; border-bottom: 1px solid #222;">
-                                    <td style="padding: 12px; text-align: left;"><strong>{{ alerta.0 }}</strong></td>
-                                    <td>{{ alerta.1 }}</td>
-                                    <td>{{ alerta.2 }}</td>
-                                    <td style="color: #ff5555; font-weight: bold;">{{ alerta.3 }} días</td>
-                                    <td>
-                                        <a href="{% url 'sala_chat' admin_id 0 %}" style="background: #444; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 10px;">Intervenir</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                {% endif %}
-            </section>
-
-            <!-- SECCION: CHAT CENTRAL -->
-            <section id="chatSection" class="section-v">
-                <h1>Centro de Mensajería Global</h1>
-                
-                <p style="opacity: 0.7; margin-bottom: 30px;">Conversaciones activas con todos los perfiles del sistema.
-                </p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-                    {% for conv in conversaciones %}
-                    <div class="card-m"
-                        style="display: flex; justify-content: space-between; align-items: center; text-align: left; {% if conv.pendiente %}border: 1px solid #4CAF50; background: #0a1a0a;{% endif %}">
-                        <div>
-                            <h3 style="margin: 0; font-size: 16px;">
-                                {{ conv.usuario.username }}
-                                {% if conv.pendiente %}
-                                    <span style="color: #4CAF50; font-size: 10px; margin-left: 5px;">● Nuevo</span>
-                                {% endif %}
-                            </h3>
-                            <p style="font-size: 12px; opacity: 0.5;">Último mensaje: {{ conv.ultimo_mensaje.fecha_envio|date:"d/m H:i" }}</p>
-                        </div>
-                        <a href="{% url 'sala_chat' conv.usuario.id 0 %}"
-                            style="background: white; color: black; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px;">Responder</a>
-                    </div>
-                    {% empty %}
-                    <p style="opacity: 0.4;">No hay conversaciones de chat registradas.</p>
-                    {% endfor %}
-                </div>
-            </section>
-
-            <!-- SECCION: USUARIOS -->
-            <section id="usersSection" class="section-v">
-                <h1>Directorio de Usuarios</h1>
-                <div
-                    style="background: #111; border-radius: 12px; margin-top: 30px; overflow: hidden; border: 1px solid #222;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <thead style="background: #1a1a1a; color: #666; text-transform: uppercase; font-size: 11px;">
-                            <tr>
-                                <th style="padding: 15px; text-align: left;">Usuario / Nombre</th>
-                                <th>Email</th>
-                                <th>Rol</th>
-                                <th>Registro</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in usuarios_todos %}
-                            <tr class="log-row">
-                                <td style="padding: 15px;"><strong>{{ u.username }}</strong><br><small>{{ u.nombre|default:"-" }}</small></td>
-                                <td>{{ u.email }}</td>
-                                <td><span class="badge badge-{{ u.rol }}">{{ u.get_rol_display }}</span></td>
-                                <td>{{ u.date_joined|date:"d/m/Y" }}</td>
-                                <td style="text-align: center;">
-                                    <form action="{% url 'admin_toggle_usuario' u.id %}" method="POST" style="margin: 0;">
-                                        {% csrf_token %}
-                                        <button type="submit" style="background: none; border: none; font-size: 18px; cursor: pointer; padding: 0;" title="Alternar Estado">
-                                            {% if u.is_active %}🟢{% else %}🔴{% endif %}
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- SECCION: AUDITORÍA (LOGS) -->
-            <section id="auditSection" class="section-v">
-                <h1>Registro de Auditoría (Logs)</h1>
-                <p style="opacity: 0.7;">Historial de todas las acciones críticas realizadas en la base de datos.</p>
-                <div
-                    style="background: #111; border-radius: 12px; margin-top: 30px; overflow: hidden; border: 1px solid #222;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                        <thead style="background: #1a1a1a; color: #666;">
-                            <tr>
-                                <th style="padding: 15px; text-align: left;">ID</th>
-                                <th style="text-align: left;">Usuario</th>
-                                <th style="text-align: left;">Acción Realizada</th>
-                                <th>Tabla</th>
-                                <th>Fecha y Hora</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for log in logs_auditoria %}
-                            <tr class="log-row">
-                                <td style="padding: 15px; opacity: 0.5;">#{{ log.0 }}</td>
-                                <td><strong>{{ log.1 }}</strong></td>
-                                <td>{{ log.2 }}</td>
-                                <td><span style="background: #222; padding: 2px 6px; border-radius: 4px;">{{ log.3
-                                        }}</span></td>
-                                <td style="text-align: center; opacity: 0.7;">{{ log.4|date:"d/m/Y H:i:s" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- SECCION: REPORTES -->
-            <section id="reportsSection" class="section-v">
-                <h1>Generación de Reportes Oficiales</h1>
-                <p style="opacity: 0.7; margin-bottom: 40px;">Descargas masivas de datos en formatos compatibles.</p>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px;">
-                    <div class="card-m" style="text-align: left; padding: 30px;">
-                        <h3>📊 Reporte de Proyectos</h3>
-                        <p style="font-size: 13px; opacity: 0.5; margin: 15px 0;">Exporta el listado completo de
-                            necesidades tecnológicas y estados.</p>
-                        <a href="{% url 'reporte_proyectos_csv' %}"
-                            style="display: block; background: #4CAF50; color: white; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold;">Descargar
-                            Excel (.csv)</a>
-                    </div>
-                    <div class="card-m" style="text-align: left; padding: 30px;">
-                        <h3>🎓 Reporte de Aprendices</h3>
-                        <p style="font-size: 13px; opacity: 0.5; margin: 15px 0;">Estadísticas de desempeño y
-                            calificaciones de desarrolladores.</p>
-                        <a href="{% url 'reporte_aprendices_csv' %}"
-                            style="display: block; background: #4CAF50; color: white; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold;">Descargar
-                            Excel (.csv)</a>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Panel Maestro</div>
+      </div>
     </div>
 
-    <script>
-        function showSection(id, btn) {
-            // Ocultar todas
-            document.querySelectorAll('.section-v').forEach(s => s.classList.remove('active'));
-            // Quitar active de botones
-            document.querySelectorAll('.sidebar ul li').forEach(l => l.classList.remove('active'));
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Visión General</div>
+      <button class="nav-item active" onclick="showSection('statsSection', this)">
+        <i class="fa fa-chart-pie"></i>
+        <span>Estadísticas</span>
+        {% if notificaciones_pendientes_count > 0 %}
+          <span class="nav-badge">{{ notificaciones_pendientes_count }}</span>
+        {% endif %}
+      </button>
+      <button class="nav-item" onclick="showSection('chatSection', this)">
+        <i class="fa fa-comments"></i>
+        <span>Chat Central</span>
+        {% if mensajes_no_leidos_admin > 0 %}
+          <span class="nav-badge">{{ mensajes_no_leidos_admin }}</span>
+        {% endif %}
+      </button>
+    </div>
 
-            // Mostrar seleccionada
-            const target = document.getElementById(id);
-            if (target) {
-                target.classList.add('active');
-                if (btn) {
-                    btn.classList.add('active');
-                } else {
-                    // Si no hay botón (carga inicial), buscar el li que tenga el onclick correspondiente
-                    const menuItems = document.querySelectorAll('.sidebar ul li');
-                    menuItems.forEach(li => {
-                        if (li.getAttribute('onclick') && li.getAttribute('onclick').includes(id)) {
-                            li.classList.add('active');
-                        }
-                    });
-                }
-            }
-        }
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Gestión</div>
+      <button class="nav-item" onclick="showSection('usersSection', this)">
+        <i class="fa fa-users"></i>
+        <span>Usuarios</span>
+      </button>
+      <button class="nav-item" onclick="showSection('projectsSection', this)">
+        <i class="fa fa-diagram-project"></i>
+        <span>Proyectos</span>
+      </button>
+      <button class="nav-item" onclick="showSection('auditSection', this)">
+        <i class="fa fa-file-shield"></i>
+        <span>Auditoría</span>
+      </button>
+      <button class="nav-item" onclick="showSection('reportsSection', this)">
+        <i class="fa fa-file-export"></i>
+        <span>Reportes</span>
+      </button>
+    </div>
 
-        // Al cargar la página, revisar si hay una sección en la URL
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const section = urlParams.get('section');
-            if (section) {
-                showSection(section);
-            }
-        };
-    </script>
+    <hr class="sidebar-sep" style="margin-top:auto;">
+    <div style="padding:12px;">
+      <a class="nav-item danger" href="{% url 'logout' %}">
+        <i class="fa fa-right-from-bracket"></i>
+        <span>Cerrar Sesión</span>
+      </a>
+    </div>
+  </aside>
 
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="main-wrapper">
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <div class="top-header-title">
+        Panel Administrador
+        <span>/ TEM Platform</span>
+      </div>
+      <button class="notif-btn" title="Notificaciones">
+        <i class="fa fa-bell"></i>
+        {% if notificaciones_pendientes_count > 0 %}
+          <span class="notif-badge">{{ notificaciones_pendientes_count }}</span>
+        {% endif %}
+      </button>
+      <div class="user-chip">
+        <div class="user-avatar"><i class="fa fa-shield-halved" style="font-size:12px;"></i></div>
+        <div>
+          <div class="user-name">Administrador</div>
+          <div class="user-role">Control Total</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="main-content">
+
+      <!-- ===== ESTADÍSTICAS ===== -->
+      <section id="statsSection" class="section-v active">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Estado Global del Sistema</div>
+            <div class="page-subtitle">Métricas en tiempo real de la plataforma</div>
+          </div>
+        </div>
+
+        <!-- Tarjetas principales -->
+        <div class="metrics-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+          <div class="metric-card dark">
+            <div class="mc-header">
+              <div class="mc-label">Usuarios Totales</div>
+              <div class="mc-icon"><i class="fa fa-users"></i></div>
+            </div>
+            <div class="mc-value">{{ total_usuarios }}</div>
+            <div class="mc-sub" style="color:rgba(255,255,255,.4);">Registrados en plataforma</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Empresas Activas</div>
+              <div class="mc-icon"><i class="fa fa-building"></i></div>
+            </div>
+            <div class="mc-value">{{ total_empresas }}</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Desarrolladores</div>
+              <div class="mc-icon"><i class="fa fa-code"></i></div>
+            </div>
+            <div class="mc-value">{{ total_devs }}</div>
+          </div>
+        </div>
+
+        <!-- Métricas de proyectos -->
+        <div class="metrics-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:24px;">
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Finalizados</div>
+              <div class="mc-icon" style="background:#dcfce7;color:#166534;"><i class="fa fa-check"></i></div>
+            </div>
+            <div class="mc-value">{{ p_fin }}</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">En Desarrollo</div>
+              <div class="mc-icon" style="background:#dbeafe;color:#1e40af;"><i class="fa fa-rocket"></i></div>
+            </div>
+            <div class="mc-value">{{ p_des }}</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Disponibles</div>
+              <div class="mc-icon" style="background:#fef3c7;color:#92400e;"><i class="fa fa-clock"></i></div>
+            </div>
+            <div class="mc-value">{{ p_pub }}</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Postulaciones</div>
+              <div class="mc-icon"><i class="fa fa-file-lines"></i></div>
+            </div>
+            <div class="mc-value">{{ post_pen }}</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Calificación</div>
+              <div class="mc-icon" style="background:#fef3c7;color:#92400e;"><i class="fa fa-star"></i></div>
+            </div>
+            <div class="mc-value">{{ promedio_global }}</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">En Retraso</div>
+              <div class="mc-icon" style="background:#fee2e2;color:#991b1b;"><i class="fa fa-triangle-exclamation"></i></div>
+            </div>
+            <div class="mc-value" style="color:var(--danger)">{{ p_ret }}</div>
+          </div>
+        </div>
+
+        <!-- Notificaciones + Últimos proyectos -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa fa-bell" style="margin-right:8px;opacity:.5;"></i>Notificaciones Recientes</div>
+            </div>
+            <ul class="notif-list">
+              {% for notif in notificaciones %}
+                <li class="notif-item">
+                  <i class="fa fa-circle-dot"></i>
+                  <div>
+                    <strong>{{ notif.get_tipo_display }}:</strong> {{ notif.mensaje }}
+                    <br><small style="color:var(--text-muted);">{{ notif.fecha|date:"d/m H:i" }}</small>
+                  </div>
+                </li>
+              {% empty %}
+                <div class="empty-state" style="padding:20px;"><i class="fa fa-inbox"></i><p>Sin notificaciones</p></div>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa fa-folder-open" style="margin-right:8px;opacity:.5;"></i>Últimos Proyectos</div>
+            </div>
+            <table class="data-table" style="margin-top:0;">
+              <tbody>
+                {% for p in proyectos_todos|slice:":5" %}
+                  <tr>
+                    <td><strong>{{ p.titulo }}</strong><br><small style="color:var(--text-muted);">{{ p.empresa.username }}</small></td>
+                    <td style="text-align:right;"><span class="badge badge-gray">{{ p.get_estado_display|upper }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Rankings de desempeño -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+          <!-- Ranking talento -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa fa-ranking-star" style="margin-right:8px;opacity:.5;"></i>Talento Destacado</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:10px;">Mejor Calificados</div>
+              <table class="data-table" style="margin-top:0;">
+                <tbody>
+                  {% for dev in ranking_talento %}
+                    <tr>
+                      <td>{{ dev.0 }}</td>
+                      <td style="text-align:right;color:#f59e0b;font-weight:600;">★ {{ dev.2 }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr><td colspan="2" style="text-align:center;color:var(--text-muted);">Sin datos</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--danger);margin-bottom:10px;">Talento en Alerta</div>
+              <table class="data-table" style="margin-top:0;">
+                <tbody>
+                  {% for dev in ranking_bajo %}
+                    <tr>
+                      <td>{{ dev.0 }}</td>
+                      <td style="color:var(--danger);font-weight:600;">★ {{ dev.2 }}</td>
+                      <td style="text-align:right;">
+                        <a href="{% url 'sala_chat' dev.3 0 %}" class="btn btn-danger btn-sm">Intervenir</a>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Sin alertas</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Ranking empresas -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fa fa-building" style="margin-right:8px;opacity:.5;"></i>Desempeño de Empresas</div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:10px;">Mejor Calificadas</div>
+              <table class="data-table" style="margin-top:0;">
+                <tbody>
+                  {% for emp in ranking_empresas %}
+                    <tr>
+                      <td>{{ emp.1|default:emp.0 }}</td>
+                      <td style="text-align:right;color:#3b82f6;font-weight:600;">★ {{ emp.2 }}</td>
+                      <td style="text-align:right;">
+                        <a href="{% url 'sala_chat' emp.4 0 %}" class="btn btn-secondary btn-sm"><i class="fa fa-message"></i></a>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Sin datos</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#f59e0b;margin-bottom:10px;">Empresas en Bajo</div>
+              <table class="data-table" style="margin-top:0;">
+                <tbody>
+                  {% for emp in ranking_empresas_bajo %}
+                    <tr>
+                      <td>{{ emp.1|default:emp.0 }}</td>
+                      <td style="color:#f59e0b;font-weight:600;">★ {{ emp.2 }}</td>
+                      <td style="text-align:right;">
+                        <a href="{% url 'sala_chat' emp.4 0 %}" class="btn btn-secondary btn-sm" style="color:#f59e0b;">Mediar</a>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Sin alertas</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial de reseñas -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa fa-comments" style="margin-right:8px;opacity:.5;"></i>Historial de Reseñas</div>
+            <div class="card-subtitle">Monitor de comentarios entre Empresas y Desarrolladores</div>
+          </div>
+          <div class="table-wrapper" style="margin-top:0;border:none;box-shadow:none;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Evaluador</th>
+                  <th>Evaluado</th>
+                  <th>Nota</th>
+                  <th>Comentario</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in resenas_auditoria %}
+                  <tr>
+                    <td>{{ r.0 }} <span style="font-size:10px;color:var(--text-muted);">({{ r.4|upper }})</span></td>
+                    <td>{{ r.1 }}</td>
+                    <td style="text-align:center;font-weight:700;">{{ r.2 }}</td>
+                    <td style="font-style:italic;color:var(--text-secondary);">"{{ r.3|truncatechars:60 }}"</td>
+                  </tr>
+                {% empty %}
+                  <tr><td colspan="4"><div class="empty-state" style="padding:20px;"><i class="fa fa-file-circle-xmark"></i><p>No hay reseñas registradas aún</p></div></td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== PROYECTOS ===== -->
+      <section id="projectsSection" class="section-v">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Monitor Maestro de Proyectos</div>
+            <div class="page-subtitle">Supervisión y moderación de todos los proyectos activos</div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Proyecto</th>
+                <th>Empresa</th>
+                <th>Estado</th>
+                <th>Desarrolladores / Hitos</th>
+                <th>Moderación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in proyectos_todos %}
+                <tr>
+                  <td>
+                    <strong>{{ p.titulo }}</strong><br>
+                    <small style="color:var(--text-muted);">{{ p.vacantes }} vacantes</small>
+                  </td>
+                  <td style="color:var(--text-secondary);">{{ p.empresa.username }}</td>
+                  <td><span class="badge badge-gray">{{ p.get_estado_display|upper }}</span></td>
+                  <td>
+                    {% if p.contratos_activos %}
+                      <div style="display:flex;flex-direction:column;gap:4px;">
+                        {% for contrato in p.contratos_activos %}
+                          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--page-bg);padding:4px 10px;border-radius:6px;font-size:12px;border-left:3px solid #111;">
+                            <span><strong>{{ contrato.desarrollador.nombre|default:contrato.desarrollador.username }}</strong></span>
+                            <span style="color:var(--text-muted);">{{ contrato.hitos_completados }}/{{ contrato.total_hitos }}</span>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% else %}
+                      <span style="color:var(--text-muted);font-style:italic;font-size:12px;">Sin desarrolladores</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div style="display:flex;gap:6px;">
+                      <a href="{% url 'sala_chat' p.empresa.id 0 %}" class="btn btn-secondary btn-sm">
+                        <i class="fa fa-comments"></i>
+                      </a>
+                      <a href="{% url 'ver_avances' p.id %}" class="btn btn-secondary btn-sm">
+                        <i class="fa fa-eye"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Alertas de inactividad -->
+        {% if alertas_retraso %}
+          <div style="margin-top:32px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+              <i class="fa fa-triangle-exclamation" style="color:var(--danger);"></i>
+              <div class="page-title" style="font-size:16px;color:var(--danger);">Proyectos con Alerta de Inactividad</div>
+            </div>
+            <div class="table-wrapper" style="border-color:#fecaca;">
+              <table class="data-table">
+                <thead style="background:#fef2f2;">
+                  <tr>
+                    <th style="color:var(--danger);">Proyecto</th>
+                    <th style="color:var(--danger);">Empresa</th>
+                    <th style="color:var(--danger);">Desarrollador</th>
+                    <th style="color:var(--danger);">Inactividad</th>
+                    <th style="color:var(--danger);">Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for alerta in alertas_retraso %}
+                    <tr>
+                      <td><strong>{{ alerta.0 }}</strong></td>
+                      <td>{{ alerta.1 }}</td>
+                      <td>{{ alerta.2 }}</td>
+                      <td style="color:var(--danger);font-weight:700;">{{ alerta.3 }} días</td>
+                      <td>
+                        <a href="{% url 'sala_chat' admin_id 0 %}" class="btn btn-danger btn-sm">Intervenir</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      <!-- ===== CHAT CENTRAL ===== -->
+      <section id="chatSection" class="section-v">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Centro de Mensajería Global</div>
+            <div class="page-subtitle">Conversaciones activas con todos los perfiles del sistema</div>
+          </div>
+        </div>
+        <div class="cards-grid">
+          {% for conv in conversaciones %}
+            <div class="project-card" style="display:flex;align-items:center;justify-content:space-between;{% if conv.pendiente %}border-left:3px solid #111;{% endif %}">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="user-avatar" style="width:40px;height:40px;background:#374151;">
+                  {{ conv.usuario.username|slice:":1"|upper }}
+                </div>
+                <div>
+                  <div class="project-card-title">
+                    {{ conv.usuario.username }}
+                    {% if conv.pendiente %}<span style="color:var(--success);font-size:10px;margin-left:5px;">● Nuevo</span>{% endif %}
+                  </div>
+                  <div class="project-card-sub">{{ conv.ultimo_mensaje.fecha_envio|date:"d/m H:i" }}</div>
+                </div>
+              </div>
+              <a href="{% url 'sala_chat' conv.usuario.id 0 %}" class="btn btn-primary btn-sm">Responder</a>
+            </div>
+          {% empty %}
+            <div class="empty-state" style="grid-column:1/-1;"><i class="fa fa-comments"></i><p>No hay conversaciones registradas</p></div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- ===== USUARIOS ===== -->
+      <section id="usersSection" class="section-v">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Directorio de Usuarios</div>
+            <div class="page-subtitle">Gestión y control de acceso a la plataforma</div>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateUserModal()">
+            <i class="fa fa-user-plus"></i> Nuevo Usuario
+          </button>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Usuario / Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Registro</th>
+                <th style="text-align:center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in usuarios_todos %}
+                <tr>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <div class="user-avatar" style="width:32px;height:32px;font-size:12px;background:#374151;">
+                        {{ u.username|slice:":1"|upper }}
+                      </div>
+                      <div>
+                        <strong>{{ u.username }}</strong><br>
+                        <small style="color:var(--text-muted);">{{ u.nombre|default:"—" }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="color:var(--text-secondary);">{{ u.email }}</td>
+                  <td>
+                    <span class="badge {% if u.rol == 'administrador' %}badge-dark{% elif u.rol == 'empresa' %}badge-info{% else %}badge-gray{% endif %}">
+                      {{ u.get_rol_display }}
+                    </span>
+                  </td>
+                  <td style="color:var(--text-secondary);">{{ u.date_joined|date:"d/m/Y" }}</td>
+                  <td style="text-align:center; white-space:nowrap;">
+                    <form action="{% url 'admin_toggle_usuario' u.id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" style="border:none;background:none;cursor:pointer;font-size:16px; margin-right:8px;" title="Alternar Estado">
+                        {% if u.is_active %}
+                          <i class="fa fa-toggle-on" style="color:var(--success);"></i>
+                        {% else %}
+                          <i class="fa fa-toggle-off" style="color:var(--text-muted);"></i>
+                        {% endif %}
+                      </button>
+                    </form>
+                    <button onclick="openEditUserModal({{ u.id }})" style="border:none;background:none;cursor:pointer;font-size:16px; margin-right:8px; color:var(--info);" title="Editar">
+                      <i class="fa fa-edit"></i>
+                    </button>
+                    <button onclick="deleteUser({{ u.id }}, '{{ u.username }}')" style="border:none;background:none;cursor:pointer;font-size:16px; color:var(--danger);" title="Eliminar">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== MODALES CRUD USUARIOS ===== -->
+      <!-- Modal Editar Usuario -->
+      <div id="editUserModal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center;">
+        <div style="background:var(--card-bg); padding:24px; border-radius:var(--radius); width:100%; max-width:400px; box-shadow:var(--shadow-lg);">
+          <h3 style="margin-bottom:16px; font-size:18px;">Editar Usuario</h3>
+          <form id="editUserForm">
+            <input type="hidden" id="edit-id">
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="edit-email" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nombre</label>
+              <input type="text" id="edit-nombre" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rol</label>
+              <select id="edit-rol" class="form-input" required>
+                <option value="empresa">Empresa</option>
+                <option value="desarrollador">Desarrollador</option>
+                <option value="administrador">Administrador</option>
+              </select>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:24px;">
+              <button type="button" class="btn btn-secondary btn-full" onclick="closeModal('editUserModal')">Cancelar</button>
+              <button type="submit" class="btn btn-primary btn-full">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal Crear Usuario -->
+      <div id="createUserModal" class="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center;">
+        <div style="background:var(--card-bg); padding:24px; border-radius:var(--radius); width:100%; max-width:400px; box-shadow:var(--shadow-lg);">
+          <h3 style="margin-bottom:16px; font-size:18px;">Nuevo Usuario</h3>
+          <form id="createUserForm">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" id="create-username" class="form-input" required autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="create-email" class="form-input" required autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contraseña</label>
+              <input type="password" id="create-password" class="form-input" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Rol</label>
+              <select id="create-rol" class="form-input" required>
+                <option value="empresa">Empresa</option>
+                <option value="desarrollador">Desarrollador</option>
+                <option value="administrador">Administrador</option>
+              </select>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:24px;">
+              <button type="button" class="btn btn-secondary btn-full" onclick="closeModal('createUserModal')">Cancelar</button>
+              <button type="submit" class="btn btn-primary btn-full">Crear</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ===== AUDITORÍA ===== -->
+      <section id="auditSection" class="section-v">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Registro de Auditoría</div>
+            <div class="page-subtitle">Historial de todas las acciones críticas en la base de datos</div>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Acción Realizada</th>
+                <th>Tabla</th>
+                <th style="text-align:center;">Fecha y Hora</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in logs_auditoria %}
+                <tr>
+                  <td style="color:var(--text-muted);font-size:12px;">#{{ log.0 }}</td>
+                  <td><strong>{{ log.1 }}</strong></td>
+                  <td>{{ log.2 }}</td>
+                  <td><span class="badge badge-gray">{{ log.3 }}</span></td>
+                  <td style="text-align:center;color:var(--text-secondary);">{{ log.4|date:"d/m/Y H:i:s" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== REPORTES ===== -->
+      <section id="reportsSection" class="section-v">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Generación de Reportes Oficiales</div>
+            <div class="page-subtitle">Exportación de datos en formatos compatibles</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+          <div class="card">
+            <div style="font-size:28px;margin-bottom:14px;">📊</div>
+            <div class="project-card-title" style="margin-bottom:8px;">Reporte de Proyectos</div>
+            <div class="project-card-sub" style="margin-bottom:20px;">
+              Exporta el listado completo de necesidades tecnológicas y estados actuales.
+            </div>
+            <a href="{% url 'reporte_proyectos_csv' %}" class="btn btn-primary btn-full">
+              <i class="fa fa-download"></i> Descargar Excel (.csv)
+            </a>
+          </div>
+          <div class="card">
+            <div style="font-size:28px;margin-bottom:14px;">🎓</div>
+            <div class="project-card-title" style="margin-bottom:8px;">Reporte de Aprendices</div>
+            <div class="project-card-sub" style="margin-bottom:20px;">
+              Estadísticas de desempeño y calificaciones de desarrolladores registrados.
+            </div>
+            <a href="{% url 'reporte_aprendices_csv' %}" class="btn btn-primary btn-full">
+              <i class="fa fa-download"></i> Descargar Excel (.csv)
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  function showSection(id, btn) {
+    document.querySelectorAll('.section-v').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) target.classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  // --- CRUD LÓGICA ---
+  function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  function openCreateUserModal() {
+    document.getElementById('createUserForm').reset();
+    document.getElementById('createUserModal').style.display = 'flex';
+  }
+
+  document.getElementById('createUserForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = {
+      username: document.getElementById('create-username').value,
+      email: document.getElementById('create-email').value,
+      password: document.getElementById('create-password').value,
+      rol: document.getElementById('create-rol').value
+    };
+
+    try {
+      const response = await fetch('/api/crear/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (response.ok) { window.location.href = '?section=usersSection'; }
+      else { alert(result.error); }
+    } catch (e) { alert("Error de red."); }
+  });
+
+  async function openEditUserModal(id) {
+    try {
+      const response = await fetch(`/api/${id}/`);
+      const user = await response.json();
+      if (response.ok) {
+        document.getElementById('edit-id').value = user.id;
+        document.getElementById('edit-email').value = user.email;
+        document.getElementById('edit-nombre').value = user.nombre || '';
+        document.getElementById('edit-rol').value = user.rol;
+        document.getElementById('editUserModal').style.display = 'flex';
+      } else { alert(user.error || "No se pudo cargar el usuario."); }
+    } catch (e) { alert("Error de conexión."); }
+  }
+
+  document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-id').value;
+    const data = {
+      email: document.getElementById('edit-email').value,
+      nombre: document.getElementById('edit-nombre').value,
+      rol: document.getElementById('edit-rol').value
+    };
+
+    try {
+      const response = await fetch(`/api/${id}/actualizar/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+        body: JSON.stringify(data)
+      });
+      if (response.ok) { window.location.href = '?section=usersSection'; }
+      else { const result = await response.json(); alert(result.error); }
+    } catch (e) { alert("Error de red."); }
+  });
+
+  async function deleteUser(id, username) {
+    if (confirm(`¿Estás SEGURO de que deseas eliminar permanentemente al usuario ${username}? Esta acción no se puede deshacer.`)) {
+      try {
+        const response = await fetch(`/api/${id}/eliminar/`, {
+          method: 'DELETE',
+          headers: { 'X-CSRFToken': getCSRFToken() }
+        });
+        if (response.ok) { window.location.href = '?section=usersSection'; }
+        else { const result = await response.json(); alert(result.error); }
+      } catch (e) { alert("Error de red."); }
+    }
+  }
+
+  window.onload = function() {
+    const s = new URLSearchParams(window.location.search).get('section');
+    if (s) showSection(s);
+  };
+</script>
 </body>
-
 </html>

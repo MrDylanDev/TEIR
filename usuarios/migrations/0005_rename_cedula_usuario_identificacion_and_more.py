@@ -11,20 +11,15 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='usuario',
-            old_name='cedula',
-            new_name='identificacion',
-        ),
-        migrations.AddField(
-            model_name='perfildesarrollador',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
-        ),
-        migrations.AddField(
-            model_name='perfilempresa',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RenameField(
+                    model_name='usuario',
+                    old_name='cedula',
+                    new_name='identificacion',
+                ),
+            ],
+            database_operations=[],
         ),
         migrations.AlterField(
             model_name='perfildesarrollador',
@@ -35,5 +30,15 @@ class Migration(migrations.Migration):
             model_name='perfilempresa',
             name='usuario',
             field=models.OneToOneField(db_column='usuario_id', on_delete=django.db.models.deletion.CASCADE, related_name='perfil_empresa', to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.AddField(
+            model_name='perfildesarrollador',
+            name='id',
+            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+        ),
+        migrations.AddField(
+            model_name='perfilempresa',
+            name='id',
+            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
         ),
     ]

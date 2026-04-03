@@ -3,103 +3,172 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Avances del Proyecto | TEM</title>
-  <link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Línea de Tiempo — {{ proyecto.titulo }}</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+  <style>
+    .timeline-item { position: relative; padding-left: 28px; }
+    .timeline-item::before {
+      content: '';
+      position: absolute; left: 0; top: 22px; bottom: -12px;
+      width: 2px; background: var(--border);
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-dot {
+      position: absolute; left: -7px; top: 20px;
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid var(--card-bg);
+      box-shadow: 0 0 0 2px var(--border);
+    }
+  </style>
 </head>
-<body style="background: #0f0f0f; color: white; display: block; padding: 40px;">
+<body>
+<div class="app-layout">
 
-  <div style="max-width: 900px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h1 style="font-weight: 300;">Línea de Tiempo de Avances</h1>
-        {% if request.user.rol == 'empresa' %}
-            <a href="{% url 'dashboard_empresa' %}?section=desarrollo" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Volver al Dashboard</a>
-        {% elif request.user.rol == 'desarrollador' %}
-            <a href="{% url 'dashboard_desarrollador' %}?section=activos" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Volver a Mis Proyectos</a>
-        {% elif request.user.rol == 'administrador' %}
-            <a href="{% url 'dashboard_admin' %}?section=projectsSection" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Volver al Panel Maestro</a>
-        {% else %}
-            <a href="{% url 'inicio' %}" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Volver al Inicio</a>
-        {% endif %}
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Avances</div>
+      </div>
     </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      {% if request.user.rol == 'empresa' %}
+        <a class="nav-item" href="{% url 'dashboard_empresa' %}?section=desarrollo"><i class="fa fa-arrow-left"></i><span>Panel Empresa</span></a>
+      {% elif request.user.rol == 'desarrollador' %}
+        <a class="nav-item" href="{% url 'dashboard_desarrollador' %}?section=activos"><i class="fa fa-arrow-left"></i><span>Mis Proyectos</span></a>
+      {% elif request.user.rol == 'administrador' %}
+        <a class="nav-item" href="{% url 'dashboard_admin' %}?section=projectsSection"><i class="fa fa-arrow-left"></i><span>Panel Admin</span></a>
+      {% else %}
+        <a class="nav-item" href="{% url 'inicio' %}"><i class="fa fa-arrow-left"></i><span>Inicio</span></a>
+      {% endif %}
+    </div>
+  </aside>
 
-    <div style="background: #111; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #222;">
-        <h2 style="font-weight: 300;">{{ proyecto.titulo }}</h2>
-        <p style="opacity: 0.7;">{{ proyecto.descripcion }}</p>
-        <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <span class="estado {{ proyecto.estado }}" style="padding: 5px 12px; border-radius: 20px; font-size: 12px; background: #333;">{{ proyecto.get_estado_display|upper }}</span>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">Avances <span>/ {{ proyecto.titulo }}</span></div>
+      {% if hitos_totales > 0 %}
+        <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-secondary);">
+          <i class="fa fa-flag-checkered" style="color:var(--text-muted);"></i>
+          {{ hitos_completados }}/{{ hitos_totales }} hitos
+          <div style="width:80px; height:6px; background:var(--border); border-radius:4px; overflow:hidden;">
+            <div style="height:100%; background:var(--success); width:{% if hitos_totales %}{% widthratio hitos_completados hitos_totales 100 %}%{% else %}0%{% endif %}; transition:width 0.5s;"></div>
+          </div>
+        </div>
+      {% endif %}
+    </header>
+
+    <main class="main-content">
+      <!-- Resumen del Proyecto -->
+      <div class="card" style="margin-bottom:20px; border-left:4px solid var(--accent);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:20px;">
+          <div>
+            <div class="card-title" style="font-size:17px;">{{ proyecto.titulo }}</div>
+            <p style="color:var(--text-secondary); font-size:13px; margin-top:6px;">{{ proyecto.descripcion }}</p>
+            <span class="badge badge-{% if proyecto.estado == 'en_desarrollo' %}info{% elif proyecto.estado == 'finalizado' %}success{% elif proyecto.estado == 'en_revision' %}warning{% else %}gray{% endif %}" style="margin-top:10px; display:inline-flex;">
+              {{ proyecto.get_estado_display|upper }}
+            </span>
+          </div>
+
+          <!-- Panel de moderación Admin -->
+          {% if request.user.rol == 'administrador' and proyecto.estado == 'finalizado' %}
+            <div style="background:#fff8f0; border:1px dashed #f59e0b; padding:14px 18px; border-radius:var(--radius-sm); min-width:220px;">
+              <div style="font-size:11px; color:#f59e0b; font-weight:700; margin-bottom:10px;">
+                <i class="fa fa-shield-halved" style="margin-right:6px;"></i>Panel de Moderación
+              </div>
+              <form method="post" action="{% url 'admin_reactivar_proyecto' proyecto.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                  onclick="return confirm('¿Reactivar este proyecto? Todos los involucrados serán notificados.')"
+                  class="btn btn-warning btn-sm btn-full" style="background:#f59e0b;">
+                  <i class="fa fa-rotate"></i> Reactivar Proyecto
+                </button>
+              </form>
             </div>
+          {% endif %}
+        </div>
+      </div>
 
-            <!-- Panel de Moderación (Solo para Admin en Proyectos Finalizados) -->
-            {% if request.user.rol == 'administrador' and proyecto.estado == 'finalizado' %}
-                <div style="background: rgba(255, 152, 0, 0.05); border: 1px dashed #ff9800; padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 15px;">
-                    <div style="font-size: 11px; color: #ff9800;">
-                        <strong>Panel de Moderación:</strong><br>
-                        ¿La empresa solicitó reactivar?
-                    </div>
-                    <form method="post" action="{% url 'admin_reactivar_proyecto' proyecto.id %}">
+      <!-- Línea de tiempo de avances -->
+      <div class="page-header" style="margin-bottom:16px;">
+        <div class="page-title" style="font-size:16px;"><i class="fa fa-timeline" style="margin-right:8px; color:var(--text-muted);"></i>Historial de Avances</div>
+      </div>
+
+      <div style="padding-left:16px; display:flex; flex-direction:column; gap:16px;">
+        {% for avance in avances %}
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:{% if avance.estado == 'aceptado' %}var(--success){% elif avance.estado == 'rechazado' %}var(--danger){% else %}var(--warning){% endif %};"></div>
+
+            <div class="card" style="border-left:3px solid {% if avance.estado == 'aceptado' %}var(--success){% elif avance.estado == 'rechazado' %}var(--danger){% else %}var(--warning){% endif %};">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                <div>
+                  <span style="font-size:15px; font-weight:600; color:var(--text-primary);">
+                    {{ avance.entregable.titulo|default:"Avance General" }}
+                  </span>
+                  <span class="badge badge-{% if avance.estado == 'aceptado' %}success{% elif avance.estado == 'rechazado' %}danger{% else %}warning{% endif %}" style="margin-left:10px;">{{ avance.get_estado_display|upper }}</span>
+                </div>
+                <span style="font-size:11.5px; color:var(--text-muted);">{{ avance.fecha_hora|date:"d M Y, H:i" }}</span>
+              </div>
+
+              <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:14px;">{{ avance.descripcion }}</p>
+
+              {% if avance.comentario_revision %}
+                <div style="background:var(--page-bg); padding:12px 16px; border-radius:var(--radius-sm); border-left:3px solid var(--info); margin-bottom:14px;">
+                  <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:6px;">Feedback de la Empresa</div>
+                  <p style="font-size:13px; color:var(--text-secondary); font-style:italic; margin:0;">"{{ avance.comentario_revision }}"</p>
+                </div>
+              {% endif %}
+
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="user-avatar" style="width:24px; height:24px; font-size:10px;">
+                    {% if avance.desarrollador.perfil_desarrollador.foto_perfil %}
+                      <img src="{{ avance.desarrollador.perfil_desarrollador.foto_perfil.url }}" alt="">
+                    {% else %}
+                      {{ avance.desarrollador.nombre|default:avance.desarrollador.username|slice:":1"|upper }}
+                    {% endif %}
+                  </div>
+                  <small style="color:var(--text-muted);">
+                    Por <strong style="color:var(--text-secondary);">{{ avance.desarrollador.nombre|default:avance.desarrollador.username }}</strong>
+                  </small>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                  {% if avance.archivo_url %}
+                    <a href="{{ avance.archivo_url }}" target="_blank" class="btn btn-secondary btn-sm">
+                      <i class="fa fa-link"></i> Ver Evidencia
+                    </a>
+                  {% endif %}
+
+                  {% if request.user.rol == 'empresa' and avance.estado == 'pendiente' %}
+                    <div>
+                      <form method="post" action="{% url 'revisar_avance' avance.id %}" style="display:flex; flex-direction:column; gap:8px; min-width:240px;">
                         {% csrf_token %}
-                        <button type="submit" 
-                           onclick="return confirm('¿Estás seguro de reactivar este proyecto y sus contratos? Todos los involucrados serán notificados.')"
-                           style="background: #ff9800; color: white; border: none; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; cursor: pointer;">
-                           ♻️ Reactivar Proyecto
-                        </button>
-                    </form>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="avances-timeline">
-      {% for avance in avances %}
-        <div style="background: #111; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid {% if avance.estado == 'aceptado' %}#4CAF50{% elif avance.estado == 'rechazado' %}#f44336{% else %}#ff9800{% endif %};">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span style="font-weight: bold; color: {% if avance.estado == 'aceptado' %}#4CAF50{% elif avance.estado == 'rechazado' %}#f44336{% else %}#ff9800{% endif %};">
-                    🚀 {{ avance.entregable.titulo|default:"Avance General" }} 
-                    <small style="opacity: 0.6; font-weight: normal; margin-left: 10px;">({{ avance.get_estado_display|upper }})</small>
-                </span>
-                <span style="opacity: 0.5; font-size: 13px;">{{ avance.fecha_hora|date:"d M Y, H:i" }}</span>
-            </div>
-            
-            <p style="margin-bottom: 15px;">{{ avance.descripcion }}</p>
-
-            {% if avance.comentario_revision %}
-                <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #64b4ff;">
-                    <small style="opacity: 0.5; display: block; margin-bottom: 5px;">Feedback de la Empresa:</small>
-                    <p style="margin: 0; font-size: 13px; font-style: italic;">"{{ avance.comentario_revision }}"</p>
-                </div>
-            {% endif %}
-
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <small style="opacity: 0.7;">Reportado por: <strong>{{ avance.desarrollador.username }}</strong></small>
-                
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    {% if avance.archivo_url %}
-                        <a href="{{ avance.archivo_url }}" target="_blank" style="color: #64b4ff; text-decoration: none; font-size: 14px;">Ver evidencia 🔗</a>
-                    {% endif %}
-
-                    {% if request.user.rol == 'empresa' and avance.estado == 'pendiente' %}
-                        <div style="margin-left: 15px; border-left: 1px solid #333; padding-left: 15px;">
-                            <form method="post" action="{% url 'revisar_avance' avance.id %}" style="display: flex; flex-direction: column; gap: 10px;">
-                                {% csrf_token %}
-                                <textarea name="comentario" placeholder="Escribe tus observaciones aquí..." style="background: #000; color: white; border: 1px solid #333; border-radius: 6px; padding: 8px; font-size: 12px; min-width: 250px;"></textarea>
-                                <div style="display: flex; gap: 5px;">
-                                    <button type="submit" name="accion" value="aceptar" style="flex: 1; background: #4CAF50; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Aceptar Hito</button>
-                                    <button type="submit" name="accion" value="rechazar" style="flex: 1; background: #f44336; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Rechazar</button>
-                                </div>
-                            </form>
+                        <textarea name="comentario" placeholder="Escribe tus observaciones..." style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; resize:none; min-height:55px; font-family:inherit; color:var(--text-primary); background:var(--card-bg);"></textarea>
+                        <div style="display:flex; gap:6px;">
+                          <button type="submit" name="accion" value="aceptar" class="btn btn-success btn-sm" style="flex:1; justify-content:center;"><i class="fa fa-check"></i> Aceptar</button>
+                          <button type="submit" name="accion" value="rechazar" class="btn btn-danger btn-sm" style="flex:1; justify-content:center;"><i class="fa fa-xmark"></i> Rechazar</button>
                         </div>
-                    {% endif %}
+                      </form>
+                    </div>
+                  {% endif %}
                 </div>
+              </div>
             </div>
-        </div>
-      {% empty %}
-        <div style="text-align: center; padding: 50px; background: #111; border-radius: 12px; border: 1px dashed #333;">
-            <p style="opacity: 0.5;">Aún no se han registrado avances para este proyecto.</p>
-        </div>
-      {% endfor %}
-    </div>
+          </div>
+        {% empty %}
+          <div class="empty-state">
+            <i class="fa fa-clock-rotate-left"></i>
+            <p>Aún no se han registrado avances para este proyecto.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </main>
   </div>
-
+</div>
 </body>
 </html>

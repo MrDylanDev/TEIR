@@ -3,42 +3,77 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mis Favoritos | TEM</title>
-  <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Mis Favoritos</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
 </head>
-<body style="background: #000; color: white; display: block; padding: 40px;">
+<body>
+<div class="app-layout">
 
-  <div style="max-width: 1000px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h1 style="font-weight: 300;">Mis Proyectos Guardados ❤️</h1>
-        <a href="{% url 'dashboard_desarrollador' %}" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Volver al Dashboard</a>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Favoritos</div>
+      </div>
     </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item active" href="#"><i class="fa fa-heart"></i><span>Guardados</span></a>
+      <a class="nav-item" href="{% url 'listar_proyectos' %}"><i class="fa fa-magnifying-glass"></i><span>Explorar</span></a>
+      <a class="nav-item" href="{% url 'dashboard_desarrollador' %}"><i class="fa fa-arrow-left"></i><span>Volver al Panel</span></a>
+    </div>
+  </aside>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">Mis Proyectos <span>/ Guardados</span></div>
+    </header>
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title"><i class="fa fa-heart" style="margin-right:10px; color:#ef4444;"></i>Proyectos Guardados</div>
+          <div class="page-subtitle">Proyectos que marcaste como favoritos para postularte más tarde</div>
+        </div>
+        <a href="{% url 'listar_proyectos' %}" class="btn btn-secondary"><i class="fa fa-plus"></i> Explorar más</a>
+      </div>
+
+      <div class="cards-grid">
         {% for fav in favoritos %}
-          <div style="background: #0a0a0a; padding: 25px; border-radius: 12px; border: 1px solid #222; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                      <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #4CAF50;">{{ fav.proyecto.get_tipo_solucion_display }}</span>
-                      <a href="{% url 'toggle_favorito' fav.proyecto.id %}" style="text-decoration: none; font-size: 18px;">❤️</a>
-                  </div>
-                  <h3 style="margin-bottom: 10px; font-weight: 300;">{{ fav.proyecto.titulo }}</h3>
-                  <p style="font-size: 14px; opacity: 0.7; line-height: 1.6;">{{ fav.proyecto.descripcion|truncatewords:20 }}</p>
+          <div class="project-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <span class="badge badge-info">{{ fav.proyecto.get_tipo_solucion_display }}</span>
+                <a href="{% url 'toggle_favorito' fav.proyecto.id %}" title="Quitar de favoritos" style="color:#ef4444; font-size:18px; line-height:1;" class="btn btn-secondary btn-sm" style="border-color:#fee2e2;">
+                  <i class="fa fa-heart"></i>
+                </a>
               </div>
-              
-              <div style="border-top: 1px solid #222; padding-top: 20px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
-                  <span style="font-size: 13px; opacity: 0.5;">De: {{ fav.proyecto.empresa.username }}</span>
-                  <a href="{% url 'postularse_a_proyecto' fav.proyecto.id %}" style="background: white; color: black; border: none; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">Postularse</a>
+              <div class="project-card-title" style="margin-bottom:8px;">{{ fav.proyecto.titulo }}</div>
+              <p class="project-card-sub" style="line-height:1.6;">{{ fav.proyecto.descripcion|truncatewords:22 }}</p>
+            </div>
+            <div style="border-top:1px solid var(--border); padding-top:16px; margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:13px; color:var(--text-secondary);">
+                <i class="fa fa-building" style="margin-right:6px; color:var(--text-muted);"></i>
+                {{ fav.proyecto.empresa.nombre|default:fav.proyecto.empresa.username }}
               </div>
+              <a href="{% url 'postularse_a_proyecto' fav.proyecto.id %}" class="btn btn-primary btn-sm">
+                <i class="fa fa-paper-plane"></i> Postularme
+              </a>
+            </div>
           </div>
         {% empty %}
-          <div style="grid-column: 1 / -1; text-align: center; padding: 100px; background: #0a0a0a; border-radius: 12px; border: 1px dashed #333;">
-              <p style="opacity: 0.5; font-size: 18px;">Aún no has guardado ningún proyecto como favorito.</p>
-              <a href="{% url 'listar_proyectos' %}" style="display: inline-block; margin-top: 20px; color: #4CAF50; text-decoration: none;">Explorar Proyectos</a>
+          <div class="empty-state" style="grid-column:1/-1;">
+            <i class="fa fa-heart-crack"></i>
+            <p style="font-size:16px; font-weight:600; margin-bottom:8px;">Aún no tienes favoritos</p>
+            <p style="margin-bottom:20px;">Guarda proyectos que te interesen para postularte después.</p>
+            <a href="{% url 'listar_proyectos' %}" class="btn btn-primary"><i class="fa fa-magnifying-glass"></i> Explorar Proyectos</a>
           </div>
         {% endfor %}
-    </div>
+      </div>
+    </main>
   </div>
-
+</div>
 </body>
 </html>

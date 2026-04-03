@@ -3,34 +3,75 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mensaje: {{ mensaje.titulo }} | TEM</title>
-  <link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | {{ mensaje.titulo|default:"Detalle del Mensaje" }}</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
 </head>
-<body style="background: #0f0f0f; color: white; display: block; padding: 40px;">
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Mensajería</div>
+      </div>
+    </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item" href="{% url 'mensajeria_inbox' %}"><i class="fa fa-arrow-left"></i><span>Bandeja de Entrada</span></a>
+    </div>
+  </aside>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">Mensaje <span>/ Detalle</span></div>
+    </header>
+    <main class="main-content" style="display:flex; justify-content:center;">
+      <div style="max-width:720px; width:100%;">
+        <div class="card">
+          <!-- Cabecera -->
+          <div style="border-bottom:1px solid var(--border); padding-bottom:18px; margin-bottom:18px;">
+            <div class="card-title" style="font-size:20px; margin-bottom:10px;">{{ mensaje.titulo|default:"(Sin título)" }}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+              <div style="display:flex; gap:20px; font-size:13px; color:var(--text-secondary);">
+                <div>
+                  <span style="color:var(--text-muted);">De:</span>
+                  <strong style="margin-left:4px;">{{ mensaje.remitente.nombre|default:mensaje.remitente.username }}</strong>
+                </div>
+                <div>
+                  <span style="color:var(--text-muted);">Para:</span>
+                  <strong style="margin-left:4px;">{{ mensaje.receptor.nombre|default:mensaje.receptor.username }}</strong>
+                </div>
+                {% if mensaje.proyecto %}
+                  <div>
+                    <span style="color:var(--text-muted);">Proyecto:</span>
+                    <span class="badge badge-info" style="margin-left:4px;">{{ mensaje.proyecto.titulo }}</span>
+                  </div>
+                {% endif %}
+              </div>
+              <span style="font-size:12px; color:var(--text-muted);">{{ mensaje.fecha_envio|date:"d M Y, H:i" }}</span>
+            </div>
+          </div>
 
-  <div style="max-width: 800px; margin: 0 auto; background: #111; padding: 35px; border-radius: 12px; border: 1px solid #222;">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 20px;">
-        <div>
-            <h1 style="font-weight: 300; font-size: 24px; margin-bottom: 5px;">{{ mensaje.titulo|default:"(Sin título)" }}</h1>
-            <p style="opacity: 0.7;">De: <strong>{{ mensaje.remitente.username }}</strong> para <strong>{{ mensaje.receptor.username }}</strong></p>
-            {% if mensaje.proyecto %}
-                <p style="font-size: 13px; color: #4CAF50; margin-top: 5px;">Proyecto: {{ mensaje.proyecto.titulo }}</p>
+          <!-- Cuerpo del mensaje -->
+          <div style="min-height:200px; line-height:1.8; font-size:14.5px; color:var(--text-secondary); white-space:pre-wrap;">{{ mensaje.contenido }}</div>
+
+          <!-- Acciones -->
+          <div style="border-top:1px solid var(--border); padding-top:20px; margin-top:24px; display:flex; gap:12px;">
+            {% if mensaje.receptor == user and mensaje.proyecto %}
+              <a href="{% url 'sala_chat' mensaje.remitente.id mensaje.proyecto.id %}" class="btn btn-primary" style="flex:1; justify-content:center;">
+                <i class="fa fa-reply"></i> Responder vía Chat
+              </a>
             {% endif %}
+            <a href="{% url 'mensajeria_inbox' %}" class="btn btn-secondary" style="flex:1; justify-content:center;">
+              <i class="fa fa-inbox"></i> Volver a la Bandeja
+            </a>
+          </div>
         </div>
-        <div style="text-align: right;">
-            <p style="font-size: 13px; opacity: 0.5;">{{ mensaje.fecha_envio|date:"d M Y, H:i" }}</p>
-        </div>
-    </div>
-
-    <div style="min-height: 250px; line-height: 1.8; font-size: 16px; white-space: pre-wrap;">{{ mensaje.contenido }}</div>
-
-    <div style="display: flex; gap: 15px; margin-top: 40px; border-top: 1px solid #222; padding-top: 30px;">
-        {% if mensaje.receptor == user %}
-            <a href="{% url 'sala_chat' mensaje.remitente.id (mensaje.proyecto.id|default:0) %}" style="background: #4CAF50; color: white; border: none; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; flex: 1; text-align: center;">💬 Ir al Chat para Responder</a>
-        {% endif %}
-        <a href="{% url 'mensajeria_inbox' %}" style="background: #222; color: white; border: 1px solid #333; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; flex: 1; text-align: center;">Volver a la bandeja</a>
-    </div>
+      </div>
+    </main>
   </div>
-
+</div>
 </body>
 </html>

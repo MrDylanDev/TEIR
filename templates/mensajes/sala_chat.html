@@ -2,132 +2,209 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Chat con {{ receptor.username }} | TEM</title>
-    <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
-    <style>
-        body { background: #000; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
-        .main-layout { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 260px; background: #0a0a0a; border-right: 1px solid #1a1a1a; display: flex; flex-direction: column; padding: 20px; }
-        .chat-area { flex: 1; display: flex; flex-direction: column; background: #000; }
-        .chat-header { background: #111; padding: 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        
-        .participant-link { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; color: #ccc; text-decoration: none; font-size: 14px; transition: 0.3s; margin-bottom: 5px; }
-        .participant-link:hover { background: #1a1a1a; color: #fff; }
-        .participant-link.active { background: #4CAF50; color: white; }
-        .role-tag { font-size: 9px; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: #222; opacity: 0.6; }
-        .mensaje { max-width: 70%; padding: 12px 18px; border-radius: 15px; font-size: 15px; line-height: 1.4; position: relative; }
-        .enviado { align-self: flex-end; background: #4CAF50; color: white; border-bottom-right-radius: 2px; }
-        .recibido { align-self: flex-start; background: #222; color: white; border-bottom-left-radius: 2px; border: 1px solid #333; }
-        .meta { display: block; font-size: 10px; margin-top: 5px; opacity: 0.6; text-align: right; }
-        .chat-input { background: #111; padding: 20px; border-top: 1px solid #222; }
-        .input-group { display: flex; gap: 15px; max-width: 1000px; margin: 0 auto; }
-        input[type="text"] { flex: 1; background: #000; border: 1px solid #333; color: white; padding: 12px 18px; border-radius: 25px; outline: none; transition: border 0.3s; }
-        input[type="text"]:focus { border-color: #4CAF50; }
-        .btn-enviar { background: #4CAF50; color: white; border: none; padding: 10px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Chat — {{ receptor.nombre|default:receptor.username }}</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+  <style>
+    /* ===== CHAT LAYOUT ===== */
+    .chat-layout { display:flex; height:calc(100vh - 64px); overflow:hidden; }
+    .chat-participants {
+      width: 240px; flex-shrink:0;
+      border-right: 1px solid var(--border);
+      background: var(--card-bg);
+      display: flex; flex-direction:column;
+      overflow-y: auto; padding: 16px 12px;
+    }
+    .chat-participants-title {
+      font-size:10px; font-weight:700; text-transform:uppercase;
+      letter-spacing:1.2px; color:var(--text-muted); padding:0 8px; margin-bottom:10px;
+    }
+    .chat-participant-link {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 10px; border-radius:10px; font-size:13px;
+      color:var(--text-secondary); text-decoration:none; margin-bottom:3px;
+      transition: all 0.18s; font-weight:500;
+    }
+    .chat-participant-link:hover { background:var(--page-bg); color:var(--text-primary); }
+    .chat-participant-link.active { background:var(--accent); color:#fff; }
+    .online-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .role-tag {
+      font-size:9px; text-transform:uppercase; letter-spacing:0.5px;
+      padding:2px 5px; border-radius:4px; background:var(--page-bg);
+      color:var(--text-muted); margin-left:auto; font-weight:700;
+    }
+
+    /* ===== CHAT MAIN ===== */
+    .chat-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .chat-messages { flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:14px; background:var(--page-bg); }
+    .chat-messages::-webkit-scrollbar { width:4px; }
+    .chat-messages::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.1); border-radius:4px; }
+
+    .message-bubble {
+      max-width:65%; padding:12px 16px;
+      border-radius:16px; font-size:13.5px; line-height:1.5;
+      position:relative; word-break:break-word;
+    }
+    .message-sent {
+      align-self:flex-end; background:var(--accent); color:#fff;
+      border-bottom-right-radius:4px;
+    }
+    .message-received {
+      align-self:flex-start; background:var(--card-bg); color:var(--text-primary);
+      border:1px solid var(--border); border-bottom-left-radius:4px;
+    }
+    .message-sender-name { font-size:10px; font-weight:700; margin-bottom:4px; opacity:0.8; }
+    .message-time { font-size:10px; margin-top:6px; opacity:0.55; text-align:right; }
+
+    /* ===== CHAT INPUT ===== */
+    .chat-input-area {
+      background:var(--card-bg); border-top:1px solid var(--border);
+      padding:16px 20px;
+    }
+    .chat-input-form { display:flex; gap:12px; max-width:900px; margin:0 auto; }
+    .chat-input-field {
+      flex:1; padding:10px 18px; border-radius:50px;
+      border:1px solid var(--border); background:var(--page-bg);
+      font-size:13.5px; font-family:inherit;
+      color:var(--text-primary); outline:none; transition:border-color 0.2s;
+    }
+    .chat-input-field:focus { border-color:#9ca3af; }
+    .chat-send-btn { padding:10px 22px; border-radius:50px; }
+    .chat-readonly {
+      text-align:center; background:var(--page-bg); padding:12px 20px;
+      border-radius:10px; border:1px solid var(--border);
+      font-size:13px; color:var(--text-muted);
+    }
+  </style>
 </head>
 <body>
+<div class="app-layout">
 
-    <div class="chat-header">
-        <div>
-            {% if es_grupal %}
-                <h2 style="margin:0; font-weight: 300;">🚀 Espacio de Trabajo: {{ proyecto.titulo }}</h2>
-                <p style="margin:5px 0 0; font-size:12px; opacity:0.6;">Equipo: 
-                    {% for comp in companeros %}{{ comp.username }}{% if not forloop.last %}, {% endif %}{% endfor %} | {{ proyecto.empresa.username }}
-                </p>
-            {% else %}
-                <h2 style="margin:0; font-weight: 300;">{{ receptor.username }} <small style="font-size: 12px; opacity:0.5;">({{ receptor.get_rol_display }})</small></h2>
-                {% if proyecto %}
-                    <p style="margin:5px 0 0; font-size:13px; color: #4CAF50;">Proyecto: {{ proyecto.titulo }}</p>
-                {% endif %}
-            {% endif %}
-        </div>
-        
-        {% if request.user.rol == 'administrador' %}
-            <a href="{% url 'dashboard_admin' %}" style="background: #222; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver al Panel</a>
-        {% elif request.user.rol == 'empresa' %}
-            <a href="{% url 'dashboard_empresa' %}?section=centro-chat" style="background: #222; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver</a>
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Mensajería</div>
+      </div>
+    </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      {% if request.user.rol == 'administrador' %}
+        <a class="nav-item" href="{% url 'dashboard_admin' %}"><i class="fa fa-arrow-left"></i><span>Panel Admin</span></a>
+      {% elif request.user.rol == 'empresa' %}
+        <a class="nav-item" href="{% url 'dashboard_empresa' %}?section=centro-chat"><i class="fa fa-arrow-left"></i><span>Panel Empresa</span></a>
+      {% else %}
+        <a class="nav-item" href="{% url 'dashboard_desarrollador' %}?section=centro-chat"><i class="fa fa-arrow-left"></i><span>Panel Dev</span></a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="main-wrapper">
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <div class="top-header-title">
+        {% if es_grupal %}
+          <i class="fa fa-users" style="margin-right:8px; color:var(--text-muted);"></i> Espacio Grupal
+          <span>/ {{ proyecto.titulo }}</span>
         {% else %}
-            <a href="{% url 'dashboard_desarrollador' %}?section=centro-chat" style="background: #222; color: white; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-size: 14px;">Volver</a>
+          <i class="fa fa-message" style="margin-right:8px; color:var(--text-muted);"></i>
+          {{ receptor.nombre|default:receptor.username }}
+          <span>/ {{ receptor.get_rol_display }}</span>
         {% endif %}
-    </div>
+      </div>
+      {% if proyecto %}
+        <span class="badge badge-info">{{ proyecto.titulo }}</span>
+      {% endif %}
+    </header>
 
-    <div class="main-layout">
-        {% if es_grupal or proyecto %}
-        <div class="sidebar">
-            <h4 style="font-size: 12px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">Participantes</h4>
-            
-            <!-- Chat Grupal -->
-            {% if proyecto %}
-            <a href="{% url 'sala_chat_grupal' proyecto.id %}" class="participant-link {% if es_grupal %}active{% endif %}">
-                <span>🚀</span> Espacio Grupal
-            </a>
-            {% endif %}
+    <!-- CHAT LAYOUT INNER -->
+    <div class="chat-layout">
 
-            <div style="margin: 20px 0; border-top: 1px solid #1a1a1a;"></div>
+      <!-- Panel de Participantes -->
+      {% if es_grupal or proyecto %}
+      <div class="chat-participants">
+        <div class="chat-participants-title">Participantes</div>
 
-            <!-- Empresa -->
-            {% if proyecto and request.user != proyecto.empresa %}
-            <a href="{% url 'sala_chat' proyecto.empresa.id proyecto.id %}" class="participant-link {% if receptor.id == proyecto.empresa.id %}active{% endif %}">
-                <div style="width: 8px; height: 8px; background: #4CAF50; border-radius: 50%;"></div>
-                {{ proyecto.empresa.username }} <span class="role-tag">Empresa</span>
-            </a>
-            {% endif %}
-
-            <!-- Desarrolladores -->
-            {% for comp in companeros %}
-                {% if comp != request.user %}
-                <a href="{% url 'sala_chat' comp.id proyecto.id %}" class="participant-link {% if receptor.id == comp.id %}active{% endif %}">
-                    <div style="width: 8px; height: 8px; background: #2196F3; border-radius: 50%;"></div>
-                    {{ comp.username }} <span class="role-tag">Dev</span>
-                </a>
-                {% endif %}
-            {% endfor %}
-        </div>
+        {% if proyecto %}
+          <a href="{% url 'sala_chat_grupal' proyecto.id %}" class="chat-participant-link {% if es_grupal %}active{% endif %}">
+            <i class="fa fa-rocket"></i> Espacio Grupal
+          </a>
+          <hr style="border:none; border-top:1px solid var(--border); margin:10px 0;">
         {% endif %}
 
-        <div class="chat-area">
-            <div class="chat-container" id="chat-container">
-                {% for msg in mensajes_chat %}
-                    <div class="mensaje {% if msg.remitente == request.user %}enviado{% else %}recibido{% endif %}">
-                        {% if es_grupal and msg.remitente != request.user %}
-                            <small style="display: block; font-weight: bold; font-size: 10px; margin-bottom: 5px; color: #4CAF50;">
-                                {{ msg.remitente.username }} ({% if msg.remitente.rol == 'empresa' %}Empresa{% else %}Dev{% endif %})
-                            </small>
-                        {% endif %}
-                        {{ msg.contenido }}
-                        <span class="meta">{{ msg.fecha_envio|date:"H:i" }}</span>
-                    </div>
-                {% empty %}
-                    <div style="text-align: center; margin-top: 50px; opacity: 0.4;">
-                        <p>No hay mensajes previos en este chat. ¡Di hola!</p>
-                    </div>
-                {% endfor %}
-            </div>
+        {% if proyecto and request.user != proyecto.empresa %}
+          <a href="{% url 'sala_chat' proyecto.empresa.id proyecto.id %}" class="chat-participant-link {% if receptor.id == proyecto.empresa.id %}active{% endif %}">
+            <span class="online-dot" style="background:var(--success);"></span>
+            {{ proyecto.empresa.nombre|default:proyecto.empresa.username }}
+            <span class="role-tag">Empresa</span>
+          </a>
+        {% endif %}
 
-            <div class="chat-input">
-                {% if proyecto and proyecto.estado == 'finalizado' %}
-                    <div style="text-align: center; padding: 15px; background: #1a1a1a; border-radius: 10px; color: #ff9800; border: 1px solid #333;">
-                        🔒 Este proyecto ha finalizado. El chat es ahora de solo lectura.
-                    </div>
-                {% else %}
-                    <form method="post" class="input-group">
-                        {% csrf_token %}
-                        <input type="text" name="contenido" placeholder="Escribe un mensaje..." required autocomplete="off">
-                        <button type="submit" class="btn-enviar">Enviar</button>
-                    </form>
-                {% endif %}
+        {% for comp in companeros %}
+          {% if comp != request.user %}
+            <a href="{% url 'sala_chat' comp.id proyecto.id %}" class="chat-participant-link {% if receptor.id == comp.id %}active{% endif %}">
+              <span class="online-dot" style="background:var(--info);"></span>
+              {{ comp.nombre|default:comp.username }}
+              <span class="role-tag">Dev</span>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Área de mensajes -->
+      <div class="chat-main">
+        <div class="chat-messages" id="chat-container">
+          {% for msg in mensajes_chat %}
+            <div class="message-bubble {% if msg.remitente == request.user %}message-sent{% else %}message-received{% endif %}">
+              {% if es_grupal and msg.remitente != request.user %}
+                <div class="message-sender-name">
+                  {{ msg.remitente.nombre|default:msg.remitente.username }}
+                  ({% if msg.remitente.rol == 'empresa' %}Empresa{% else %}Dev{% endif %})
+                </div>
+              {% endif %}
+              {{ msg.contenido }}
+              <div class="message-time">{{ msg.fecha_envio|date:"H:i" }}</div>
             </div>
+          {% empty %}
+            <div style="text-align:center; padding:60px 20px; color:var(--text-muted);">
+              <i class="fa fa-comments" style="font-size:36px; margin-bottom:12px; opacity:0.3; display:block;"></i>
+              No hay mensajes aún. ¡Sé el primero en escribir! 👋
+            </div>
+          {% endfor %}
         </div>
-    </div>
 
-    <script>
-        // Auto-scroll al final del chat
-        const container = document.getElementById('chat-container');
-        container.scrollTop = container.scrollHeight;
-    </script>
+        <div class="chat-input-area">
+          {% if proyecto and proyecto.estado == 'finalizado' %}
+            <div class="chat-readonly">
+              <i class="fa fa-lock" style="margin-right:8px;"></i>
+              Este proyecto ha finalizado. El chat es ahora de solo lectura.
+            </div>
+          {% else %}
+            <form method="post" class="chat-input-form">
+              {% csrf_token %}
+              <input type="text" name="contenido" class="chat-input-field" placeholder="Escribe un mensaje..." required autocomplete="off">
+              <button type="submit" class="btn btn-primary chat-send-btn">
+                <i class="fa fa-paper-plane"></i>
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
 
+    </div><!-- end chat-layout -->
+  </div><!-- end main-wrapper -->
+</div><!-- end app-layout -->
+
+<script>
+  const container = document.getElementById('chat-container');
+  if (container) container.scrollTop = container.scrollHeight;
+</script>
 </body>
 </html>

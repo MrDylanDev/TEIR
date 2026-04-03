@@ -56,6 +56,7 @@ class PerfilEmpresa(models.Model):
     telefono = models.CharField(max_length=20, blank=True, null=True)
     descripcion = models.TextField(blank=True, null=True)
     ciudad = models.CharField(max_length=100, blank=True, null=True)
+    logo = models.ImageField(upload_to='perfiles/empresas/', blank=True, null=True)
     calificacion_promedio = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
 
     def __str__(self):
@@ -69,6 +70,8 @@ class PerfilDesarrollador(models.Model):
     programa_formacion = models.CharField(max_length=200, blank=True, null=True)
     ficha = models.CharField(max_length=50, blank=True, null=True)
     habilidades = models.TextField(blank=True, null=True)
+    foto_perfil = models.ImageField(upload_to='perfiles/devs/', blank=True, null=True)
+    portafolio_url = models.URLField(max_length=500, blank=True, null=True)
     calificacion_promedio = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     num_proyectos_completados = models.IntegerField(default=0)
 

@@ -2,291 +2,424 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TEM - Desarrollador</title>
-  <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}" />
-  <style>
-      .seccion-v { display: none; }
-      .seccion-v.activa { display: block; }
-      .btn-nav { width: 100%; text-align: left; background: none; border: none; color: white; padding: 12px 20px; cursor: pointer; transition: 0.3s; border-radius: 8px; margin-bottom: 5px; font-size: 14px; }
-      .btn-nav:hover { background: #111; }
-      .btn-nav.active { background: #4CAF50; font-weight: bold; }
-      .card-p { background: #0a0a0a; padding: 20px; border-radius: 12px; border: 1px solid #222; transition: 0.3s; }
-      .card-p:hover { border-color: #4CAF50; }
-      .badge { font-size: 10px; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; font-weight: bold; }
-      .badge-pendiente { background: #ff9800; color: white; }
-      .badge-aceptada { background: #4CAF50; color: white; }
-      .badge-rechazada { background: #f44336; color: white; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Desarrollador</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}?v=2">
 </head>
 <body>
+<div class="app-layout">
 
+  <!-- ===== SIDEBAR ===== -->
   <aside class="sidebar">
-    <div class="logo">
-      <img src="{% static 'IMG/Logo.jpg' %}" alt="Logo TEM" style="width: 60px; border-radius: 50%;">
-      <h3 style="margin-top: 10px; font-size: 16px;">TechnoEmprende</h3>
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Desarrollador</div>
+      </div>
     </div>
 
-    <nav class="menu" style="margin-top: 30px;">
-      <button class="btn-nav active" onclick="verSeccion('inicio', this)">
-          🏠 Inicio
-          {% if notificaciones_pendientes_count > 0 %}
-              <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 5px;">{{ notificaciones_pendientes_count }}</span>
-          {% endif %}
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Principal</div>
+      <button class="nav-item active" onclick="verSeccion('inicio', this)">
+        <i class="fa fa-house"></i>
+        <span>Inicio</span>
+        {% if notificaciones_pendientes_count > 0 %}
+          <span class="nav-badge">{{ notificaciones_pendientes_count }}</span>
+        {% endif %}
       </button>
-      <button class="btn-nav" onclick="verSeccion('centro-chat', this)" style="color: #4CAF50;">💬 Chat</button>
-      
-      <div style="margin: 20px 0 10px 20px; font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;">Proyectos</div>
-      <a href="{% url 'listar_proyectos' %}" style="text-decoration: none;"><button class="btn-nav">🔍 Explorar Proyectos</button></a>
-      <button class="btn-nav" onclick="verSeccion('postulaciones', this)">📝 Mis Postulaciones</button>
-      <button class="btn-nav" onclick="verSeccion('activos', this)">🚀 Trabajo Actual</button>
-      <button class="btn-nav" onclick="verSeccion('completados', this)">🏆 Proyectos finalizados</button>
-      <button class="btn-nav" onclick="verSeccion('favoritos', this)">❤️ Favoritos</button>
+      <button class="nav-item" onclick="verSeccion('centro-chat', this)">
+        <i class="fa fa-comments"></i>
+        <span>Mensajes</span>
+      </button>
+    </div>
 
-      <div style="margin: 20px 0 10px 20px; font-size: 11px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;">Cuenta</div>
-      <a href="{% url 'editar_perfil' %}" style="text-decoration: none;"><button class="btn-nav">👤 Mi Perfil (Editar)</button></a>
-      <a href="{% url 'logout' %}" style="text-decoration: none;"><button class="btn-nav" style="color: #ff5555;">🚪 Cerrar Sesión</button></a>
-    </nav>
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Proyectos</div>
+      <a class="nav-item" href="{% url 'listar_proyectos' %}">
+        <i class="fa fa-magnifying-glass"></i>
+        <span>Explorar</span>
+      </a>
+      <button class="nav-item" onclick="verSeccion('postulaciones', this)">
+        <i class="fa fa-file-lines"></i>
+        <span>Postulaciones</span>
+      </button>
+      <button class="nav-item" onclick="verSeccion('activos', this)">
+        <i class="fa fa-rocket"></i>
+        <span>Trabajo Actual</span>
+      </button>
+      <button class="nav-item" onclick="verSeccion('completados', this)">
+        <i class="fa fa-trophy"></i>
+        <span>Finalizados</span>
+      </button>
+      <button class="nav-item" onclick="verSeccion('favoritos', this)">
+        <i class="fa fa-heart"></i>
+        <span>Favoritos</span>
+      </button>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-group-label">Cuenta</div>
+      <a class="nav-item" href="{% url 'editar_perfil' %}">
+        <i class="fa fa-user"></i>
+        <span>Mi Perfil</span>
+      </a>
+    </div>
+
+    <hr class="sidebar-sep" style="margin-top: auto;">
+    <div style="padding: 12px;">
+      <a class="nav-item danger" href="{% url 'logout' %}">
+        <i class="fa fa-right-from-bracket"></i>
+        <span>Cerrar Sesión</span>
+      </a>
+    </div>
   </aside>
 
-  <main>
-    <section class="contenido">
-      
-      <!-- Mensajes globales de Django -->
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="main-wrapper">
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <div class="top-header-title">
+        Panel Desarrollador
+        <span>/ TEM Platform</span>
+      </div>
+      <button class="notif-btn" title="Notificaciones">
+        <i class="fa fa-bell"></i>
+        {% if notificaciones_pendientes_count > 0 %}
+          <span class="notif-badge">{{ notificaciones_pendientes_count }}</span>
+        {% endif %}
+      </button>
+      <div class="user-chip">
+        <div class="user-avatar">
+          {% if perfil.foto_perfil %}
+            <img src="{{ perfil.foto_perfil.url }}" alt="Perfil">
+          {% else %}
+            {{ request.user.nombre|default:request.user.username|slice:":1"|upper }}
+          {% endif %}
+        </div>
+        <div>
+          <div class="user-name">{{ request.user.nombre|default:request.user.username }}</div>
+          <div class="user-role">Desarrollador</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="main-content">
+
+      <!-- Mensajes Django -->
       {% if messages %}
-          <div style="margin-bottom: 25px;">
-              {% for message in messages %}
-                  <div style="padding: 15px; border-radius: 8px; margin-bottom: 10px; background: {% if message.tags == 'error' %}#f44336{% elif message.tags == 'warning' %}#ff9800{% else %}#4CAF50{% endif %}; color: white; font-weight: bold; border-left: 5px solid rgba(0,0,0,0.2); animation: slideDown 0.5s ease;">
-                      {{ message }}
-                  </div>
-              {% endfor %}
+        {% for message in messages %}
+          <div class="{% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
+            <i class="fa {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+            {{ message }}
           </div>
+        {% endfor %}
       {% endif %}
-      
-      <!-- Sección: Inicio -->
+
+      <!-- ===== INICIO ===== -->
       <div id="inicio" class="seccion-v activa">
-          <h1>Resumen de Actividad</h1>
-          <p style="opacity: 0.7;">Bienvenido de nuevo, {{ request.user.nombre|default:request.user.username }}.</p>
-
-          <div class="stats" style="margin-top: 30px;">
-            <div class="card"><h3>Proyectos Activos</h3><p>{{ proyectos_activos_count }}</p></div>
-            <div class="card"><h3>Completados</h3><p>{{ proyectos_completados }}</p></div>
-            <div class="card"><h3>Disponibles</h3><p>{{ nuevos_proyectos }}</p></div>
+        <div class="page-header">
+          <div>
+            <div class="page-title">Resumen de Actividad</div>
+            <div class="page-subtitle">Bienvenido de nuevo, {{ request.user.nombre|default:request.user.username }}</div>
           </div>
+        </div>
 
-          <div style="margin-top: 40px; max-width: 600px;">
-              <div class="perfil-bloque" style="background: #0a0a0a;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                      <h3 style="margin: 0;">🔔 Notificaciones Recientes</h3>
-                      {% if notificaciones_pendientes_count > 0 %}
-                        <form action="{% url 'marcar_notificaciones_leidas' %}" method="POST" style="margin: 0;">
-                            {% csrf_token %}
-                            <button type="submit" style="background: none; border: 1px solid #4CAF50; color: #4CAF50; font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Marcar leídas</button>
-                        </form>
-                      {% endif %}
-                  </div>
-                  <ul style="list-style: none; padding: 0;">
-                      {% for notif in notificaciones %}
-                        <li style="padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; opacity: 0.8;">{{ notif.mensaje }}</li>
-                      {% empty %}
-                        <li style="opacity: 0.4; font-size: 13px;">Sin avisos nuevos.</li>
-                      {% endfor %}
-                  </ul>
+        <div class="metrics-grid">
+          <div class="metric-card dark">
+            <div class="mc-header">
+              <div class="mc-label">Proyectos Activos</div>
+              <div class="mc-icon"><i class="fa fa-rocket"></i></div>
+            </div>
+            <div class="mc-value">{{ proyectos_activos_count }}</div>
+            <div class="mc-sub" style="color:rgba(255,255,255,0.4);">En desarrollo ahora</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Completados</div>
+              <div class="mc-icon"><i class="fa fa-trophy"></i></div>
+            </div>
+            <div class="mc-value">{{ proyectos_completados }}</div>
+            <div class="mc-sub">Proyectos finalizados</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Disponibles</div>
+              <div class="mc-icon"><i class="fa fa-briefcase"></i></div>
+            </div>
+            <div class="mc-value">{{ nuevos_proyectos }}</div>
+            <div class="mc-sub">Para postularse</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-header">
+              <div class="mc-label">Calificación</div>
+              <div class="mc-icon"><i class="fa fa-star"></i></div>
+            </div>
+            <div class="mc-value">{{ calificacion_promedio }}</div>
+            <div class="mc-sub">Promedio / 5.0</div>
+          </div>
+        </div>
+
+        <!-- Notificaciones recientes -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa fa-bell" style="margin-right:8px;opacity:.5;"></i>Notificaciones Recientes</div>
+            </div>
+            {% if notificaciones_pendientes_count > 0 %}
+              <form action="{% url 'marcar_notificaciones_leidas' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary btn-sm">Marcar leídas</button>
+              </form>
+            {% endif %}
+          </div>
+          <ul class="notif-list">
+            {% for notif in notificaciones %}
+              <li class="notif-item">
+                <i class="fa fa-circle-dot"></i>
+                {{ notif.mensaje }}
+              </li>
+            {% empty %}
+              <div class="empty-state" style="padding:30px;">
+                <i class="fa fa-inbox"></i>
+                <p>Sin notificaciones nuevas</p>
               </div>
-          </div>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
 
-
-      <!-- Sección: Chat -->
+      <!-- ===== CHAT ===== -->
       <div id="centro-chat" class="seccion-v">
-          <h1>Centro de Mensajes</h1>
-          <p style="opacity: 0.7; margin-bottom: 30px;">Conversaciones con empresas y soporte.</p>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
-              <div class="card-p" style="border-color: #4CAF50;">
-                  <h3 style="margin-bottom: 5px;">Soporte TEM</h3>
-                  <p style="font-size: 13px; opacity: 0.6; margin-bottom: 20px;">Ayuda técnica y administrativa.</p>
-                  <a href="{% url 'sala_chat_general' admin_id %}" style="display: block; background: #4CAF50; color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Chatear con Admin</a>
+        <div class="page-header">
+          <div>
+            <div class="page-title">Centro de Mensajes</div>
+            <div class="page-subtitle">Conversaciones con empresas y soporte</div>
+          </div>
+        </div>
+        <div class="cards-grid">
+          <div class="project-card" style="border-left: 3px solid #111;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+              <div class="user-avatar" style="width:44px;height:44px;font-size:16px;"><i class="fa fa-shield-halved"></i></div>
+              <div>
+                <div class="project-card-title">Soporte TEM</div>
+                <div class="project-card-sub">Asistencia técnica y administrativa</div>
               </div>
-              {% for contrato in mis_proyectos_activos_v %}
-                <div class="card-p">
-                    <h3 style="margin-bottom: 5px;">{{ contrato.empresa_nombre }}</h3>
-                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 15px;">Proyecto: {{ contrato.titulo }}</p>
-                    <a href="{% url 'sala_chat' contrato.empresa_id contrato.proyecto_id %}" style="display: block; background: white; color: black; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold;">Hablar con Empresa</a>
-                </div>
-              {% endfor %}
+            </div>
+            <a href="{% url 'sala_chat_general' admin_id %}" class="btn btn-primary btn-full">
+              <i class="fa fa-comments"></i> Chatear con Admin
+            </a>
           </div>
+          {% for contrato in mis_proyectos_activos_v %}
+            <div class="project-card">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                <div class="user-avatar" style="width:44px;height:44px;font-size:16px;background:#374151;">
+                  {{ contrato.empresa_nombre|slice:":1"|upper }}
+                </div>
+                <div>
+                  <div class="project-card-title">{{ contrato.empresa_nombre }}</div>
+                  <div class="project-card-sub">{{ contrato.titulo }}</div>
+                </div>
+              </div>
+              <a href="{% url 'sala_chat' contrato.empresa_id contrato.proyecto_id %}" class="btn btn-secondary btn-full">
+                <i class="fa fa-message"></i> Hablar con Empresa
+              </a>
+            </div>
+          {% empty %}
+            <div class="empty-state"><i class="fa fa-comments"></i><p>Sin conversaciones activas</p></div>
+          {% endfor %}
+        </div>
       </div>
 
-      <!-- Sección: Postulaciones -->
+      <!-- ===== POSTULACIONES ===== -->
       <div id="postulaciones" class="seccion-v">
-          <h1>Mis Postulaciones</h1>
-          <p style="opacity: 0.7; margin-bottom: 30px;">Seguimiento de las solicitudes enviadas.</p>
-          <div style="display: flex; flex-direction: column; gap: 15px;">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Mis Postulaciones</div>
+            <div class="page-subtitle">Seguimiento de solicitudes enviadas</div>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Proyecto</th>
+                <th>Fecha Envío</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
               {% for post in mis_postulaciones %}
-                <div class="card-p" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3 style="margin: 0;">{{ post.proyecto.titulo }}</h3>
-                        <p style="font-size: 13px; opacity: 0.5; margin-top: 5px;">Enviada el: {{ post.fecha|date:"d/m/Y" }}</p>
-                    </div>
+                <tr>
+                  <td><strong>{{ post.proyecto.titulo }}</strong></td>
+                  <td style="color:var(--text-secondary)">{{ post.fecha|date:"d/m/Y" }}</td>
+                  <td>
                     <span class="badge badge-{{ post.estado }}">{{ post.get_estado_display }}</span>
-                </div>
+                  </td>
+                </tr>
               {% empty %}
-                <p style="opacity: 0.5; text-align: center; padding: 50px;">Aún no te has postulado a ningún proyecto.</p>
+                <tr><td colspan="3">
+                  <div class="empty-state"><i class="fa fa-file-circle-xmark"></i><p>Aún no te has postulado a ningún proyecto</p></div>
+                </td></tr>
               {% endfor %}
-          </div>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- Sección: Trabajo Actual -->
+      <!-- ===== TRABAJO ACTUAL ===== -->
       <div id="activos" class="seccion-v">
-          
-          <h1>Proyectos en Desarrollo</h1>
-          <p style="opacity: 0.7; margin-bottom: 30px;">Registra tus avances y gestiona tus entregas.</p>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
-              {% for proyecto in mis_proyectos_activos_v %}
-                <div class="card-p">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <h3 style="margin-bottom: 10px; color: #4CAF50;">{{ proyecto.titulo }}</h3>
-                        <span style="font-size: 11px; padding: 4px 8px; background: rgba(76, 175, 80, 0.1); color: #4CAF50; border-radius: 4px; border: 1px solid rgba(76, 175, 80, 0.2);">
-                            📅 Plazo: {{ proyecto.fecha_fin|date:"d M, Y"|default:"Sin fecha" }}
-                        </span>
-                    </div>
-                    
-                    <!-- Lista de Hitos en el Dashboard -->
-                    <div style="margin-bottom: 20px;">
-                        <h4 style="font-size: 11px; opacity: 0.4; text-transform: uppercase; margin-bottom: 10px;">Hitos del Proyecto</h4>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            {% for hito in proyecto.hitos %}
-                                <div style="border-bottom: 1px solid #111; padding-bottom: 8px; opacity: {% if hito.estado == 'completado' %}0.4{% else %}1{% endif %};">
-                                    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: bold;">
-                                        <span style="color: {% if hito.estado == 'completado' %}#4CAF50{% else %}#ff9800{% endif %};">{% if hito.estado == 'completado' %}✔{% else %}○{% endif %}</span>
-                                        <span style="{% if hito.estado == 'completado' %}text-decoration: line-through;{% endif %}">{{ hito.titulo }}</span>
-                                    </div>
-                                    {% if hito.descripcion %}
-                                        <p style="margin: 4px 0 0 22px; font-size: 11px; opacity: 0.6; line-height: 1.4;">{{ hito.descripcion }}</p>
-                                    {% endif %}
-                                </div>
-                            {% empty %}
-                                <p style="font-size: 11px; opacity: 0.3;">La empresa aún no ha definido hitos.</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <p style="font-size: 13px; opacity: 0.5; margin-bottom: 20px;">Empresa: {{ proyecto.empresa_nombre }}</p>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; gap: 10px;">
-                            <a href="{% url 'registrar_avance' proyecto.proyecto_id %}" style="flex: 1; background: white; color: black; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">Registrar Avance</a>
-                            <a href="{% url 'ver_avances' proyecto.proyecto_id %}" style="flex: 1; background: #111; color: white; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; border: 1px solid #333; font-size: 13px;"> Historial de Avances</a>
-                        </div>
-                        {% if proyecto.num_desarrolladores >= 2 %}
-                        <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50; padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; border: 1px solid rgba(76, 175, 80, 0.3);">🚀 Abrir Espacio de Trabajo</a>
-                        {% endif %}
-                    </div>
-                </div>
-              {% empty %}
-                <p style="opacity: 0.5; text-align: center; padding: 50px; grid-column: 1/-1;">No tienes proyectos activos.</p>
-              {% endfor %}
+        <div class="page-header">
+          <div>
+            <div class="page-title">Proyectos en Desarrollo</div>
+            <div class="page-subtitle">Registra avances y gestiona entregas</div>
           </div>
+        </div>
+        <div class="cards-grid">
+          {% for proyecto in mis_proyectos_activos_v %}
+            <div class="project-card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                <div class="project-card-title">{{ proyecto.titulo }}</div>
+                <span class="badge badge-info">
+                  <i class="fa fa-calendar" style="margin-right:4px;"></i>
+                  {{ proyecto.fecha_fin|date:"d M"|default:"Sin fecha" }}
+                </span>
+              </div>
+              <div class="project-card-sub" style="margin-bottom:16px;">Empresa: {{ proyecto.empresa_nombre }}</div>
+
+              <!-- Hitos -->
+              <div style="margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:10px;">
+                  Hitos del Proyecto
+                </div>
+                {% for hito in proyecto.hitos %}
+                  <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);{% if hito.estado == 'completado' %}opacity:.5;{% endif %}">
+                    <i class="fa {% if hito.estado == 'completado' %}fa-circle-check{% else %}fa-circle{% endif %}"
+                       style="color:{% if hito.estado == 'completado' %}#22c55e{% else %}#d1d5db{% endif %};font-size:12px;"></i>
+                    <span style="font-size:13px;{% if hito.estado == 'completado' %}text-decoration:line-through;{% endif %}">{{ hito.titulo }}</span>
+                  </div>
+                {% empty %}
+                  <p style="font-size:12px;color:var(--text-muted);">Sin hitos definidos aún</p>
+                {% endfor %}
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;gap:8px;">
+                  <a href="{% url 'registrar_avance' proyecto.proyecto_id %}" class="btn btn-primary" style="flex:1;justify-content:center;">
+                    <i class="fa fa-pen"></i> Registrar Avance
+                  </a>
+                  <a href="{% url 'ver_avances' proyecto.proyecto_id %}" class="btn btn-secondary" style="flex:1;justify-content:center;">
+                    <i class="fa fa-eye"></i> Historial
+                  </a>
+                </div>
+                {% if proyecto.num_desarrolladores >= 2 %}
+                  <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" class="btn btn-secondary btn-full">
+                    <i class="fa fa-users"></i> Espacio de Trabajo
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="empty-state" style="grid-column:1/-1;"><i class="fa fa-rocket"></i><p>No tienes proyectos activos</p></div>
+          {% endfor %}
+        </div>
       </div>
 
-      <!-- Seccion: Historial de proyectos -->
+      <!-- ===== HISTORIAL ===== -->
       <div id="completados" class="seccion-v">
-          <h1>Historial de Proyectos</h1>
-          <p style="opacity: 0.7; margin-bottom: 30px;">Historial de proyectos finalizados y testimonios de empresas.</p>
-          <div style="display: flex; flex-direction: column; gap: 20px;">
-              {% for contratacion in mis_proyectos_finalizados %}
-                <div class="card-p">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="margin: 0;">{{ contratacion.proyecto.titulo }}</h3>
-                        <div style="color: #FFD700; font-size: 18px;">
-                            {% if contratacion.valoracion %}
-                                {% with ''|center:contratacion.valoracion.puntuacion as range %}
-                                    {% for _ in range %}★{% endfor %}
-                                {% endwith %}
-                            {% else %}
-                                Sin calificación
-                            {% endif %}
-                        </div>
-                    </div>
-                    <p style="font-size: 14px; opacity: 0.6; margin-top: 10px;">Empresa: {{ contratacion.empresa.username }}</p>
-                    <div style="margin-top: 15px; padding: 15px; background: #111; border-radius: 8px; font-style: italic; font-size: 13px; border-left: 3px solid #4CAF50;">
-                        {% if contratacion.valoracion %}
-                            "{{ contratacion.valoracion.comentario|default:"El cliente no dejó un comentario." }}"
-                        {% else %}
-                            "Proyecto finalizado satisfactoriamente."
-                        {% endif %}
-                    </div>
-                    <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; gap: 10px;">
-                            <a href="{% url 'sala_chat' contratacion.proyecto.empresa.id contratacion.proyecto.id %}" style="flex: 1; background: #222; color: #4CAF50; text-align: center; padding: 8px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #333;">💬 Historial Chat Privado</a>
-                            <a href="{% url 'calificar_empresa' contratacion.proyecto.id %}" style="flex: 1; background: #4CAF50; color: white; text-align: center; padding: 8px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px;">⭐ Calificar Empresa</a>
-                        </div>
-                        <!-- Botón chat grupal si el proyecto fue colaborativo -->
-                        {% if contratacion.num_desarrolladores >= 2 %}
-                        <a href="{% url 'sala_chat_grupal' contratacion.proyecto.id %}" style="background: rgba(76, 175, 80, 0.1); color: #4CAF50; padding: 8px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid rgba(76, 175, 80, 0.3);">🚀 Ver Chat Grupal (Espacio de Trabajo)</a>
-                        {% endif %}
-                    </div>
-                </div>
-              {% empty %}
-                <p style="opacity: 0.5; text-align: center; padding: 50px;">Aún no has finalizado proyectos.</p>
-              {% endfor %}
+        <div class="page-header">
+          <div>
+            <div class="page-title">Historial de Proyectos</div>
+            <div class="page-subtitle">Proyectos finalizados y testimonios de empresas</div>
           </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          {% for contratacion in mis_proyectos_finalizados %}
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div class="project-card-title">{{ contratacion.proyecto.titulo }}</div>
+                <div style="color:#f59e0b;font-size:16px;letter-spacing:2px;">
+                  {% if contratacion.valoracion %}
+                    {% with ''|center:contratacion.valoracion.puntuacion as range %}
+                      {% for _ in range %}★{% endfor %}
+                    {% endwith %}
+                  {% else %}
+                    <span style="font-size:12px;color:var(--text-muted);">Sin calificación</span>
+                  {% endif %}
+                </div>
+              </div>
+              <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">
+                Empresa: {{ contratacion.empresa.username }}
+              </p>
+              {% if contratacion.valoracion %}
+                <div style="background:var(--page-bg);border-radius:var(--radius-sm);padding:14px;font-style:italic;font-size:13px;color:var(--text-secondary);border-left:3px solid #e5e7eb;">
+                  "{{ contratacion.valoracion.comentario|default:"El cliente no dejó un comentario." }}"
+                </div>
+              {% endif %}
+              <div style="display:flex;gap:8px;margin-top:14px;">
+                <a href="{% url 'sala_chat' contratacion.proyecto.empresa.id contratacion.proyecto.id %}" class="btn btn-secondary btn-sm">
+                  <i class="fa fa-comments"></i> Chat Privado
+                </a>
+                <a href="{% url 'calificar_empresa' contratacion.proyecto.id %}" class="btn btn-primary btn-sm">
+                  <i class="fa fa-star"></i> Calificar Empresa
+                </a>
+                {% if contratacion.num_desarrolladores >= 2 %}
+                  <a href="{% url 'sala_chat_grupal' contratacion.proyecto.id %}" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-users"></i> Chat Grupal
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <div class="empty-state"><i class="fa fa-trophy"></i><p>Aún no has finalizado proyectos</p></div>
+          {% endfor %}
+        </div>
       </div>
 
-      <!-- Seccion: Favoritos -->
+      <!-- ===== FAVORITOS ===== -->
       <div id="favoritos" class="seccion-v">
-          <h1>Mis Proyectos Favoritos</h1>
-          <p style="opacity: 0.7; margin-bottom: 30px;">Proyectos que te interesaron. ¡Postúlate antes de que se agoten las vacantes!</p>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-              {% for fav in favoritos %}
-                <div class="card-p">
-                    <h3>{{ fav.proyecto.titulo }}</h3>
-                    <p style="font-size: 13px; opacity: 0.6; margin: 10px 0;">{{ fav.proyecto.get_tipo_solucion_display }}</p>
-                    <a href="{% url 'postularse_a_proyecto' fav.proyecto.id %}" style="display: block; background: #4CAF50; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; color: white; font-weight: bold; font-size: 13px;">Postularme ahora</a>
-                </div>
-              {% empty %}
-                <p style="opacity: 0.5; text-align: center; padding: 50px;">No tienes favoritos guardados.</p>
-              {% endfor %}
+        <div class="page-header">
+          <div>
+            <div class="page-title">Mis Favoritos</div>
+            <div class="page-subtitle">¡Postúlate antes de que se agoten las vacantes!</div>
           </div>
+        </div>
+        <div class="cards-grid">
+          {% for fav in favoritos %}
+            <div class="project-card">
+              <div class="project-card-title">{{ fav.proyecto.titulo }}</div>
+              <div class="project-card-sub" style="margin:8px 0 16px;">{{ fav.proyecto.get_tipo_solucion_display }}</div>
+              <a href="{% url 'postularse_a_proyecto' fav.proyecto.id %}" class="btn btn-primary btn-full">
+                <i class="fa fa-paper-plane"></i> Postularme ahora
+              </a>
+            </div>
+          {% empty %}
+            <div class="empty-state" style="grid-column:1/-1;"><i class="fa fa-heart"></i><p>No tienes favoritos guardados</p></div>
+          {% endfor %}
+        </div>
       </div>
 
-    </section>
-  </main>
+    </main>
+  </div>
+</div>
 
-  <script>
-    function verSeccion(id, btn) {
-        // Ocultar todas
-        document.querySelectorAll('.seccion-v').forEach(s => s.classList.remove('activa'));
-        // Quitar active de botones
-        document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
-        
-        // Mostrar seleccionada
-        const target = document.getElementById(id);
-        if (target) {
-            target.classList.add('activa');
-            if (btn) btn.classList.add('active');
-            else {
-                // Si no hay botón (carga inicial), buscar el que tenga el onclick correspondiente
-                const menuBtns = document.querySelectorAll('.btn-nav');
-                menuBtns.forEach(b => {
-                    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(id)) {
-                        b.classList.add('active');
-                    }
-                });
-            }
-        }
-    }
-
-    // Al cargar la página, revisar si hay una sección en la URL
-    window.onload = function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const section = urlParams.get('section');
-        if (section) {
-            verSeccion(section);
-        }
-    };
-  </script>
+<script>
+  function verSeccion(id, btn) {
+    document.querySelectorAll('.seccion-v').forEach(s => s.classList.remove('activa'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    const target = document.getElementById(id);
+    if (target) target.classList.add('activa');
+    if (btn) btn.classList.add('active');
+  }
+  window.onload = function() {
+    const s = new URLSearchParams(window.location.search).get('section');
+    if (s) verSeccion(s);
+  };
+</script>
 </body>
 </html>

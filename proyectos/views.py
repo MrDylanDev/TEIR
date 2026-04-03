@@ -18,17 +18,23 @@ def listar_proyectos(request):
     tipo = request.GET.get('tipo')
     prioridad = request.GET.get('prioridad')
     
-    sql = "SELECT id, titulo, descripcion, tipo_solucion, prioridad, fecha_publicacion, nombre_empresa, num_postulaciones, empresa_reputacion FROM v_proyectos_disponibles WHERE 1=1"
+    sql = """
+        SELECT v.id, v.titulo, v.descripcion, v.tipo_solucion, v.prioridad, v.fecha_publicacion, 
+               v.nombre_empresa, v.num_postulaciones, v.empresa_reputacion, pe.logo
+        FROM v_proyectos_disponibles v
+        LEFT JOIN perfil_empresa pe ON pe.nombre_empresa = v.nombre_empresa
+        WHERE 1=1
+    """
     params = []
     
     if tipo:
-        sql += " AND tipo_solucion = %s"
+        sql += " AND v.tipo_solucion = %s"
         params.append(tipo)
     if prioridad:
-        sql += " AND prioridad = %s"
+        sql += " AND v.prioridad = %s"
         params.append(prioridad)
         
-    sql += " ORDER BY fecha_publicacion DESC"
+    sql += " ORDER BY v.fecha_publicacion DESC"
     
     with connection.cursor() as cursor:
         cursor.execute(sql, params)
@@ -43,7 +49,8 @@ def listar_proyectos(request):
                 'fecha_publicacion': row[5],
                 'empresa_nombre': row[6],
                 'num_postulaciones': row[7],
-                'empresa_reputacion': row[8]
+                'empresa_reputacion': row[8],
+                'empresa_logo': row[9]
             })
     
     favoritos_ids = []
@@ -87,7 +94,7 @@ def crear_proyecto(request):
         except Exception as e:
             messages.error(request, f"Error: {e}")
             
-    return render(request, 'proyectos/crear.html')
+    return redirect('dashboard_empresa')
 
 @login_required
 def finalizar_proyecto(request, proyecto_id):

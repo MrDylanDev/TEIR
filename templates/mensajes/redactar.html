@@ -3,53 +3,82 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Redactar Mensaje | TEM</title>
-  <link rel="stylesheet" href="{% static 'empresa/css/empresa.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Redactar Mensaje</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
 </head>
-<body style="background: #0f0f0f; color: white; display: block; padding: 40px;">
-
-  <div style="max-width: 700px; margin: 0 auto; background: #111; padding: 35px; border-radius: 12px; border: 1px solid #222;">
-    <h1 style="font-weight: 300; margin-bottom: 25px;">Nuevo Mensaje</h1>
-    
-    <form method="post">
-      {% csrf_token %}
-      
-      <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px; opacity: 0.7;">Para:</label>
-          <select name="receptor" required style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px;">
-              <option value="">Selecciona un usuario...</option>
-              {% for u in usuarios %}
-                <option value="{{ u.id }}" {% if para_id == u.id %}selected{% endif %}>{{ u.username }} ({{ u.get_rol_display }})</option>
-              {% endfor %}
-          </select>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Mensajería</div>
       </div>
+    </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item" href="{% url 'mensajeria_inbox' %}"><i class="fa fa-arrow-left"></i><span>Volver a Mensajes</span></a>
+    </div>
+  </aside>
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">Mensajería <span>/ Nuevo Mensaje</span></div>
+    </header>
+    <main class="main-content" style="display:flex; justify-content:center;">
+      <div style="max-width:640px; width:100%;">
+        <div class="page-header">
+          <div>
+            <div class="page-title"><i class="fa fa-pen-to-square" style="margin-right:10px; color:var(--text-muted);"></i>Redactar Mensaje</div>
+          </div>
+        </div>
+        <div class="card">
+          <form method="post" style="display:flex; flex-direction:column; gap:16px;">
+            {% csrf_token %}
 
-      <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px; opacity: 0.7;">Proyecto relacionado (Opcional):</label>
-          <select name="proyecto" style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px;">
-              <option value="">Ninguno</option>
-              {% for p in proyectos %}
-                <option value="{{ p.id }}" {% if proyecto_pre == p.id %}selected{% endif %}>{{ p.titulo }}</option>
-              {% endfor %}
-          </select>
-      </div>
+            <div class="form-group">
+              <label class="form-label">Para</label>
+              <select name="receptor" required style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit;">
+                <option value="">Selecciona un usuario...</option>
+                {% for u in usuarios %}
+                  <option value="{{ u.id }}" {% if para_id == u.id %}selected{% endif %}>{{ u.nombre|default:u.username }} ({{ u.get_rol_display }})</option>
+                {% endfor %}
+              </select>
+            </div>
 
-      <div style="margin-bottom: 20px;">
-          <label style="display: block; margin-bottom: 8px; opacity: 0.7;">Título:</label>
-          <input type="text" name="titulo" required placeholder="Escribe el título del mensaje" style="width: 100%; background: #000; color: white; border: 1px solid #333; padding: 12px; border-radius: 8px;">
-      </div>
+            <div class="form-group">
+              <label class="form-label">Proyecto Relacionado <span style="font-weight:400; color:var(--text-muted);">(Opcional)</span></label>
+              <select name="proyecto" style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit;">
+                <option value="">Ninguno</option>
+                {% for p in proyectos %}
+                  <option value="{{ p.id }}" {% if proyecto_pre == p.id %}selected{% endif %}>{{ p.titulo }}</option>
+                {% endfor %}
+              </select>
+            </div>
 
-      <div style="margin-bottom: 25px;">
-          <label style="display: block; margin-bottom: 8px; opacity: 0.7;">Mensaje:</label>
-          <textarea name="contenido" required placeholder="Escribe tu mensaje aquí..." style="width: 100%; min-height: 200px; background: #000; color: white; border: 1px solid #333; padding: 15px; border-radius: 8px; line-height: 1.6;"></textarea>
-      </div>
+            <div class="form-group">
+              <label class="form-label">Asunto</label>
+              <input type="text" name="titulo" required placeholder="Escribe el asunto del mensaje" style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit;">
+            </div>
 
-      <div style="display: flex; gap: 15px; margin-top: 30px;">
-          <button type="submit" style="background: white; color: black; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1;">Enviar Mensaje</button>
-          <a href="{% url 'mensajeria_inbox' %}" style="background: #222; color: white; border: 1px solid #333; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; text-align: center;">Cancelar</a>
+            <div class="form-group">
+              <label class="form-label">Mensaje</label>
+              <textarea name="contenido" required placeholder="Escribe tu mensaje aquí..." style="width:100%; min-height:200px; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit; line-height:1.6; resize:vertical; outline:none;"></textarea>
+            </div>
+
+            <div style="border-top:1px solid var(--border); padding-top:18px; display:flex; gap:12px;">
+              <a href="{% url 'mensajeria_inbox' %}" class="btn btn-secondary" style="flex:1; justify-content:center;">Cancelar</a>
+              <button type="submit" class="btn btn-primary" style="flex:2; justify-content:center;">
+                <i class="fa fa-paper-plane"></i> Enviar Mensaje
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </form>
+    </main>
   </div>
-
+</div>
 </body>
 </html>

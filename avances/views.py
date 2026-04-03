@@ -184,7 +184,7 @@ def ver_avances(request, proyecto_id):
         return redirect('inicio')
         
     # Consulta de avances optimizada con select_related
-    avances = Avance.objects.filter(proyecto=proyecto).select_related('desarrollador', 'entregable').order_by('-fecha_hora')
+    avances = Avance.objects.filter(proyecto=proyecto).select_related('desarrollador__perfil_desarrollador', 'entregable').order_by('-fecha_hora')
     
     # Obtener el progreso total desde la vista SQL
     hitos_completados = 0

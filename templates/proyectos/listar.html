@@ -2,123 +2,203 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
   <meta charset="UTF-8">
-  <title>Explorar Proyectos | TEM</title>
-  <link rel="stylesheet" href="{% static 'Desarrollador/css/desarrollador.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Explorar Proyectos</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
   <style>
-      body { background: #000; color: white; padding: 40px; font-family: 'Inter', sans-serif; }
-      .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-      .filters-bar { background: #0a0a0a; padding: 15px 25px; border-radius: 12px; margin-bottom: 40px; border: 1px solid #1a1a1a; display: flex; gap: 20px; align-items: center; }
-      .filter-group { display: flex; align-items: center; gap: 10px; flex: 1; }
-      select { background: #111; color: white; border: 1px solid #333; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; flex: 1; }
-      .btn-filter { background: #4CAF50; color: white; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; }
-      
-      .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
-      .project-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 16px; padding: 25px; display: flex; flex-direction: column; transition: 0.3s; position: relative; }
-      .project-card:hover { border-color: #4CAF50; transform: translateY(-5px); }
-      
-      .tag-solucion { font-size: 10px; text-transform: uppercase; color: #4CAF50; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; display: block; }
-      .project-title { font-size: 20px; font-weight: 300; margin-bottom: 12px; color: #fff; }
-      .project-desc { font-size: 14px; opacity: 0.6; line-height: 1.6; margin-bottom: 25px; min-height: 65px; }
-      
-      .card-footer { border-top: 1px solid #1a1a1a; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; }
-      .company-info { display: flex; align-items: center; gap: 8px; font-size: 12px; opacity: 0.5; }
-      .btn-apply { background: #fff; color: #000; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; transition: 0.3s; }
-      .btn-apply:hover { background: #4CAF50; color: #fff; }
-      .already-applied { color: #4CAF50; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-      
-      .badge-prio { font-size: 9px; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
-      .prio-alta { background: rgba(244, 67, 54, 0.1); color: #f44336; border: 1px solid #f44336; }
-      .prio-media { background: rgba(255, 152, 0, 0.1); color: #ff9800; border: 1px solid #ff9800; }
-      .prio-baja { background: rgba(33, 150, 243, 0.1); color: #2196f3; border: 1px solid #2196f3; }
+    /* Estilos específicos para la vista de Explorar Proyectos (adaptados al nuevo Light Theme) */
+    .filters-bar { 
+      background: var(--card-bg); 
+      padding: 18px 24px; 
+      border-radius: var(--radius); 
+      margin-bottom: 24px; 
+      border: 1px solid var(--border); 
+      box-shadow: var(--shadow-sm);
+      display: flex; 
+      gap: 20px; 
+      align-items: flex-end; 
+    }
+    
+    .filter-group { flex: 1; }
+    
+    .project-card { 
+      display: flex; 
+      flex-direction: column; 
+    }
+    
+    .tag-solucion { 
+      font-size: 10px; 
+      text-transform: uppercase; 
+      color: var(--text-muted); 
+      font-weight: 700; 
+      letter-spacing: 0.8px; 
+      margin-bottom: 8px; 
+      display: block; 
+    }
+    
+    .project-desc { 
+      font-size: 13.5px; 
+      color: var(--text-secondary); 
+      line-height: 1.6; 
+      margin-top: 8px;
+      margin-bottom: 20px; 
+      flex: 1;
+    }
+    
+    .card-footer { 
+      border-top: 1px solid var(--border); 
+      padding-top: 16px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
   </style>
 </head>
 <body>
 
-  <div style="max-width: 1100px; margin: 0 auto;">
+<div class="app-layout">
+
+  <!-- ===== SIDEBAR (Mínimo, solo para volver) ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Explorar</div>
+      </div>
+    </div>
+
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item" href="{% url 'dashboard_desarrollador' %}">
+        <i class="fa fa-arrow-left"></i>
+        <span>Volver al Panel</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN WRAPPER ===== -->
+  <div class="main-wrapper">
     
-    <div class="header-flex">
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <div class="top-header-title">
+        Explorar Proyectos
+        <span>/ TEM Platform</span>
+      </div>
+      <div class="user-chip">
+        <div class="user-avatar">{{ request.user.nombre|default:request.user.username|slice:":1"|upper }}</div>
         <div>
-            <h1 style="font-weight: 300; font-size: 32px;">Explorar Proyectos</h1>
-            <p style="opacity: 0.5; font-size: 14px; margin-top: 5px;">Encuentra tu próximo reto profesional.</p>
+          <div class="user-name">{{ request.user.nombre|default:request.user.username }}</div>
+          <div class="user-role">Desarrollador</div>
         </div>
-        <div style="display: flex; gap: 12px;">
-            <a href="{% url 'dashboard_desarrollador' %}" style="background: #fff; color: #000; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 14px;">Panel Principal</a>
-        </div>
-    </div>
+      </div>
+    </header>
 
-    <!-- Barra de Filtros Compacta -->
-    <form method="get" class="filters-bar">
-        <div class="filter-group">
-            <span style="font-size: 12px; opacity: 0.4;">SOLUCIÓN</span>
-            <select name="tipo">
-                <option value="">Todas</option>
-                <option value="sitio_web" {% if request.GET.tipo == 'sitio_web' %}selected{% endif %}>Sitio Web</option>
-                <option value="aplicacion_movil" {% if request.GET.tipo == 'aplicacion_movil' %}selected{% endif %}>App Móvil</option>
-                <option value="automatizacion" {% if request.GET.tipo == 'automatizacion' %}selected{% endif %}>Automatización</option>
-                <option value="sistema_escritorio" {% if request.GET.tipo == 'sistema_escritorio' %}selected{% endif %}>Escritorio</option>
-            </select>
+    <!-- CONTENT -->
+    <main class="main-content">
+      
+      <div class="page-header">
+        <div>
+          <div class="page-title">Encuentra tu próximo reto</div>
+          <div class="page-subtitle">Filtra y postúlate a las mejores ofertas del mercado</div>
         </div>
-        <div class="filter-group">
-            <span style="font-size: 12px; opacity: 0.4;">PRIORIDAD</span>
-            <select name="prioridad">
-                <option value="">Todas</option>
-                <option value="alta" {% if request.GET.prioridad == 'alta' %}selected{% endif %}>Alta</option>
-                <option value="media" {% if request.GET.prioridad == 'media' %}selected{% endif %}>Media</option>
-                <option value="baja" {% if request.GET.prioridad == 'baja' %}selected{% endif %}>Baja</option>
-            </select>
-        </div>
-        <button type="submit" class="btn-filter">Aplicar Filtros</button>
-        {% if request.GET.tipo or request.GET.prioridad %}
-            <a href="{% url 'listar_proyectos' %}" style="color: #666; text-decoration: none; font-size: 12px;">Limpiar</a>
-        {% endif %}
-    </form>
+      </div>
 
-    <!-- Grid de Proyectos -->
-    <div class="projects-grid">
-        {% for proyecto in proyectos %}
-          <div class="project-card">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                  <span class="tag-solucion">{{ proyecto.tipo_solucion }}</span>
-                  <a href="{% url 'toggle_favorito' proyecto.id %}" style="text-decoration: none; font-size: 16px;">
-                      {% if proyecto.id in favoritos_ids %}❤️{% else %}🤍{% endif %}
-                  </a>
-              </div>
-              
-              <h3 class="project-title">{{ proyecto.titulo }}</h3>
-              <p class="project-desc">{{ proyecto.descripcion|truncatewords:18 }}</p>
-              
-              <div style="margin-bottom: 25px;">
-                  <span class="badge-prio prio-{{ proyecto.prioridad }}">{{ proyecto.prioridad }}</span>
-                  <span style="font-size: 11px; opacity: 0.4; margin-left: 10px;">{{ proyecto.num_postulaciones }} postulaciones</span>
-              </div>
+      <!-- Barra de Filtros -->
+      <form method="get" class="filters-bar">
+          <div class="filter-group">
+              <label class="form-label">Tipo de Solución</label>
+              <select name="tipo" class="form-select">
+                  <option value="">Todas las opciones</option>
+                  <option value="sitio_web" {% if request.GET.tipo == 'sitio_web' %}selected{% endif %}>Sitio Web</option>
+                  <option value="aplicacion_movil" {% if request.GET.tipo == 'aplicacion_movil' %}selected{% endif %}>App Móvil</option>
+                  <option value="automatizacion" {% if request.GET.tipo == 'automatizacion' %}selected{% endif %}>Automatización</option>
+                  <option value="sistema_escritorio" {% if request.GET.tipo == 'sistema_escritorio' %}selected{% endif %}>Sistema de Escritorio</option>
+              </select>
+          </div>
+          <div class="filter-group">
+              <label class="form-label">Prioridad</label>
+              <select name="prioridad" class="form-select">
+                  <option value="">Todas</option>
+                  <option value="alta" {% if request.GET.prioridad == 'alta' %}selected{% endif %}>Alta</option>
+                  <option value="media" {% if request.GET.prioridad == 'media' %}selected{% endif %}>Media</option>
+                  <option value="baja" {% if request.GET.prioridad == 'baja' %}selected{% endif %}>Baja</option>
+              </select>
+          </div>
+          <div style="display:flex;gap:12px;height:40px;">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Filtrar</button>
+            {% if request.GET.tipo or request.GET.prioridad %}
+                <a href="{% url 'listar_proyectos' %}" class="btn btn-secondary">Limpiar</a>
+            {% endif %}
+          </div>
+      </form>
 
-                  <div class="card-footer">
-                      <div class="company-info" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-                          <div style="display: flex; align-items: center; gap: 8px;">
-                              <div style="width: 20px; height: 20px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">🏢</div>
-                              <span style="font-weight: bold; color: #fff;">{{ proyecto.empresa_nombre }}</span>
-                          </div>
-                          {% if proyecto.empresa_reputacion > 0 %}
-                              <div style="color: #FFD700; font-size: 11px;">
-                                  ⭐ {{ proyecto.empresa_reputacion|floatformat:1 }}
-                              </div>
+      <!-- Grid de Proyectos -->
+      <div class="cards-grid">
+          {% for proyecto in proyectos %}
+            <div class="project-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <span class="tag-solucion">{{ proyecto.tipo_solucion }}</span>
+                    <a href="{% url 'toggle_favorito' proyecto.id %}" style="text-decoration: none; font-size: 18px; line-height: 1; transition: transform 0.2s;">
+                        {% if proyecto.id in favoritos_ids %}<i class="fa-solid fa-heart" style="color:var(--danger)"></i>{% else %}<i class="fa-regular fa-heart" style="color:var(--text-muted)"></i>{% endif %}
+                    </a>
+                </div>
+                
+                <h3 class="project-card-title">{{ proyecto.titulo }}</h3>
+                
+                <div style="margin: 8px 0;">
+                    <span class="badge badge-{% if proyecto.prioridad == 'alta' %}danger{% elif proyecto.prioridad == 'media' %}warning{% else %}info{% endif %}">{{ proyecto.prioridad }}</span>
+                    <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">
+                        <i class="fa fa-users" style="margin-right:4px;"></i>{{ proyecto.num_postulaciones }} postulantes
+                    </span>
+                </div>
+                
+                <p class="project-desc">{{ proyecto.descripcion|truncatewords:20 }}</p>
+
+                <div class="card-footer">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 11px; background: var(--page-bg); border: 1px solid var(--border);">
+                          {% if proyecto.empresa_logo %}
+                            <img src="/media/{{ proyecto.empresa_logo }}" alt="Logo">
                           {% else %}
-                              <div style="opacity: 0.3; font-size: 10px;">Sin calificación aún</div>
+                            <i class="fa fa-building" style="color: var(--text-muted);"></i>
                           {% endif %}
-                      </div>
-                      
-                      <a href="{% url 'postularse_a_proyecto' proyecto.id %}" class="btn-apply">Postularse</a>
-                  </div>
-          </div>
-        {% empty %}
-          <div style="grid-column: 1 / -1; text-align: center; padding: 80px; background: #0a0a0a; border-radius: 20px; border: 1px dashed #1a1a1a;">
-              <p style="opacity: 0.3; font-size: 16px;">No se encontraron proyectos con los filtros seleccionados.</p>
-          </div>
-        {% endfor %}
-    </div>
+                        </div>
+                        <div>
+                            <div style="font-size:13px; font-weight:600; color:var(--text-primary);">
+                              {{ proyecto.empresa_nombre }}
+                            </div>
+                            <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
+                              {% if proyecto.empresa_reputacion > 0 %}
+                                <i class="fa fa-star" style="color:#f59e0b; margin-right:3px;"></i>{{ proyecto.empresa_reputacion|floatformat:1 }} reputación
+                              {% else %}
+                                Empresa nueva
+                              {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{% url 'postularse_a_proyecto' proyecto.id %}" class="btn btn-primary btn-sm">
+                      <i class="fa fa-paper-plane"></i> Postularme
+                    </a>
+                </div>
+            </div>
+          {% empty %}
+            <div class="empty-state" style="grid-column: 1 / -1; padding: 60px; background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border);">
+                <i class="fa fa-magnifying-glass" style="font-size: 32px; color: var(--text-muted); margin-bottom: 15px;"></i>
+                <p style="color: var(--text-secondary); font-size: 15px;">No se encontraron proyectos con los filtros seleccionados.</p>
+                {% if request.GET.tipo or request.GET.prioridad %}
+                    <a href="{% url 'listar_proyectos' %}" class="btn btn-primary" style="margin-top: 15px;">Limpiar filtros</a>
+                {% endif %}
+            </div>
+          {% endfor %}
+      </div>
+      
+    </main>
   </div>
+</div>
 
 </body>
 </html>

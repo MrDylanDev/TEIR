@@ -5,294 +5,193 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro | TEM</title>
-  <link rel="stylesheet" href="{% static 'publico/css/styleregistro.css' %}">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #000; --bg-2: #0d0d0d;
+      --border: rgba(255,255,255,0.08); --border-focus: rgba(255,255,255,0.25);
+      --text: #fff; --text-muted: rgba(255,255,255,0.45); --text-muted-2: rgba(255,255,255,0.65);
+    }
     body {
-      background-color: #0a0a0a;
-      color: white;
+      background: var(--bg); color: var(--text);
       font-family: 'Inter', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
+      min-height: 100vh; display: flex; justify-content: center; align-items: center;
+      padding: 40px 20px; position: relative;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 100%);
     }
     .register-container {
-      max-width: 450px;
-      width: 100%;
-      background: #111;
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative; z-index: 1;
+      width: 100%; max-width: 480px;
+      background: rgba(10,10,10,0.85); backdrop-filter: blur(28px);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 44px 40px; box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+      animation: fadeInUp 0.5s ease both;
     }
-    .logo {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      text-align: center;
-      letter-spacing: 2px;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 24px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #999;
-      margin-bottom: 30px;
-      font-size: 14px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #ccc;
-      font-size: 14px;
-      font-weight: 500;
-    }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    
+    .logo { text-align: center; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 24px; color: #fff; }
+    h2 { text-align: center; font-size: 24px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; }
+    .subtitle { text-align: center; color: var(--text-muted-2); font-size: 14.5px; margin-bottom: 32px; line-height: 1.6; }
+    
+    form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+    .full-width { grid-column: 1 / -1; }
+    
+    .form-group { margin-bottom: 0; }
+    label { display: block; margin-bottom: 8px; color: var(--text-muted-2); font-size: 13.5px; font-weight: 600; }
     input, select {
-      width: 100%;
-      padding: 12px 15px;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 8px;
-      color: white;
-      font-size: 15px;
-      transition: all 0.3s;
-      box-sizing: border-box;
+      width: 100%; padding: 13px 16px; font-family: 'Inter', sans-serif;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; color: #fff; font-size: 14.5px; transition: all 0.2s;
     }
     input:focus, select:focus {
-      border-color: white;
-      outline: none;
+      outline: none; background: rgba(255,255,255,0.06); border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
     }
-    input::placeholder {
-      color: #666;
+    input::placeholder { color: rgba(255,255,255,0.25); }
+    
+    .error input, .error select { border-color: #ef4444; }
+    .error input:focus, .error select:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+    .errorlist { list-style: none; margin: 6px 0 0; color: #fca5a5; font-size: 12.5px; padding: 0; }
+    small { color: var(--text-muted); font-size: 12px; display: block; margin-top: 6px; }
+    
+    button[type="submit"] {
+      width: 100%; padding: 14px; margin-top: 14px; font-family: 'Inter', sans-serif;
+      background: #fff; color: #000; border: none; border-radius: 10px;
+      font-weight: 800; font-size: 15px; cursor: pointer; transition: all 0.22s;
     }
-    .errorlist {
-      list-style: none;
-      padding: 0;
-      margin: 5px 0 0 0;
-      color: #ff6b6b;
-      font-size: 13px;
-    }
-    .helptext {
-      display: block;
-      color: #777;
-      font-size: 12px;
-      margin-top: 5px;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      background: white;
-      color: black;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-      margin-top: 10px;
-    }
-    button:hover {
-      background: #ddd;
-    }
-    .login-link {
-      text-align: center;
-      margin-top: 25px;
-      color: #999;
-      font-size: 14px;
-    }
-    .login-link a {
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .login-link a:hover {
-      text-decoration: underline;
-    }
-    .alert {
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .alert-error {
-      background: rgba(255, 107, 107, 0.1);
-      border: 1px solid #ff6b6b;
-      color: #ff6b6b;
-    }
-    .alert-success {
-      background: rgba(76, 175, 80, 0.1);
-      border: 1px solid #4CAF50;
-      color: #4CAF50;
-    }
-    /* Estilo para el campo username cuando tiene error */
-    .error input {
-      border-color: #ff6b6b;
-    }
-    small {
-      color: #777;
-      font-size: 11px;
-      display: block;
-      margin-top: 5px;
+    button[type="submit"]:hover { background: #e5e5e5; transform: translateY(-1px); }
+    
+    .login-link { text-align: center; margin-top: 24px; color: var(--text-muted); font-size: 14px; }
+    .login-link a { color: #fff; text-decoration: none; font-weight: 600; padding-bottom: 2px; border-bottom: 1px solid rgba(255,255,255,0.3); transition: border-color 0.2s; }
+    .login-link a:hover { border-color: #fff; }
+    
+    .alert { padding: 12px 14px; border-radius: 10px; margin-bottom: 24px; font-size: 13.5px; display: flex; align-items: center; gap: 8px; }
+    .alert-error { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+    .alert-success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+    
+    /* Better Select dropdown styling */
+    select option { background: #111; color: #fff; }
+    
+    /* Responsive tweaks */
+    @media (max-width: 480px) {
+      .register-container { padding: 36px 24px; }
+      h2 { font-size: 22px; }
+      form { grid-template-columns: 1fr; gap: 16px; }
     }
   </style>
 </head>
 <body>
   <div class="register-container">
-    <div class="logo">T E M</div>
-    <h2>Formulario de Registro</h2>
-    <div class="subtitle">Accede al ecosistema profesional TEM</div>
+    <div class="logo">TEM</div>
+    <h2>Crear Cuenta</h2>
+    <div class="subtitle">Únete al ecosistema profesional de talento SENA y empresas en Colombia.</div>
 
-    <!-- Mostrar mensajes de error/éxito -->
     {% if messages %}
       {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        <div class="alert alert-{{ message.tags }}">
+          <i class="fa {% if message.tags == 'success' %}fa-check-circle{% else %}fa-circle-exclamation{% endif %}"></i> {{ message }}
+        </div>
       {% endfor %}
     {% endif %}
 
     <form method="post" action="{% url 'registro' %}">
       {% csrf_token %}
 
-      <!-- Campo Username -->
+      <div class="form-group full-width {% if form.nombre.errors %}error{% endif %}">
+        <label>Nombre Completo / Razón Social</label>
+        <input type="text" name="nombre" value="{{ form.nombre.value|default:'' }}" placeholder="Ej: Alejandro Pérez" required autocomplete="off">
+        {% if form.nombre.errors %}
+          <ul class="errorlist">{% for error in form.nombre.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
       <div class="form-group {% if form.username.errors %}error{% endif %}">
         <label>Nombre de usuario</label>
-        <input type="text" name="username" value="{{ form.username.value|default:'' }}" placeholder="Ej: alejandro123" required>
+        <input type="text" name="username" value="{{ form.username.value|default:'' }}" placeholder="Ej: alejandro123" required autocomplete="off">
         {% if form.username.errors %}
-          <ul class="errorlist">
-            {% for error in form.username.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
+          <ul class="errorlist">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>
         {% else %}
-          <small>Solo letras, números y @/./+/-/_</small>
+          <small>Solo letras, números y (@/./+/-/_).</small>
         {% endif %}
       </div>
 
-      <!-- Campo Nombre Completo -->
-      <div class="form-group {% if form.nombre.errors %}error{% endif %}">
-        <label>Nombre Completo</label>
-        <input type="text" name="nombre" value="{{ form.nombre.value|default:'' }}" placeholder="Ej: Alejandro Pérez" required>
-        {% if form.nombre.errors %}
-          <ul class="errorlist">
-            {% for error in form.nombre.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      </div>
-
-      <!-- Campo Rol -->
-      <div class="form-group {% if form.rol.errors %}error{% endif %}">
-        <label>Selecciona tu rol</label>
-        <select name="rol" id="id_rol" required>
-          <option value="" disabled {% if not form.rol.value %}selected{% endif %}>-- Selecciona un rol --</option>
-          <option value="empresa" {% if form.rol.value == 'empresa' %}selected{% endif %}>Empresa</option>
-          <option value="desarrollador" {% if form.rol.value == 'desarrollador' %}selected{% endif %}>Desarrollador</option>
-        </select>
-        {% if form.rol.errors %}
-          <ul class="errorlist">
-            {% for error in form.rol.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      </div>
-
-      <!-- Campo Tipo de Documento (Dinámico) -->
-      <div class="form-group" id="container_tipo_documento" style="display: none;">
-        <label>Registrarse con:</label>
-        {{ form.tipo_documento }}
-        {% if form.tipo_documento.errors %}
-          <ul class="errorlist">
-            {% for error in form.tipo_documento.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      </div>
-
-      <!-- Campo Identificación (Cédula/NIT) -->
-      <div class="form-group {% if form.identificacion.errors %}error{% endif %}">
-        <label id="label_cedula">Número de Identificación</label>
-        <input type="text" name="identificacion" value="{{ form.identificacion.value|default:'' }}" placeholder="Ej: 123456789" required>
-        {% if form.identificacion.errors %}
-          <ul class="errorlist">
-            {% for error in form.identificacion.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      </div>
-
-      <!-- Campo Email -->
       <div class="form-group {% if form.email.errors %}error{% endif %}">
         <label>Correo electrónico</label>
-        <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="ejemplo@correo.com" required>
+        <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="ejemplo@correo.com" required autocomplete="off">
         {% if form.email.errors %}
-          <ul class="errorlist">
-            {% for error in form.email.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
+          <ul class="errorlist">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>
         {% endif %}
       </div>
 
-      <!-- Campo Fecha de Nacimiento -->
-      <div class="form-group {% if form.fecha_nacimiento.errors %}error{% endif %}">
+      <div class="form-group full-width {% if form.rol.errors %}error{% endif %}">
+        <label>Selecciona tu rol</label>
+        <select name="rol" id="id_rol" required>
+          <option value="" disabled {% if not form.rol.value %}selected{% endif %}>-- Elige cómo usarás TEM --</option>
+          <option value="empresa" {% if form.rol.value == 'empresa' %}selected{% endif %}>Soy Empresa (Busco talento)</option>
+          <option value="desarrollador" {% if form.rol.value == 'desarrollador' %}selected{% endif %}>Soy Desarrollador (SENA)</option>
+        </select>
+        {% if form.rol.errors %}
+          <ul class="errorlist">{% for error in form.rol.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="form-group" id="container_tipo_documento" style="display: none;">
+        <label>Tipo de Documento</label>
+        {{ form.tipo_documento }}
+        {% if form.tipo_documento.errors %}
+          <ul class="errorlist">{% for error in form.tipo_documento.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="form-group {% if form.identificacion.errors %}error{% endif %}">
+        <label id="label_cedula">Número de Identificación</label>
+        <input type="text" name="identificacion" value="{{ form.identificacion.value|default:'' }}" placeholder="Ej: 1002345678" required autocomplete="off">
+        {% if form.identificacion.errors %}
+          <ul class="errorlist">{% for error in form.identificacion.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="form-group full-width {% if form.fecha_nacimiento.errors %}error{% endif %}">
         <label>Fecha de Nacimiento</label>
         <input type="date" name="fecha_nacimiento" value="{{ form.fecha_nacimiento.value|default:'' }}" required>
         {% if form.fecha_nacimiento.errors %}
-          <ul class="errorlist">
-            {% for error in form.fecha_nacimiento.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
+          <ul class="errorlist">{% for error in form.fecha_nacimiento.errors %}<li>{{ error }}</li>{% endfor %}</ul>
         {% else %}
-          <small>Debes ser mayor de 18 años.</small>
+          <small>Recuerda que debes ser mayor de edad.</small>
         {% endif %}
       </div>
 
-      <!-- Campo Contraseña -->
       <div class="form-group {% if form.password1.errors %}error{% endif %}">
         <label>Contraseña</label>
         <input type="password" name="password1" placeholder="••••••••" required>
         {% if form.password1.errors %}
-          <ul class="errorlist">
-            {% for error in form.password1.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
+          <ul class="errorlist">{% for error in form.password1.errors %}<li>{{ error }}</li>{% endfor %}</ul>
         {% else %}
-          <small>Mínimo 8 caracteres. No puede ser solo números.</small>
+          <small>Mín. 8 caracteres alfanuméricos.</small>
         {% endif %}
       </div>
 
-      <!-- Campo Confirmar Contraseña -->
       <div class="form-group {% if form.password2.errors %}error{% endif %}">
         <label>Confirmar contraseña</label>
         <input type="password" name="password2" placeholder="••••••••" required>
         {% if form.password2.errors %}
-          <ul class="errorlist">
-            {% for error in form.password2.errors %}
-              <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
+          <ul class="errorlist">{% for error in form.password2.errors %}<li>{{ error }}</li>{% endfor %}</ul>
         {% endif %}
       </div>
 
-      <button type="submit">Enviar registro</button>
+      <button type="submit" class="full-width">Completar registro</button>
     </form>
 
     <div class="login-link">
-      ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a>
+      ¿Ya tienes una cuenta? <a href="{% url 'inicio' %}">Inicia sesión aquí</a>
     </div>
   </div>
 
@@ -306,37 +205,57 @@
       const rol = rolSelect.value;
       if (rol === 'empresa') {
         typeDocContainer.style.display = 'block';
-        labelCedula.innerText = 'Número de Identificación';
+        labelCedula.innerText = 'NIT o Número de Identificación';
+        if(typeDocSelect) {
+            typeDocSelect.style.width = '100%';
+            typeDocSelect.style.padding = '13px 16px';
+            typeDocSelect.style.background = 'rgba(255,255,255,0.03)';
+            typeDocSelect.style.border = '1px solid rgba(255,255,255,0.1)';
+            typeDocSelect.style.borderRadius = '10px';
+            typeDocSelect.style.color = '#fff';
+            typeDocSelect.style.fontSize = '14.5px';
+            typeDocSelect.style.fontFamily = "'Inter', sans-serif";
+            // Clean up old options
+            for(let option of typeDocSelect.options){ option.style.background='#111'; option.style.color='#fff'; }
+        }
       } else {
         typeDocContainer.style.display = 'none';
-        typeDocSelect.value = 'cedula'; // Forzamos cédula para desarrolladores
-        labelCedula.innerText = 'Cédula de Ciudadanía';
+        if (typeDocSelect) typeDocSelect.value = 'cedula'; 
+        labelCedula.innerText = 'Cédula de Identidad';
       }
     }
 
     rolSelect.addEventListener('change', updateDocFields);
-    window.addEventListener('load', updateDocFields); // Ejecutar al cargar por si hay errores de validación
+    window.addEventListener('load', updateDocFields);
 
-    // Validación simple en cliente
     document.querySelector('form').addEventListener('submit', function(e) {
       const username = document.querySelector('input[name="username"]').value;
       const password1 = document.querySelector('input[name="password1"]').value;
       const password2 = document.querySelector('input[name="password2"]').value;
       
-      // Validar que username no tenga espacios
-      if (username.includes(' ')) {
+      if (username.trim().includes(' ')) {
         e.preventDefault();
-        alert('El nombre de usuario no puede contener espacios');
+        alert('El nombre de usuario no puede contener espacios obligatorios.');
         return;
       }
-      
-      // Validar que las contraseñas coincidan
       if (password1 !== password2) {
         e.preventDefault();
-        alert('Las contraseñas no coinciden');
+        alert('Las contraseñas ingresadas no coinciden. Verifícalas y vuelve a intentar.');
         return;
       }
     });
+
+    // Añade clase glass al select inyectado por form de Django (si existe)
+    if(typeDocSelect) {
+        typeDocSelect.style.width = '100%';
+        typeDocSelect.style.padding = '13px 16px';
+        typeDocSelect.style.background = 'rgba(255,255,255,0.03)';
+        typeDocSelect.style.border = '1px solid rgba(255,255,255,0.1)';
+        typeDocSelect.style.borderRadius = '10px';
+        typeDocSelect.style.color = '#fff';
+        typeDocSelect.style.fontSize = '14.5px';
+        typeDocSelect.style.marginBottom = '8px';
+    }
   </script>
 </body>
 </html>

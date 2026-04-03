@@ -3,38 +3,87 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Calificar Empresa | TEM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEM | Calificar Empresa</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
   <style>
-      body { background: #000; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; }
-      .card { background: #0a0a0a; padding: 40px; border-radius: 20px; border: 1px solid #222; max-width: 500px; width: 100%; }
-      .rating { display: flex; flex-direction: row-reverse; gap: 10px; margin: 20px 0; }
-      .rating input { display: none; }
-      .rating label { cursor: pointer; font-size: 30px; color: #222; transition: 0.3s; }
-      .rating label:hover, .rating label:hover ~ label, .rating input:checked ~ label { color: #FFD700; }
-      textarea { width: 100%; min-height: 100px; background: #111; border: 1px solid #333; color: white; padding: 15px; border-radius: 10px; box-sizing: border-box; }
-      .btn { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
-      .btn-submit { background: #4CAF50; color: white; }
-      .btn-cancel { background: transparent; color: #666; text-decoration: none; display: block; text-align: center; margin-top: 15px; }
+    .star-rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 10px; margin: 16px 0; }
+    .star-rating input { display: none; }
+    .star-rating label {
+      cursor: pointer; font-size: 32px; color: var(--border);
+      transition: color 0.2s;
+    }
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label { color: #f59e0b; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1 style="font-weight: 300;">Calificar Empresa</h1>
-    <p style="opacity: 0.6;">Tu feedback ayuda a otros desarrolladores a conocer cómo es trabajar con <strong>{{ proyecto.empresa.username }}</strong>.</p>
-    
-    <form method="post">
-      {% csrf_token %}
-      <div class="rating">
-          <input type="radio" name="puntuacion" value="5" id="5" required><label for="5">★</label>
-          <input type="radio" name="puntuacion" value="4" id="4"><label for="4">★</label>
-          <input type="radio" name="puntuacion" value="3" id="3"><label for="3">★</label>
-          <input type="radio" name="puntuacion" value="2" id="2"><label for="2">★</label>
-          <input type="radio" name="puntuacion" value="1" id="1"><label for="1">★</label>
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
+      <div>
+        <div class="sidebar-brand-text">TEM</div>
+        <div class="sidebar-brand-sub">Calificación</div>
       </div>
-      <textarea name="comentario" placeholder="¿Cómo fue tu experiencia en este proyecto?"></textarea>
-      <button type="submit" class="btn btn-submit">Enviar Calificación</button>
-      <a href="{% url 'dashboard_desarrollador' %}" class="btn-cancel">Omitir por ahora</a>
-    </form>
+    </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item" href="{% url 'dashboard_desarrollador' %}">
+        <i class="fa fa-arrow-left"></i><span>Volver al Panel</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">Calificar Empresa <span>/ Evaluación Final</span></div>
+    </header>
+    <main class="main-content" style="display:flex; justify-content:center;">
+      <div style="max-width:520px; width:100%;">
+        <div class="page-header">
+          <div>
+            <div class="page-title"><i class="fa fa-star" style="margin-right:10px; color:#f59e0b;"></i>Evalúa tu Experiencia</div>
+            <div class="page-subtitle">Tu feedback ayuda a otros desarrolladores a conocer cómo es trabajar con <strong>{{ proyecto.empresa.nombre|default:proyecto.empresa.username }}</strong></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <form method="post" style="display:flex; flex-direction:column; gap:20px;">
+            {% csrf_token %}
+
+            <div style="text-align:center; padding:10px 0;">
+              <p style="font-size:13px; color:var(--text-secondary); margin-bottom:4px;">¿Cómo calificarías a esta empresa?</p>
+              <div class="star-rating">
+                <input type="radio" name="puntuacion" value="5" id="s5" required><label for="s5">★</label>
+                <input type="radio" name="puntuacion" value="4" id="s4"><label for="s4">★</label>
+                <input type="radio" name="puntuacion" value="3" id="s3"><label for="s3">★</label>
+                <input type="radio" name="puntuacion" value="2" id="s2"><label for="s2">★</label>
+                <input type="radio" name="puntuacion" value="1" id="s1"><label for="s1">★</label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label"><i class="fa fa-comment" style="margin-right:6px;"></i>Comentarios</label>
+              <textarea name="comentario" placeholder="¿Cómo fue tu experiencia en este proyecto? ¿La empresa fue clara, justa y puntual?" style="width:100%; min-height:120px; padding:10px 14px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13.5px; color:var(--text-primary); background:var(--card-bg); font-family:inherit; resize:vertical; outline:none;"></textarea>
+            </div>
+
+            <div style="border-top:1px solid var(--border); padding-top:20px; display:flex; flex-direction:column; gap:10px;">
+              <button type="submit" class="btn btn-primary btn-full">
+                <i class="fa fa-star"></i> Enviar Calificación
+              </button>
+              <a href="{% url 'dashboard_desarrollador' %}" class="btn btn-secondary btn-full" style="justify-content:center;">
+                Omitir por ahora
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
   </div>
+</div>
 </body>
 </html>

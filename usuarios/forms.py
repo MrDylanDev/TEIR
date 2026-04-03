@@ -86,9 +86,10 @@ class RegistroUsuarioForm(UserCreationForm):
 class PerfilEmpresaForm(forms.ModelForm):
     class Meta:
         model = PerfilEmpresa
-        fields = ['nombre_empresa', 'sector', 'telefono', 'ciudad', 'descripcion']
+        fields = ['nombre_empresa', 'logo', 'sector', 'telefono', 'ciudad', 'descripcion']
         widgets = {
             'nombre_empresa': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la empresa'}),
+            'logo': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'sector': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Sector (ej: Tecnología)'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
             'ciudad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ciudad'}),
@@ -98,8 +99,10 @@ class PerfilEmpresaForm(forms.ModelForm):
 class PerfilDesarrolladorForm(forms.ModelForm):
     class Meta:
         model = PerfilDesarrollador
-        fields = ['programa_formacion', 'ficha', 'habilidades']
+        fields = ['foto_perfil', 'programa_formacion', 'ficha', 'habilidades', 'portafolio_url']
         widgets = {
+            'foto_perfil': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'portafolio_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://github.com/tu-usuario'}),
             'programa_formacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Programa de formación (ADSO, etc)'}),
             'ficha': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de Ficha'}),
             'habilidades': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Lista tus habilidades (ej: Python, Java, SQL...)'}),

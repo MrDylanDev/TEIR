@@ -15,16 +15,18 @@ def ver_postulaciones_empresa(request, proyecto_id):
     postulaciones = []
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT id, desarrollador_nombre, calificacion_promedio, num_proyectos_completados, habilidades, mensaje, fecha 
-            FROM v_postulaciones_activas 
-            WHERE proyecto_id = %s AND estado = 'pendiente'
-            ORDER BY fecha DESC
+            SELECT v.id, v.desarrollador_nombre, v.calificacion_promedio, v.num_proyectos_completados, 
+                   v.habilidades, v.mensaje, v.fecha, pd.foto_perfil
+            FROM v_postulaciones_activas v
+            LEFT JOIN perfil_desarrollador pd ON pd.usuario_id = (SELECT id FROM usuarios WHERE nombre = v.desarrollador_nombre LIMIT 1)
+            WHERE v.proyecto_id = %s AND v.estado = 'pendiente'
+            ORDER BY v.fecha DESC
         """, [proyecto_id])
         rows = cursor.fetchall()
         for row in rows:
             postulaciones.append({
                 'id': row[0],
-                'desarrollador': {'nombre': row[1]},
+                'desarrollador': {'nombre': row[1], 'foto_perfil': row[7]},
                 'calificacion_promedio': row[2],
                 'proyectos_completados': row[3],
                 'habilidades': row[4],
@@ -50,7 +52,12 @@ def postularse_a_proyecto(request, proyecto_id):
         return redirect('dashboard_desarrollador')
     
     if request.method == 'POST':
-        mensaje = request.POST.get('mensaje')
+        carta = request.POST.get('carta', '')
+        experiencia = request.POST.get('experiencia', '')
+        link = request.POST.get('link', '')
+        
+        mensaje = f"CARTA DE PRESENTACIÓN:\n{carta}\n\nEXPERIENCIA:\n{experiencia}\n\nPORTAFOLIO/ENLACE:\n{link}"
+        
         try:
             with connection.cursor() as cursor:
                 cursor.callproc('sp_postularse', [proyecto.id, request.user.id, mensaje])
