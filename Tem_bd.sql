@@ -16,6 +16,16 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Current Database: `tem_dbv2`
+--
+
+/*!40000 DROP DATABASE IF EXISTS `tem_dbv2`*/;
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `tem_dbv2` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+
+USE `tem_dbv2`;
+
+--
 -- Table structure for table `auth_group`
 --
 
@@ -148,6 +158,7 @@ CREATE TABLE `contrataciones` (
   `estado` varchar(10) NOT NULL DEFAULT 'activa',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_proyecto_desarrollador` (`proyecto_id`,`desarrollador_id`),
+  UNIQUE KEY `contrataciones_proyecto_id_desarrollador_id_c63a1d98_uniq` (`proyecto_id`,`desarrollador_id`),
   KEY `idx_desarrollador` (`desarrollador_id`),
   KEY `idx_empresa` (`empresa_id`),
   KEY `idx_estado` (`estado`),
@@ -175,18 +186,18 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `trg_validar_vacantes_antes_de_contratar` BEFORE INSERT ON `contrataciones` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_validar_vacantes_antes_de_contratar` BEFORE INSERT ON `contrataciones` FOR EACH ROW BEGIN
   DECLARE v_vacantes_totales INT;
   DECLARE v_vacantes_ocupadas INT;
 
-  -- 1. Obtener el límite de vacantes del proyecto
+  
   SELECT vacantes INTO v_vacantes_totales FROM proyectos WHERE id = NEW.proyecto_id;
 
-  -- 2. Contar contrataciones activas actuales para este proyecto
+  
   SELECT COUNT(*) INTO v_vacantes_ocupadas FROM contrataciones 
   WHERE proyecto_id = NEW.proyecto_id AND estado = 'activa';
 
-  -- 3. Validar si hay cupo
+  
   IF v_vacantes_ocupadas >= v_vacantes_totales THEN
     SIGNAL SQLSTATE '45000' 
     SET MESSAGE_TEXT = 'Límite de vacantes excedido: El proyecto ya no tiene cupos disponibles.';
@@ -303,7 +314,7 @@ CREATE TABLE `django_migrations` (
   `name` varchar(255) NOT NULL,
   `applied` datetime(6) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -312,7 +323,7 @@ CREATE TABLE `django_migrations` (
 
 LOCK TABLES `django_migrations` WRITE;
 /*!40000 ALTER TABLE `django_migrations` DISABLE KEYS */;
-INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2026-03-30 21:08:01.850450'),(2,'contenttypes','0002_remove_content_type_name','2026-03-30 21:08:01.865577'),(3,'auth','0001_initial','2026-03-30 21:08:01.871610'),(4,'auth','0002_alter_permission_name_max_length','2026-03-30 21:08:01.875557'),(5,'auth','0003_alter_user_email_max_length','2026-03-30 21:08:01.878600'),(6,'auth','0004_alter_user_username_opts','2026-03-30 21:08:01.882240'),(7,'auth','0005_alter_user_last_login_null','2026-03-30 21:08:01.885798'),(8,'auth','0006_require_contenttypes_0002','2026-03-30 21:08:01.890080'),(9,'auth','0007_alter_validators_add_error_messages','2026-03-30 21:08:01.893043'),(10,'auth','0008_alter_user_username_max_length','2026-03-30 21:08:01.896066'),(11,'auth','0009_alter_user_last_name_max_length','2026-03-30 21:08:01.900484'),(12,'auth','0010_alter_group_name_max_length','2026-03-30 21:08:01.904685'),(13,'auth','0011_update_proxy_permissions','2026-03-30 21:08:01.908813'),(14,'auth','0012_alter_user_first_name_max_length','2026-03-30 21:08:01.912379'),(15,'usuarios','0001_initial','2026-03-30 21:08:01.916725'),(16,'admin','0001_initial','2026-03-30 21:08:01.920163'),(17,'admin','0002_logentry_remove_auto_add','2026-03-30 21:08:01.923665'),(18,'admin','0003_logentry_add_action_flag_choices','2026-03-30 21:08:01.926597'),(19,'proyectos','0001_initial','2026-03-30 21:08:01.930026'),(20,'avances','0001_initial','2026-03-30 21:08:01.933183'),(21,'avances','0002_alter_avance_table','2026-03-30 21:08:01.936463'),(22,'avances','0003_alter_avance_archivo_url_alter_avance_table','2026-03-30 21:08:01.940269'),(23,'proyectos','0002_proyecto_vacantes_alter_proyecto_estado_and_more','2026-03-30 21:08:01.943805'),(24,'contrataciones','0001_initial','2026-03-30 21:08:01.947991'),(25,'contrataciones','0002_alter_contratacion_proyecto','2026-03-30 21:08:01.951555'),(26,'contrataciones','0003_alter_contratacion_table','2026-03-30 21:08:01.955244'),(27,'contrataciones','0004_alter_contratacion_table','2026-03-30 21:08:01.958493'),(28,'favoritos','0001_initial','2026-03-30 21:08:01.961658'),(29,'favoritos','0002_alter_favorito_table','2026-03-30 21:08:01.965134'),(30,'favoritos','0003_alter_favorito_table','2026-03-30 21:08:01.968927'),(31,'logs','0001_initial','2026-03-30 21:08:01.973052'),(32,'logs','0002_alter_copiaseguridad_table_alter_logauditoria_table','2026-03-30 21:08:01.976126'),(33,'logs','0003_alter_logauditoria_registro_id_and_more','2026-03-30 21:08:01.980179'),(34,'logs','0004_alter_copiaseguridad_ejecutado_por','2026-03-30 21:08:01.983678'),(35,'proyectos','0003_alter_historialestadoproyecto_table_and_more','2026-03-30 21:08:01.987191'),(36,'proyectos','0004_valoracion_rol_evaluador_and_more','2026-03-30 21:08:01.991480'),(37,'mensajes','0001_initial','2026-03-30 21:08:01.994937'),(38,'mensajes','0002_alter_mensaje_table','2026-03-30 21:08:01.998462'),(39,'mensajes','0003_alter_mensaje_proyecto_alter_mensaje_table','2026-03-30 21:08:02.002100'),(40,'mensajes','0004_alter_mensaje_receptor','2026-03-30 21:08:02.005519'),(41,'notificaciones','0001_initial','2026-03-30 21:08:02.010277'),(42,'notificaciones','0002_alter_notificacion_table','2026-03-30 21:08:02.014643'),(43,'notificaciones','0003_alter_notificacion_options_and_more','2026-03-30 21:08:02.018718'),(44,'postulaciones','0001_initial','2026-03-30 21:08:02.022416'),(45,'postulaciones','0002_alter_postulacion_table','2026-03-30 21:08:02.026082'),(46,'postulaciones','0003_alter_postulacion_table','2026-03-30 21:08:02.029450'),(47,'proyectos','0005_alter_historialestadoproyecto_cambiado_por_and_more','2026-03-30 21:08:02.033149'),(48,'proyectos','0006_alter_valoracion_unique_together','2026-03-30 21:08:02.037200'),(49,'sessions','0001_initial','2026-03-30 21:08:02.041092'),(50,'usuarios','0002_usuario_fecha_nacimiento_and_more','2026-03-30 21:08:02.044676'),(51,'usuarios','0003_alter_usuario_options_usuario_nombre_and_more','2026-03-30 21:08:02.048467'),(52,'usuarios','0004_alter_usuario_options_usuario_nombre_and_more','2026-03-30 21:08:02.052183'),(53,'proyectos','0007_alter_historialestadoproyecto_estado_anterior_and_more','2026-03-30 21:40:37.286334'),(54,'avances','0004_remove_avance_porcentaje_avance_entregable','2026-03-30 21:43:22.648896'),(55,'avances','0005_avance_comentario_revision_avance_estado','2026-03-30 22:03:41.990741'),(56,'proyectos','0008_alter_entregable_estado_equipo_entregable_equipo','2026-03-30 22:23:13.670025'),(57,'usuarios','0005_rename_cedula_usuario_identificacion_and_more','2026-03-31 04:53:12.560312'),(58,'usuarios','0006_remove_usuario_fecha_registro_and_more','2026-03-31 05:12:38.014439'),(59,'usuarios','0007_remove_usuario_bloqueado_hasta_and_more','2026-03-31 05:45:14.469818'),(60,'proyectos','0009_remove_proyecto_aprobado_por_and_more','2026-03-31 05:53:37.204320'),(61,'usuarios','0008_remove_usuario_first_name_remove_usuario_last_name','2026-03-31 06:00:25.639612'),(62,'contrataciones','0005_alter_contratacion_estado_and_more','2026-03-31 06:10:15.869458'),(63,'contrataciones','0006_remove_contratacion_asignado_por','2026-03-31 06:15:52.256973'),(64,'avances','0006_alter_avance_entregable','2026-03-31 06:47:19.745048'),(65,'proyectos','0010_alter_valoracion_puntuacion','2026-03-31 06:59:31.665278'),(66,'avances','0007_alter_avance_entregable','2026-03-31 19:29:41.291749'),(67,'contrataciones','0007_remove_contratacion_fecha_fin_estimada','2026-03-31 19:29:41.312622'),(68,'logs','0005_remove_logauditoria_ip_address','2026-03-31 19:29:41.316838'),(69,'mensajes','0005_rename_cuerpo_mensaje_contenido_and_more','2026-03-31 19:29:41.320243'),(70,'notificaciones','0004_notificacion_proyecto','2026-03-31 19:29:41.323450'),(71,'postulaciones','0004_alter_postulacion_estado','2026-03-31 19:29:41.326890'),(72,'usuarios','0009_remove_perfilempresa_nit','2026-03-31 19:29:41.330324');
+INSERT INTO `django_migrations` VALUES (1,'contenttypes','0001_initial','2026-03-30 21:08:01.850450'),(2,'contenttypes','0002_remove_content_type_name','2026-03-30 21:08:01.865577'),(3,'auth','0001_initial','2026-03-30 21:08:01.871610'),(4,'auth','0002_alter_permission_name_max_length','2026-03-30 21:08:01.875557'),(5,'auth','0003_alter_user_email_max_length','2026-03-30 21:08:01.878600'),(6,'auth','0004_alter_user_username_opts','2026-03-30 21:08:01.882240'),(7,'auth','0005_alter_user_last_login_null','2026-03-30 21:08:01.885798'),(8,'auth','0006_require_contenttypes_0002','2026-03-30 21:08:01.890080'),(9,'auth','0007_alter_validators_add_error_messages','2026-03-30 21:08:01.893043'),(10,'auth','0008_alter_user_username_max_length','2026-03-30 21:08:01.896066'),(11,'auth','0009_alter_user_last_name_max_length','2026-03-30 21:08:01.900484'),(12,'auth','0010_alter_group_name_max_length','2026-03-30 21:08:01.904685'),(13,'auth','0011_update_proxy_permissions','2026-03-30 21:08:01.908813'),(14,'auth','0012_alter_user_first_name_max_length','2026-03-30 21:08:01.912379'),(15,'usuarios','0001_initial','2026-03-30 21:08:01.916725'),(16,'admin','0001_initial','2026-03-30 21:08:01.920163'),(17,'admin','0002_logentry_remove_auto_add','2026-03-30 21:08:01.923665'),(18,'admin','0003_logentry_add_action_flag_choices','2026-03-30 21:08:01.926597'),(19,'proyectos','0001_initial','2026-03-30 21:08:01.930026'),(20,'avances','0001_initial','2026-03-30 21:08:01.933183'),(21,'avances','0002_alter_avance_table','2026-03-30 21:08:01.936463'),(22,'avances','0003_alter_avance_archivo_url_alter_avance_table','2026-03-30 21:08:01.940269'),(23,'proyectos','0002_proyecto_vacantes_alter_proyecto_estado_and_more','2026-03-30 21:08:01.943805'),(24,'contrataciones','0001_initial','2026-03-30 21:08:01.947991'),(25,'contrataciones','0002_alter_contratacion_proyecto','2026-03-30 21:08:01.951555'),(26,'contrataciones','0003_alter_contratacion_table','2026-03-30 21:08:01.955244'),(27,'contrataciones','0004_alter_contratacion_table','2026-03-30 21:08:01.958493'),(28,'favoritos','0001_initial','2026-03-30 21:08:01.961658'),(29,'favoritos','0002_alter_favorito_table','2026-03-30 21:08:01.965134'),(30,'favoritos','0003_alter_favorito_table','2026-03-30 21:08:01.968927'),(31,'logs','0001_initial','2026-03-30 21:08:01.973052'),(32,'logs','0002_alter_copiaseguridad_table_alter_logauditoria_table','2026-03-30 21:08:01.976126'),(33,'logs','0003_alter_logauditoria_registro_id_and_more','2026-03-30 21:08:01.980179'),(34,'logs','0004_alter_copiaseguridad_ejecutado_por','2026-03-30 21:08:01.983678'),(35,'proyectos','0003_alter_historialestadoproyecto_table_and_more','2026-03-30 21:08:01.987191'),(36,'proyectos','0004_valoracion_rol_evaluador_and_more','2026-03-30 21:08:01.991480'),(37,'mensajes','0001_initial','2026-03-30 21:08:01.994937'),(38,'mensajes','0002_alter_mensaje_table','2026-03-30 21:08:01.998462'),(39,'mensajes','0003_alter_mensaje_proyecto_alter_mensaje_table','2026-03-30 21:08:02.002100'),(40,'mensajes','0004_alter_mensaje_receptor','2026-03-30 21:08:02.005519'),(41,'notificaciones','0001_initial','2026-03-30 21:08:02.010277'),(42,'notificaciones','0002_alter_notificacion_table','2026-03-30 21:08:02.014643'),(43,'notificaciones','0003_alter_notificacion_options_and_more','2026-03-30 21:08:02.018718'),(44,'postulaciones','0001_initial','2026-03-30 21:08:02.022416'),(45,'postulaciones','0002_alter_postulacion_table','2026-03-30 21:08:02.026082'),(46,'postulaciones','0003_alter_postulacion_table','2026-03-30 21:08:02.029450'),(47,'proyectos','0005_alter_historialestadoproyecto_cambiado_por_and_more','2026-03-30 21:08:02.033149'),(48,'proyectos','0006_alter_valoracion_unique_together','2026-03-30 21:08:02.037200'),(49,'sessions','0001_initial','2026-03-30 21:08:02.041092'),(50,'usuarios','0002_usuario_fecha_nacimiento_and_more','2026-03-30 21:08:02.044676'),(51,'usuarios','0003_alter_usuario_options_usuario_nombre_and_more','2026-03-30 21:08:02.048467'),(52,'usuarios','0004_alter_usuario_options_usuario_nombre_and_more','2026-03-30 21:08:02.052183'),(53,'proyectos','0007_alter_historialestadoproyecto_estado_anterior_and_more','2026-03-30 21:40:37.286334'),(54,'avances','0004_remove_avance_porcentaje_avance_entregable','2026-03-30 21:43:22.648896'),(55,'avances','0005_avance_comentario_revision_avance_estado','2026-03-30 22:03:41.990741'),(56,'proyectos','0008_alter_entregable_estado_equipo_entregable_equipo','2026-03-30 22:23:13.670025'),(57,'usuarios','0005_rename_cedula_usuario_identificacion_and_more','2026-03-31 04:53:12.560312'),(58,'usuarios','0006_remove_usuario_fecha_registro_and_more','2026-03-31 05:12:38.014439'),(59,'usuarios','0007_remove_usuario_bloqueado_hasta_and_more','2026-03-31 05:45:14.469818'),(60,'proyectos','0009_remove_proyecto_aprobado_por_and_more','2026-03-31 05:53:37.204320'),(61,'usuarios','0008_remove_usuario_first_name_remove_usuario_last_name','2026-03-31 06:00:25.639612'),(62,'contrataciones','0005_alter_contratacion_estado_and_more','2026-03-31 06:10:15.869458'),(63,'contrataciones','0006_remove_contratacion_asignado_por','2026-03-31 06:15:52.256973'),(64,'avances','0006_alter_avance_entregable','2026-03-31 06:47:19.745048'),(65,'proyectos','0010_alter_valoracion_puntuacion','2026-03-31 06:59:31.665278'),(66,'avances','0007_alter_avance_entregable','2026-03-31 19:29:41.291749'),(67,'contrataciones','0007_remove_contratacion_fecha_fin_estimada','2026-03-31 19:29:41.312622'),(68,'logs','0005_remove_logauditoria_ip_address','2026-03-31 19:29:41.316838'),(69,'mensajes','0005_rename_cuerpo_mensaje_contenido_and_more','2026-03-31 19:29:41.320243'),(70,'notificaciones','0004_notificacion_proyecto','2026-03-31 19:29:41.323450'),(71,'postulaciones','0004_alter_postulacion_estado','2026-03-31 19:29:41.326890'),(72,'usuarios','0009_remove_perfilempresa_nit','2026-03-31 19:29:41.330324'),(73,'contrataciones','0008_alter_contratacion_unique_together','2026-04-02 03:34:25.491999'),(74,'usuarios','0010_perfilempresa_calificacion_promedio','2026-04-02 03:36:38.431136'),(75,'usuarios','0011_perfildesarrollador_foto_perfil_and_more','2026-04-03 04:48:28.577395');
 /*!40000 ALTER TABLE `django_migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -363,7 +374,7 @@ CREATE TABLE `entregables` (
   KEY `idx_entregables_fecha` (`fecha_creacion`),
   CONSTRAINT `entregables_equipo_id_4cceddef_fk_equipos_id` FOREIGN KEY (`equipo_id`) REFERENCES `equipos` (`id`),
   CONSTRAINT `entregables_proyecto_id_950be557_fk_proyectos_id` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -390,7 +401,7 @@ CREATE TABLE `equipos` (
   PRIMARY KEY (`id`),
   KEY `fk_equipos_proyecto` (`proyecto_id`),
   CONSTRAINT `fk_equipos_proyecto` FOREIGN KEY (`proyecto_id`) REFERENCES `proyectos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -537,7 +548,6 @@ CREATE TABLE `mensajes` (
   `titulo` varchar(200) DEFAULT NULL,
   `contenido` text NOT NULL,
   `leido` tinyint(1) DEFAULT '0',
-  `archivado` tinyint(1) DEFAULT '0',
   `fecha_envio` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `proyecto_id` (`proyecto_id`),
@@ -567,7 +577,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `trg_notificacion_mensaje` AFTER INSERT ON `mensajes` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_notificacion_mensaje` AFTER INSERT ON `mensajes` FOR EACH ROW BEGIN
   DECLARE v_nombre_remitente VARCHAR(150);
   SELECT nombre INTO v_nombre_remitente FROM usuarios WHERE id = NEW.remitente_id;
 
@@ -637,11 +647,13 @@ CREATE TABLE `perfil_desarrollador` (
   `habilidades` text,
   `calificacion_promedio` decimal(3,2) DEFAULT '0.00',
   `num_proyectos_completados` int DEFAULT '0',
+  `foto_perfil` varchar(100) DEFAULT NULL,
+  `portafolio_url` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `usuario_id` (`usuario_id`),
   KEY `idx_calificacion` (`calificacion_promedio`),
   CONSTRAINT `perfil_desarrollador_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -650,7 +662,7 @@ CREATE TABLE `perfil_desarrollador` (
 
 LOCK TABLES `perfil_desarrollador` WRITE;
 /*!40000 ALTER TABLE `perfil_desarrollador` DISABLE KEYS */;
-INSERT INTO `perfil_desarrollador` VALUES (1,3,'ADSO','21232324241','SOlo python',4.00,2);
+INSERT INTO `perfil_desarrollador` VALUES (1,3,'ADSO','21232324241','SOlo python',4.00,3,'perfiles/devs/pxfuel.jpg',NULL);
 /*!40000 ALTER TABLE `perfil_desarrollador` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -670,6 +682,7 @@ CREATE TABLE `perfil_empresa` (
   `descripcion` text,
   `ciudad` varchar(100) DEFAULT NULL,
   `calificacion_promedio` decimal(3,2) DEFAULT '0.00',
+  `logo` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `usuario_id` (`usuario_id`),
   KEY `idx_sector` (`sector`),
@@ -684,7 +697,7 @@ CREATE TABLE `perfil_empresa` (
 
 LOCK TABLES `perfil_empresa` WRITE;
 /*!40000 ALTER TABLE `perfil_empresa` DISABLE KEYS */;
-INSERT INTO `perfil_empresa` VALUES (1,2,'Pepsico','Tecnología','3233801021','La mejor empresa de tecnologia','MEdellin',1.00);
+INSERT INTO `perfil_empresa` VALUES (1,2,'Pepsico','Tecnología','3233801021','La mejor empresa de tecnologia','MEdellin',1.00,NULL);
 /*!40000 ALTER TABLE `perfil_empresa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -730,7 +743,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `trg_nueva_postulacion` AFTER INSERT ON `postulaciones` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_nueva_postulacion` AFTER INSERT ON `postulaciones` FOR EACH ROW BEGIN
   DECLARE v_empresa_id BIGINT;
   DECLARE v_nombre_dev VARCHAR(150);
   DECLARE v_titulo_proy VARCHAR(200);
@@ -783,7 +796,7 @@ CREATE TABLE `proyectos` (
   FULLTEXT KEY `ft_busqueda_proyectos` (`titulo`,`descripcion`),
   CONSTRAINT `proyectos_ibfk_1` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`),
   CONSTRAINT `check_vacantes_positivas` CHECK ((`vacantes` > 0))
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -803,10 +816,10 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `trg_actualizar_proyectos_completados` AFTER UPDATE ON `proyectos` FOR EACH ROW BEGIN
-    -- Detectar cuando el proyecto pasa a estado 'finalizado'
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_actualizar_proyectos_completados` AFTER UPDATE ON `proyectos` FOR EACH ROW BEGIN
+    
     IF OLD.estado != 'finalizado' AND NEW.estado = 'finalizado' THEN
-        -- Incrementar el contador para todos los desarrolladores que terminaron el proyecto con contrato activo
+        
         UPDATE perfil_desarrollador 
         SET num_proyectos_completados = num_proyectos_completados + 1
         WHERE usuario_id IN (
@@ -853,7 +866,7 @@ CREATE TABLE `usuarios` (
   KEY `idx_rol` (`rol`),
   KEY `idx_estado` (`estado`),
   KEY `idx_user_rol_est` (`rol`,`estado`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -862,7 +875,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin_master','Admin Master',NULL,NULL,'admin@tem.com','pbkdf2_sha256$1200000$kJ4MmqW9gQrKXwUixhjgMJ$PHeLMLggWqeUarePItNuB4YGyqksc7/9nyQFcZ8vnhQ=','administrador','activo','869edb810fa7f54ab2089916b2597584','2026-04-01 05:27:30',0,1,1,'2026-03-29 00:52:09','2026-04-01 21:33:52'),(2,'empresa_tech','Tech Corp SAS',NULL,NULL,'contacto@techcorp.com','pbkdf2_sha256$1200000$s2MSdDRGR9t4E4gfcZE2Js$3TQYfJoJ6RUDIpOzz4gQGl3VexPKKTEG+i0F8Nq35ZU=','empresa','activo',NULL,NULL,0,0,1,'2026-03-29 00:52:10','2026-04-01 22:33:06'),(3,'dev_expert','Juan Desarrollador',NULL,NULL,'dev@pro.com','pbkdf2_sha256$1200000$lRdby9qIK5Nv5Abl0xLDLN$pmH5D6I7Tvux2x2E/CxSFfHcAIMh7NvcRMFnCsLA0YQ=','desarrollador','activo',NULL,NULL,0,0,1,'2026-03-29 00:52:11','2026-04-01 22:28:29');
+INSERT INTO `usuarios` VALUES (1,'admin_master','Admin Master','4299485410','1990-01-02','admin@tem.com','pbkdf2_sha256$1200000$kJ4MmqW9gQrKXwUixhjgMJ$PHeLMLggWqeUarePItNuB4YGyqksc7/9nyQFcZ8vnhQ=','administrador','activo','869edb810fa7f54ab2089916b2597584','2026-04-01 05:27:30',0,1,1,'2026-03-29 00:52:09','2026-04-06 03:31:12'),(2,'empresa_tech','Tech Corp SAS','4032546710','1890-02-10','contacto@techcorp.com','pbkdf2_sha256$1200000$s2MSdDRGR9t4E4gfcZE2Js$3TQYfJoJ6RUDIpOzz4gQGl3VexPKKTEG+i0F8Nq35ZU=','empresa','activo',NULL,NULL,0,0,1,'2026-03-29 00:52:10','2026-04-06 04:04:54'),(3,'dev_expert','Juan Desarrollador','4621382190','1970-04-06','dev@pro.com','pbkdf2_sha256$1200000$lRdby9qIK5Nv5Abl0xLDLN$pmH5D6I7Tvux2x2E/CxSFfHcAIMh7NvcRMFnCsLA0YQ=','desarrollador','activo','t_zZsFWp2KxXh8RRtCtnjKFnFEftcacL71Sn1aWSdoc','2026-04-02 23:56:38',0,0,1,'2026-03-29 00:52:11','2026-04-06 03:42:52');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -874,7 +887,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `trg_log_nuevo_usuario` AFTER INSERT ON `usuarios` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_log_nuevo_usuario` AFTER INSERT ON `usuarios` FOR EACH ROW BEGIN
     INSERT INTO logs_auditoria (usuario_id, accion, tabla_afectada, registro_id)
     VALUES (
         NEW.id, 
@@ -897,8 +910,8 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `trg_registro_sesion` BEFORE UPDATE ON `usuarios` FOR EACH ROW BEGIN
-  -- Escuchamos el cambio en last_login (columna estándar de Django)
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_registro_sesion` BEFORE UPDATE ON `usuarios` FOR EACH ROW BEGIN
+  
   IF NEW.last_login IS NOT NULL AND 
      (OLD.last_login IS NULL OR OLD.last_login != NEW.last_login) THEN
     INSERT INTO logs_auditoria (usuario_id, accion, tabla_afectada, registro_id)
@@ -919,7 +932,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 */ /*!50003 TRIGGER `trg_log_usuario_modificado` AFTER UPDATE ON `usuarios` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_log_usuario_modificado` AFTER UPDATE ON `usuarios` FOR EACH ROW BEGIN
   IF OLD.estado != NEW.estado THEN
     INSERT INTO logs_auditoria (usuario_id, accion, tabla_afectada, registro_id)
     VALUES (
@@ -1299,7 +1312,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE  PROCEDURE `sp_aceptar_postulacion`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_aceptar_postulacion`(
     IN p_postulacion_id BIGINT,
     IN p_empresa_id BIGINT
 )
@@ -1319,11 +1332,11 @@ BEGIN
 
     START TRANSACTION;
 
-    -- 1. Obtener datos básicos y BLOQUEAR la fila de la postulación
+    
     SELECT proyecto_id, desarrollador_id INTO v_proyecto_id, v_desarrollador_id
     FROM postulaciones WHERE id = p_postulacion_id FOR UPDATE;
 
-    -- 2. BLOQUEAR el proyecto para asegurar conteo de vacantes exacto
+    
     SELECT titulo, vacantes INTO v_titulo_proyecto, v_vacantes_totales
     FROM proyectos WHERE id = v_proyecto_id AND empresa_id = p_empresa_id FOR UPDATE;
 
@@ -1331,7 +1344,7 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Proyecto no encontrado o no pertenece a la empresa.';
     END IF;
 
-    -- 3. Contar vacantes ocupadas
+    
     SELECT COUNT(*) INTO v_vacantes_ocupadas 
     FROM contrataciones WHERE proyecto_id = v_proyecto_id AND estado = 'activa';
 
@@ -1339,28 +1352,28 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Límite de vacantes alcanzado para este proyecto.';
     END IF;
 
-    -- 4. Aceptar postulación
+    
     UPDATE postulaciones SET estado = 'aceptada' WHERE id = p_postulacion_id;
 
-    -- 5. Crear Contratación
+    
     INSERT INTO contrataciones (proyecto_id, desarrollador_id, empresa_id, fecha_inicio, estado)
     VALUES (v_proyecto_id, v_desarrollador_id, p_empresa_id, CURDATE(), 'activa');
 
-    -- 6. Notificar al desarrollador aceptado
+    
     INSERT INTO notificaciones (usuario_id, proyecto_id, tipo, mensaje, fecha)
     VALUES (v_desarrollador_id, v_proyecto_id, 'aprobacion', 
             CONCAT('¡Felicidades! Has sido contratado para el proyecto: ', v_titulo_proyecto), NOW());
 
-    -- 7. Verificar si se llenaron las vacantes
+    
     IF (v_vacantes_ocupadas + 1) >= v_vacantes_totales THEN
-        -- Cerrar proyecto
+        
         UPDATE proyectos SET estado = 'en_desarrollo' WHERE id = v_proyecto_id;
 
-        -- Rechazar postulaciones pendientes sobrantes
+        
         UPDATE postulaciones SET estado = 'rechazada' 
         WHERE proyecto_id = v_proyecto_id AND estado = 'pendiente';
 
-        -- Notificar a los rechazados
+        
         INSERT INTO notificaciones (usuario_id, proyecto_id, tipo, mensaje, fecha)
         SELECT desarrollador_id, v_proyecto_id, 'postulacion', 
                CONCAT('El proyecto ''', v_titulo_proyecto, ''' ha completado sus vacantes. Tu postulación ha sido cerrada.'), NOW()
@@ -1386,7 +1399,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE  PROCEDURE `sp_calificar_proyecto`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_calificar_proyecto`(
   IN p_proyecto_id      INT,
   IN p_evaluador_id     INT,
   IN p_evaluado_id      INT,
@@ -1399,7 +1412,7 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La calificación debe estar entre 1 y 5';
     END IF;
 
-    -- Validar que no se repita la calificación para el mismo objetivo en el mismo proyecto
+    
     IF EXISTS (
         SELECT 1 FROM valoraciones 
         WHERE proyecto_id = p_proyecto_id 
@@ -1417,8 +1430,8 @@ BEGIN
         VALUES (p_proyecto_id, p_evaluado_id, p_evaluador_id, p_puntuacion, p_comentario, 'desarrollador');
     END IF;
 
-    -- ELIMINADO: UPDATE proyectos SET estado = 'finalizado'... 
-    -- El cierre lo manejará Django al terminar la lista de desarrolladores.
+    
+    
 
     SELECT 'Calificación registrada exitosamente' AS mensaje, TRUE AS success;
 END ;;
@@ -1437,7 +1450,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE  PROCEDURE `sp_cancelar_contratacion`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_cancelar_contratacion`(
   IN p_contratacion_id BIGINT,
   IN p_empresa_id BIGINT
 )
@@ -1447,7 +1460,7 @@ BEGIN
   DECLARE v_vacantes_totales INT;
   DECLARE v_vacantes_ocupadas INT;
 
-  -- 1. Buscar la contratación y el estado del proyecto
+  
   SELECT c.proyecto_id, p.estado, p.vacantes 
   INTO v_proyecto_id, v_estado_actual, v_vacantes_totales
   FROM contrataciones c
@@ -1460,22 +1473,22 @@ BEGIN
 
   START TRANSACTION;
 
-    -- 2. Marcar contratación como cancelada
+    
     UPDATE contrataciones SET estado = 'cancelada' WHERE id = p_contratacion_id;
 
-    -- 3. Recalcular vacantes ocupadas
+    
     SELECT COUNT(*) INTO v_vacantes_ocupadas FROM contrataciones 
     WHERE proyecto_id = v_proyecto_id AND estado = 'activa';
 
-    -- 4. Lógica Inteligente de Estado del Proyecto
-    -- Solo pasamos a 'publicado' si NO estaba 'inactivo' o 'suspendido' o 'finalizado'
+    
+    
     IF v_estado_actual NOT IN ('inactivo', 'suspendido', 'finalizado', 'cancelado') THEN
       IF v_vacantes_ocupadas < v_vacantes_totales THEN
         UPDATE proyectos SET estado = 'publicado' WHERE id = v_proyecto_id;
       END IF;
     END IF;
 
-    -- 5. Auditoría
+    
     INSERT INTO logs_auditoria (usuario_id, accion, tabla_afectada, registro_id)
     VALUES (p_empresa_id, CONCAT('Contrato cancelado (ID: ', p_contratacion_id, ')'), 'contrataciones', p_contratacion_id);
 
@@ -1499,7 +1512,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE  PROCEDURE `sp_marcar_notificaciones_leidas`(IN p_usuario_id BIGINT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_marcar_notificaciones_leidas`(IN p_usuario_id BIGINT)
 BEGIN
   UPDATE notificaciones SET leida = 1 WHERE usuario_id = p_usuario_id;
   SELECT 'Notificaciones marcadas como leídas' AS mensaje, TRUE AS success;
@@ -1519,7 +1532,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE  PROCEDURE `sp_postularse`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_postularse`(
   IN p_proyecto_id      BIGINT,
   IN p_desarrollador_id BIGINT,
   IN p_mensaje          TEXT
@@ -1553,7 +1566,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE  PROCEDURE `sp_reporte_admin`()
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_reporte_admin`()
 BEGIN
   SELECT * FROM v_estadisticas_sistema;
 END ;;
@@ -1572,7 +1585,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE  PROCEDURE `sp_solicitar_recuperacion`(IN p_email VARCHAR(150))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_solicitar_recuperacion`(IN p_email VARCHAR(150))
 BEGIN
   IF EXISTS (SELECT 1 FROM usuarios WHERE email = p_email) THEN
     UPDATE usuarios SET token_recuperacion = MD5(NOW()), token_expiracion = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE email = p_email;
@@ -1596,7 +1609,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE  PROCEDURE `sp_toggle_favorito`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_toggle_favorito`(
   IN p_desarrollador_id BIGINT,
   IN p_proyecto_id BIGINT
 )
@@ -1618,6 +1631,12 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
+-- Current Database: `tem_dbv2`
+--
+
+USE `tem_dbv2`;
+
+--
 -- Final view structure for view `v_calificacion_desarrolladores`
 --
 
@@ -1629,7 +1648,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = latin1 */;
 /*!50001 SET collation_connection      = latin1_swedish_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_calificacion_desarrolladores` AS select `valoraciones`.`desarrollador_id` AS `desarrollador_id`,count(`valoraciones`.`id`) AS `total_calificaciones`,round(avg(`valoraciones`.`puntuacion`),2) AS `promedio` from `valoraciones` where (`valoraciones`.`rol_evaluador` = 'empresa') group by `valoraciones`.`desarrollador_id` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1647,7 +1666,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_dashboard_admin` AS select (select count(0) from `usuarios`) AS `total_usuarios`,(select count(0) from `usuarios` where (`usuarios`.`rol` = 'empresa')) AS `total_empresas`,(select count(0) from `usuarios` where (`usuarios`.`rol` = 'desarrollador')) AS `total_desarrolladores`,(select count(0) from `proyectos`) AS `total_proyectos`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'publicado')) AS `proyectos_publicados`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'en_desarrollo')) AS `proyectos_en_desarrollo`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'finalizado')) AS `proyectos_finalizados` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1665,7 +1684,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_dashboard_desarrollador` AS select `u`.`id` AS `desarrollador_id`,`u`.`nombre` AS `nombre`,coalesce(`vc`.`promedio`,0.00) AS `calificacion_promedio`,(select count(0) from `contrataciones` where ((`contrataciones`.`desarrollador_id` = `u`.`id`) and (`contrataciones`.`estado` = 'finalizada'))) AS `num_proyectos_completados`,(select count(0) from `contrataciones` where ((`contrataciones`.`desarrollador_id` = `u`.`id`) and (`contrataciones`.`estado` = 'activa'))) AS `proyectos_activos`,(select count(0) from `favoritos` where (`favoritos`.`desarrollador_id` = `u`.`id`)) AS `proyectos_favoritos`,(select count(0) from `notificaciones` where ((`notificaciones`.`usuario_id` = `u`.`id`) and (`notificaciones`.`leida` = false))) AS `notificaciones_pendientes` from (`usuarios` `u` left join `v_calificacion_desarrolladores` `vc` on((`u`.`id` = `vc`.`desarrollador_id`))) where (`u`.`rol` = 'desarrollador') */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1683,7 +1702,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_dashboard_empresa` AS select `u`.`id` AS `empresa_id`,`u`.`nombre` AS `nombre`,`pe`.`nombre_empresa` AS `nombre_empresa`,(select count(0) from `proyectos` where ((`proyectos`.`empresa_id` = `u`.`id`) and (`proyectos`.`estado` = 'publicado'))) AS `proyectos_publicados`,(select count(0) from `proyectos` where ((`proyectos`.`empresa_id` = `u`.`id`) and (`proyectos`.`estado` = 'en_desarrollo'))) AS `proyectos_activos`,(select count(0) from (`postulaciones` `p` join `proyectos` `pr` on((`p`.`proyecto_id` = `pr`.`id`))) where ((`pr`.`empresa_id` = `u`.`id`) and (`p`.`estado` = 'pendiente'))) AS `postulaciones_pendientes`,(select count(0) from `contrataciones` where ((`contrataciones`.`empresa_id` = `u`.`id`) and (`contrataciones`.`estado` = 'activa'))) AS `desarrolladores_contratados` from (`usuarios` `u` left join `perfil_empresa` `pe` on((`u`.`id` = `pe`.`usuario_id`))) where (`u`.`rol` = 'empresa') */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1701,7 +1720,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_estadisticas_sistema` AS select (select count(0) from `usuarios` where ((`usuarios`.`rol` = 'empresa') and (`usuarios`.`estado` = 'activo'))) AS `total_empresas_activas`,(select count(0) from `usuarios` where ((`usuarios`.`rol` = 'desarrollador') and (`usuarios`.`estado` = 'activo'))) AS `total_desarrolladores_activos`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'publicado')) AS `proyectos_publicados`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'en_desarrollo')) AS `proyectos_en_desarrollo`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'finalizado')) AS `proyectos_finalizados`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'pendiente_aprobacion')) AS `proyectos_pendientes_aprobacion`,(select count(0) from (`postulaciones` `pos` join `proyectos` `p` on((`pos`.`proyecto_id` = `p`.`id`))) where ((`pos`.`estado` = 'pendiente') and (`p`.`estado` = 'publicado'))) AS `postulaciones_pendientes`,(select round(avg(`valoraciones`.`puntuacion`),2) from `valoraciones`) AS `calificacion_promedio_global`,(select count(0) from `proyectos` `p` where ((`p`.`estado` = 'en_desarrollo') and exists(select 1 from `avances` `a` where ((`a`.`proyecto_id` = `p`.`id`) and (`a`.`fecha_hora` >= (now() - interval 20 day)))) is false)) AS `proyectos_con_retraso` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1719,7 +1738,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_notificaciones_pendientes` AS select `n`.`id` AS `id`,`n`.`usuario_id` AS `usuario_id`,`u`.`nombre` AS `usuario_nombre`,`n`.`tipo` AS `tipo`,`n`.`mensaje` AS `mensaje`,`n`.`fecha` AS `fecha`,timestampdiff(MINUTE,`n`.`fecha`,now()) AS `minutos_desde_creacion` from (`notificaciones` `n` join `usuarios` `u` on((`n`.`usuario_id` = `u`.`id`))) where (`n`.`leida` = false) order by `n`.`fecha` desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1737,7 +1756,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_portafolio_publico` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`emp`.`nombre` AS `empresa_nombre`,`pe`.`nombre_empresa` AS `nombre_empresa`,`pe`.`sector` AS `sector`,`dev`.`nombre` AS `desarrollador_nombre`,`pd`.`programa_formacion` AS `programa_formacion`,`pd`.`calificacion_promedio` AS `calificacion_promedio`,`v`.`puntuacion` AS `calificacion_proyecto`,`v`.`comentario` AS `comentario`,`v`.`fecha` AS `fecha_finalizacion` from ((((((`proyectos` `p` join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) left join `perfil_empresa` `pe` on((`emp`.`id` = `pe`.`usuario_id`))) join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) left join `perfil_desarrollador` `pd` on((`dev`.`id` = `pd`.`usuario_id`))) left join `valoraciones` `v` on((`p`.`id` = `v`.`proyecto_id`))) where (`p`.`estado` = 'finalizado') order by `v`.`fecha` desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1755,7 +1774,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_postulaciones_activas` AS select `pos`.`id` AS `id`,`pos`.`proyecto_id` AS `proyecto_id`,`pos`.`desarrollador_id` AS `desarrollador_id`,`pos`.`mensaje` AS `mensaje`,`pos`.`estado` AS `estado`,`pos`.`fecha` AS `fecha`,`u`.`nombre` AS `desarrollador_nombre`,`pd`.`calificacion_promedio` AS `calificacion_promedio`,`pd`.`num_proyectos_completados` AS `num_proyectos_completados`,`pd`.`habilidades` AS `habilidades`,`p`.`titulo` AS `proyecto_titulo`,`emp`.`nombre` AS `empresa_nombre` from ((((`postulaciones` `pos` join `usuarios` `u` on((`pos`.`desarrollador_id` = `u`.`id`))) left join `perfil_desarrollador` `pd` on((`u`.`id` = `pd`.`usuario_id`))) join `proyectos` `p` on((`pos`.`proyecto_id` = `p`.`id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) where (`pos`.`estado` = 'pendiente') */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1773,7 +1792,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_proyectos_alerta_inactividad` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`estado` AS `estado`,`emp`.`nombre` AS `empresa_nombre`,`dev`.`nombre` AS `desarrollador_nombre`,(select max(`avances`.`fecha_hora`) from `avances` where (`avances`.`proyecto_id` = `p`.`id`)) AS `ultimo_avance`,(to_days(now()) - to_days((select max(`avances`.`fecha_hora`) from `avances` where (`avances`.`proyecto_id` = `p`.`id`)))) AS `dias_sin_avance` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where ((`p`.`estado` = 'en_desarrollo') and ((select max(`avances`.`fecha_hora`) from `avances` where (`avances`.`proyecto_id` = `p`.`id`)) < (now() - interval 15 day))) order by (to_days(now()) - to_days((select max(`avances`.`fecha_hora`) from `avances` where (`avances`.`proyecto_id` = `p`.`id`)))) desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1791,7 +1810,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_proyectos_disponibles` AS select `p`.`id` AS `id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`u`.`nombre` AS `empresa_nombre`,`pe`.`nombre_empresa` AS `nombre_empresa`,`pe`.`sector` AS `sector`,coalesce(`vr`.`promedio_reputacion`,0.00) AS `empresa_reputacion`,(select count(0) from `postulaciones` where (`postulaciones`.`proyecto_id` = `p`.`id`)) AS `num_postulaciones` from (((`proyectos` `p` join `usuarios` `u` on((`p`.`empresa_id` = `u`.`id`))) left join `perfil_empresa` `pe` on((`u`.`id` = `pe`.`usuario_id`))) left join `v_reputacion_empresas` `vr` on((`u`.`id` = `vr`.`usuario_id`))) where (`p`.`estado` = 'publicado') order by `p`.`fecha_publicacion` desc */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1809,7 +1828,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_proyectos_en_desarrollo` AS select `p`.`id` AS `proyecto_id`,`p`.`titulo` AS `titulo`,`p`.`descripcion` AS `descripcion`,`p`.`tipo_solucion` AS `tipo_solucion`,`p`.`prioridad` AS `prioridad`,`p`.`fecha_publicacion` AS `fecha_publicacion`,`p`.`fecha_limite` AS `fecha_limite`,`emp`.`nombre` AS `empresa_nombre`,group_concat(distinct `dev`.`nombre` separator ', ') AS `desarrolladores_nombres`,min(`c`.`fecha_inicio`) AS `fecha_inicio`,(select count(0) from `entregables` `e` where ((`e`.`proyecto_id` = `p`.`id`) and (`e`.`estado` = 'completado'))) AS `hitos_completados`,(select count(0) from `entregables` `e` where (`e`.`proyecto_id` = `p`.`id`)) AS `hitos_totales`,(select max(`a`.`fecha_hora`) from `avances` `a` where (`a`.`proyecto_id` = `p`.`id`)) AS `ultimo_avance`,group_concat(distinct `dev`.`id` separator ',') AS `desarrolladores_ids`,`emp`.`id` AS `empresa_id`,`p`.`estado` AS `estado` from (((`proyectos` `p` join `contrataciones` `c` on((`p`.`id` = `c`.`proyecto_id`))) join `usuarios` `emp` on((`p`.`empresa_id` = `emp`.`id`))) join `usuarios` `dev` on((`c`.`desarrollador_id` = `dev`.`id`))) where (`p`.`estado` in ('en_desarrollo','en_revision')) group by `p`.`id`,`p`.`titulo`,`p`.`descripcion`,`p`.`tipo_solucion`,`p`.`prioridad`,`p`.`fecha_publicacion`,`p`.`fecha_limite`,`emp`.`nombre`,`emp`.`id`,`p`.`estado` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1827,7 +1846,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_reputacion_empresas` AS select `u`.`id` AS `usuario_id`,`u`.`nombre` AS `nombre_usuario`,`pe`.`nombre_empresa` AS `nombre_empresa`,`pe`.`sector` AS `sector`,count(`v`.`id`) AS `total_evaluaciones`,round(avg(`v`.`puntuacion`),2) AS `promedio_reputacion` from ((`usuarios` `u` left join `perfil_empresa` `pe` on((`u`.`id` = `pe`.`usuario_id`))) join `valoraciones` `v` on((`u`.`id` = `v`.`empresa_id`))) where ((`u`.`rol` = 'empresa') and (`v`.`rol_evaluador` = 'desarrollador')) group by `u`.`id`,`u`.`nombre`,`pe`.`nombre_empresa`,`pe`.`sector` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1845,7 +1864,7 @@ DELIMITER ;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013  SQL SECURITY DEFINER */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_top_desarrolladores` AS select `u`.`id` AS `id`,`u`.`nombre` AS `nombre`,`pd`.`programa_formacion` AS `programa_formacion`,`pd`.`ficha` AS `ficha`,`pd`.`habilidades` AS `habilidades`,coalesce(`vc`.`promedio`,0.00) AS `calificacion_promedio`,(select count(0) from `contrataciones` where ((`contrataciones`.`desarrollador_id` = `u`.`id`) and (`contrataciones`.`estado` = 'finalizada'))) AS `num_proyectos_completados` from ((`usuarios` `u` left join `perfil_desarrollador` `pd` on((`u`.`id` = `pd`.`usuario_id`))) left join `v_calificacion_desarrolladores` `vc` on((`u`.`id` = `vc`.`desarrollador_id`))) where ((`u`.`rol` = 'desarrollador') and (`u`.`estado` = 'activo')) having (`num_proyectos_completados` > 0) order by `calificacion_promedio` desc,`num_proyectos_completados` desc limit 10 */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -1860,4 +1879,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-01 23:02:06
+-- Dump completed on 2026-04-09 19:28:00

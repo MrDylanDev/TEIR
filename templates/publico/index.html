@@ -627,6 +627,12 @@ document.addEventListener("DOMContentLoaded", function () {
       new bootstrap.Modal(document.getElementById('loginModal')).show();
     }
   }
+
+  // Auto-open modal via URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('login') === '1') {
+    new bootstrap.Modal(document.getElementById('loginModal')).show();
+  }
 });
 </script>
 

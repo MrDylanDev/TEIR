@@ -106,7 +106,7 @@
       {% csrf_token %}
 
       <div class="form-group full-width {% if form.nombre.errors %}error{% endif %}">
-        <label>Nombre Completo / Razón Social</label>
+        <label>Nombre Completo</label>
         <input type="text" name="nombre" value="{{ form.nombre.value|default:'' }}" placeholder="Ej: Alejandro Pérez" required autocomplete="off">
         {% if form.nombre.errors %}
           <ul class="errorlist">{% for error in form.nombre.errors %}<li>{{ error }}</li>{% endfor %}</ul>
@@ -191,7 +191,7 @@
     </form>
 
     <div class="login-link">
-      ¿Ya tienes una cuenta? <a href="{% url 'inicio' %}">Inicia sesión aquí</a>
+      ¿Ya tienes una cuenta? <a href="{% url 'inicio' %}?login=1">Inicia sesión aquí</a>
     </div>
   </div>
 
