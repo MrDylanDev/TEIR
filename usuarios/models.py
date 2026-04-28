@@ -37,9 +37,9 @@ class Usuario(AbstractUser):
     intentos_fallidos = models.PositiveSmallIntegerField(default=0)
 
     def save(self, *args, **kwargs):
-        # Sincronizar is_superuser con el rol de administrador
-        if self.rol == 'administrador':
-            self.is_superuser = True
+        # Sincronizar is_superuser con el rol: True solo si es administrador,
+        # False en cualquier otro caso (evita que ex-admins conserven acceso elevado)
+        self.is_superuser = (self.rol == 'administrador')
         super().save(*args, **kwargs)
 
     @property

@@ -2,17 +2,21 @@ from django.core.cache import cache
 from .models import Usuario
 
 def get_admin_id():
-    """Retorna el ID del primer administrador encontrado, usando caché para optimizar el rendimiento."""
+    """
+    Retorna el ID del primer administrador encontrado, usando caché para optimizar el rendimiento.
+    Retorna None si no existe ningún administrador en el sistema (nunca usa un ID por defecto).
+    """
     cached_id = cache.get('admin_id')
-    if cached_id:
+    if cached_id is not None:
         return cached_id
-        
+
     admin_id = Usuario.objects.filter(rol='administrador').values_list('id', flat=True).first()
-    result = admin_id or 1
-    
-    # Cacheamos el resultado por 5 minutos (300 segundos) para mayor frescura
-    cache.set('admin_id', result, timeout=300)
-    return result
+
+    # Solo cacheamos si encontramos un admin real; evitamos cachear None
+    if admin_id is not None:
+        cache.set('admin_id', admin_id, timeout=300)
+
+    return admin_id  # Puede ser None si no hay administradores
 
 def get_admin_ids():
     """Retorna una lista con los IDs de todos los administradores del sistema, optimizando con caché."""

@@ -110,7 +110,8 @@ def login_view(request):
             user_to_check.intentos_fallidos += 1
             if user_to_check.intentos_fallidos >= 5:
                 user_to_check.estado = 'suspendido'
-                user_to_check.save(update_fields=['intentos_fallidos', 'estado'])
+                user_to_check.is_active = False  # Bloquear a nivel Django, no solo chequeo manual
+                user_to_check.save(update_fields=['intentos_fallidos', 'estado', 'is_active'])
                 messages.error(request, "Tu cuenta ha sido suspendida por exceso de intentos fallidos. Contacta a soporte.")
             else:
                 user_to_check.save(update_fields=['intentos_fallidos'])
@@ -201,7 +202,7 @@ def dashboard_empresa(request):
     # Sincronizamos el contador del dashboard con el filtro corregido
     post_pen = postulaciones_pendientes_obj.count()
     
-    # Soporte Admin Dinámico
+    # Soporte Admin Dinámico (None si no existe ningún administrador)
     admin_id = get_admin_id()
 
     # Reputación Corporativa
@@ -338,7 +339,7 @@ def dashboard_desarrollador(request):
                 'num_desarrolladores': len(dev_ids),
                 'hitos': hitos_por_proyecto.get(row[0], []) # Usamos los hitos pre-cargados
             })
-    # Soporte Admin Dinámico
+    # Soporte Admin Dinámico (None si no existe ningún administrador)
     admin_id = get_admin_id()
 
     # --- Notificaciones (Centralizado con Utility) ---
@@ -713,7 +714,10 @@ def api_actualizar_usuario(request, usuario_id):
         if 'email' in data: user.email = data['email']
         if 'nombre' in data: user.nombre = data['nombre']
         if 'rol' in data: user.rol = data['rol']
-        if 'estado' in data: user.estado = data['estado']
+        if 'estado' in data:
+            user.estado = data['estado']
+            # Sincronizar is_active: solo 'activo' permite autenticarse en Django
+            user.is_active = (user.estado == 'activo')
         
         user.save()
 
