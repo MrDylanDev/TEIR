@@ -98,15 +98,76 @@
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
     .hero h1 {
-      font-size: clamp(42px, 6.5vw, 80px);
-      font-weight: 900; line-height: 1.06; letter-spacing: -2.5px;
-      animation: fadeInUp 0.7s ease 0.1s both;
+      font-size: clamp(42px, 6.5vw, 85px);
+      font-weight: 900; line-height: 1.02; letter-spacing: -3px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: #fff;
     }
-    .hero h1 em { font-style: normal; color: var(--text-2); }
+
+    .word-reveal {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+    }
+
+    .word-reveal span {
+      display: inline-block;
+      animation: revealUp 0.9s cubic-bezier(0.19, 1, 0.22, 1) both;
+    }
+
+    @keyframes revealUp {
+      0%   { transform: translateY(110%) skewY(10deg); opacity: 0; }
+      100% { transform: translateY(0) skewY(0); opacity: 1; }
+    }
+
+    /* Brillo Plateado/Blanco de alto contraste */
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(
+        to right, 
+        #ffffff 20%, 
+        #a1a1aa 40%, 
+        #ffffff 60%, 
+        #ffffff 80%
+      );
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: silverFlow 3s linear infinite;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+    }
+
+    @keyframes silverFlow {
+      to { background-position: 200% center; }
+    }
+
     .hero-sub {
-      font-size: 17px; color: var(--text-3); line-height: 1.75;
-      max-width: 520px; margin: 22px auto 40px; font-weight: 400;
-      animation: fadeInUp 0.7s ease 0.2s both;
+      font-size: 19px; color: rgba(255,255,255,0.5); line-height: 1.6;
+      max-width: 650px; margin: 35px auto 50px;
+      font-weight: 300;
+      animation: fadeInUpBlur 1.2s cubic-bezier(0.19, 1, 0.22, 1) 0.8s both;
+    }
+
+    @keyframes fadeInUpBlur {
+      from { opacity: 0; transform: translateY(30px); filter: blur(15px); }
+      to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    /* Efecto de línea decorativa B&W */
+    .hero h1::after {
+      content: '';
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #fff, transparent);
+      margin-top: 20px;
+      animation: lineWidth 1.5s ease 1s both;
+    }
+
+    @keyframes lineWidth {
+      to { width: 150px; }
     }
     .hero-scroll { margin-top: 52px; }
     .scroll-arrow {
@@ -240,6 +301,226 @@
     .reveal { opacity: 0; transform: translateY(28px); transition: all 0.6s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
+    /* ===== ANDROIDE PREMIUM (ROBOT ELEGANTE) ===== */
+    #scroll-robot {
+      position: fixed;
+      right: 35px;
+      top: 180px;
+      width: 100px;
+      z-index: 900;
+      pointer-events: auto;
+      filter: drop-shadow(0 15px 35px rgba(0,0,0,0.6));
+      will-change: transform;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .robot-container {
+      position: relative;
+      transition: transform 0.1s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    /* Burbuja de diálogo - Estilo Minimalista */
+    .robot-bubble {
+      position: absolute;
+      bottom: 115%;
+      right: -10px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 10px 16px;
+      width: 190px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      color: #111;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px) scale(0.9);
+      transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+      pointer-events: none;
+      text-align: center;
+      z-index: 1001;
+      border-bottom: 3px solid #111;
+    }
+
+    #scroll-robot.show-bubble .robot-bubble {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Animación del visor */
+    @keyframes visorScan {
+      0%, 100% { transform: translateX(-15px); }
+      50% { transform: translateX(15px); }
+    }
+    .visor-light {
+      animation: visorScan 3s ease-in-out infinite;
+      transition: fill 0.3s ease;
+    }
+
+    /* Nueva animación de Privacidad: Brazos cubriendo ojos (Premium) */
+    #scroll-robot.covering-eyes #robot-visuals {
+      transform: translateY(-5px) scale(1.02) !important;
+      filter: drop-shadow(0 0 40px rgba(59, 130, 246, 0.3));
+    }
+    
+    #scroll-robot.covering-eyes .robot-head {
+      transform: translateY(3px) rotateX(15deg);
+    }
+
+    #scroll-robot.covering-eyes #arm-left {
+      transform: rotate(-135deg) translate(-5px, -10px);
+    }
+
+    #scroll-robot.covering-eyes #arm-right {
+      transform: rotate(135deg) translate(5px, -10px);
+    }
+    
+    #scroll-robot.covering-eyes .visor-light {
+      fill: #ff3333 !important;
+      filter: drop-shadow(0 0 10px #ff3333);
+    }
+
+    #scroll-robot.covering-eyes .privacy-shutter {
+      opacity: 1 !important;
+    }
+
+    #scroll-robot.covering-eyes .robot-bubble {
+      background: rgba(15, 23, 42, 0.9) !important;
+      color: #fff !important;
+      border-bottom: 3px solid #ff3333 !important;
+      transform: translateY(0) scale(1) !important; /* Asegurar que no rote */
+    }
+
+    #scroll-robot .robot-arm {
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .privacy-shutter {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #scroll-robot.looking-down #robot-visuals {
+      transform: rotateX(15deg) translateY(5px);
+    }
+
+    #scroll-robot.login-mode {
+      transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+      right: calc(50% + 280px) !important;
+      top: 50% !important;
+      margin-top: -65px !important;
+      transform: none !important;
+      z-index: 2000 !important;
+      filter: drop-shadow(0 0 50px rgba(59, 130, 246, 0.2));
+    }
+
+    #scroll-robot.login-mode #robot-visuals {
+      /* Quitamos transform: none para permitir el giro de 180deg */
+      animation: robotFloatMode 3s ease-in-out infinite !important;
+      perspective: 1000px;
+    }
+
+    #scroll-robot {
+      perspective: 1000px;
+      transition: all 0.5s ease;
+    }
+    
+    #robot-visuals {
+      transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1), filter 0.4s ease;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes robotFloatMode {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-15px) rotate(2deg); }
+    }
+
+    /* Partículas de datos */
+    .data-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #3b82f6;
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #scroll-robot.login-mode .data-particle {
+      animation: particleFly 2s infinite;
+    }
+    @keyframes particleFly {
+      0% { transform: translate(0,0) scale(1); opacity: 0.8; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+    }
+
+    @media (max-width: 768px) {
+      #scroll-robot.login-mode { display: none; }
+    }
+
+    #scroll-robot.show-bubble .robot-bubble {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    #scroll-robot svg { width: 100%; height: auto; display: block; }
+
+    /* Fuego de los propulsores */
+    .thruster-fire {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #scroll-robot.falling .thruster-fire {
+      opacity: 1;
+    }
+    @keyframes firePulse {
+      0%, 100% { transform: scaleY(1); opacity: 0.8; }
+      50% { transform: scaleY(1.4); opacity: 1; }
+    }
+    .fire-core { animation: firePulse 0.1s infinite; transform-origin: top; }
+
+    /* Visor de cristal */
+    .visor-glass {
+      fill: url(#visorGradient);
+      stroke: rgba(255,255,255,0.1);
+    }
+
+    /* Animación del cuerpo flotando en reposo */
+    @keyframes robotFloat {
+      0%,100% { transform: translateY(0px) rotate(-1.5deg); }
+      50%      { transform: translateY(-12px) rotate(1.5deg); }
+    }
+    #scroll-robot.idle {
+      animation: robotFloat 3s ease-in-out infinite;
+    }
+
+    /* Parpadeo de los ojos */
+    @keyframes blink-eye {
+      0%,90%,100% { transform: scaleY(1); }
+      95%          { transform: scaleY(0.05); }
+    }
+    .robot-eye {
+      transform-origin: center;
+      animation: blink-eye 3.5s ease-in-out infinite;
+    }
+
+    /* Estelas de velocidad */
+    .speed-line {
+      stroke: rgba(255,255,255,0.15);
+      stroke-dasharray: 10 20;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #scroll-robot.falling .speed-line {
+      opacity: 1;
+      animation: speedScroll 0.2s linear infinite;
+    }
+    @keyframes speedScroll {
+      from { stroke-dashoffset: 30; }
+      to { stroke-dashoffset: 0; }
+    }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 900px) {
       .navbar-tem { padding: 0 20px; }
@@ -254,7 +535,87 @@
 </head>
 <body>
 
-<!-- ===== Django Messages (hidden, for auto-open modal) ===== -->
+  <!-- ===== ROBOT ANDROIDE PREMIUM EVOLVED ===== -->
+  <div id="scroll-robot">
+    <div class="robot-container" id="robot-visuals">
+      <div class="robot-bubble" id="robot-text">Iniciando protocolo de asistencia...</div>
+      
+      <!-- Partículas decorativas -->
+      <div class="data-particle" style="--dx:-40px; --dy:-40px; animation-delay:0.1s"></div>
+      <div class="data-particle" style="--dx:40px; --dy:-50px; animation-delay:0.5s"></div>
+      <div class="data-particle" style="--dx:-30px; --dy:50px; animation-delay:0.9s"></div>
+
+      <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#e2e8f0"/>
+          </linearGradient>
+          <linearGradient id="visorGlass" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0f172a"/>
+            <stop offset="50%" stop-color="#1e293b"/>
+            <stop offset="100%" stop-color="#020617"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- CABEZA (CASCO) -->
+        <g class="robot-head" style="transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);">
+          <path d="M25 40 C 25 15, 75 15, 75 40 L 75 50 C 75 60, 25 60, 25 50 Z" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
+          <!-- VISOR CRISTAL LÍQUIDO -->
+          <rect x="30" y="35" width="40" height="12" rx="6" fill="url(#visorGlass)"/>
+          
+          <!-- Efecto de Ojos Privados (X) -->
+          <g class="privacy-shutter">
+             <line x1="38" y1="39" x2="44" y2="43" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
+             <line x1="44" y1="39" x2="38" y2="43" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
+             <line x1="56" y1="39" x2="62" y2="43" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
+             <line x1="62" y1="39" x2="56" y2="43" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
+          </g>
+
+          <circle class="visor-light" cx="50" cy="41" r="2.5" fill="#fff" filter="url(#glow)">
+             <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Reflejo en visor -->
+          <rect x="35" y="37" width="10" height="2" rx="1" fill="#fff" opacity="0.1"/>
+        </g>
+
+        <!-- CUELLO -->
+        <rect x="45" y="58" width="10" height="6" fill="#1e293b"/>
+
+        <!-- TORSO SEGMENTADO -->
+        <path d="M30 65 L 70 65 C 75 65, 75 95, 70 100 L 30 100 C 25 95, 25 65, 30 65" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
+        <rect x="35" y="75" width="30" height="2" fill="#cbd5e1" opacity="0.5"/>
+        <circle cx="50" cy="85" r="5" fill="#1e293b"/>
+        <circle cx="50" cy="85" r="2" fill="#fff">
+           <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- BRAZOS ARTICULADOS -->
+        <g id="arm-left" class="robot-arm" style="transform-origin: 22px 70px;">
+           <circle cx="22" cy="70" r="4" fill="#1e293b"/>
+           <path d="M22 70 L 12 90" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+           <circle cx="12" cy="90" r="4" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
+        </g>
+        <g id="arm-right" class="robot-arm" style="transform-origin: 78px 70px;">
+           <circle cx="78" cy="70" r="4" fill="#1e293b"/>
+           <path d="M78 70 L 88 90" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
+           <circle cx="88" cy="90" r="4" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
+        </g>
+
+        <!-- PROPULSOR (BASE) -->
+        <path d="M40 105 L 60 105 L 55 115 L 45 115 Z" fill="#1e293b"/>
+        <path d="M42 115 Q 50 135, 58 115" stroke="#3b82f6" stroke-width="2" opacity="0.6">
+           <animate attributeName="d" values="M42 115 Q 50 125, 58 115; M42 115 Q 50 145, 58 115; M42 115 Q 50 125, 58 115" dur="0.2s" repeatCount="indefinite"/>
+        </path>
+      </svg>
+    </div>
+  </div>
 {% if messages %}
   <div id="django-messages" style="display:none;">
     {% for message in messages %}
@@ -284,7 +645,8 @@
   <div class="hero-content">
     <div class="hero-badge">Plataforma SENA × Empresas</div>
     <h1>
-      Conecta Talento<br>con <em>Oportunidades Reales</em>
+      <span class="word-reveal"><span>Conecta Talento</span></span>
+      <span class="word-reveal" style="animation-delay: 0.2s;"><span style="animation-delay: 0.2s;">con <em>Oportunidades Reales</em></span></span>
     </h1>
     <p class="hero-sub">
       TEM une a empresas con los mejores desarrolladores aprendices del SENA. Gestiona proyectos, postulaciones, avances y contratos en un solo lugar.
@@ -541,7 +903,6 @@
   </div>
 </div>
 
-<!-- ===== SCRIPTS ===== -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -633,6 +994,190 @@ document.addEventListener("DOMContentLoaded", function () {
   if (urlParams.get('login') === '1') {
     new bootstrap.Modal(document.getElementById('loginModal')).show();
   }
+
+  // ===== ROBOT INTELIGENTE CON SPRING PHYSICS Y DIÁLOGOS =====
+  const robot = document.getElementById('scroll-robot');
+  const visuals = document.getElementById('robot-visuals');
+  const bubble = document.getElementById('robot-text');
+  if (!robot || !visuals) return;
+
+  let currentY = 0;
+  let targetY = 0;
+  let velocityY = 0;
+  let lastScrollY = window.scrollY;
+
+  const stiffness = 0.08;
+  const damping = 0.82;
+  const precision = 0.01;
+
+  // Mapa de mensajes por sección (Cacheamos elementos para rendimiento)
+  const sections = [
+    { el: document.getElementById('inicio'), msg: '¡Hola! Bienvenido a TEM 🤖' },
+    { el: document.getElementById('como-funciona'), msg: 'Mira qué fácil es nuestro proceso' },
+    { el: document.getElementById('funcionalidades'), msg: 'Tenemos todo para tu proyecto' },
+    { el: document.getElementById('contacto'), msg: '¿Hablamos? ¡Escríbenos!' }
+  ].filter(s => s.el);
+
+  let lastMsg = "";
+
+  function updateRobotDialog() {
+    const scrollY = window.scrollY;
+    let currentMsg = "Explora la plataforma 🚀";
+
+    for (const s of sections) {
+      const rect = s.el.getBoundingClientRect();
+      if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
+        currentMsg = s.msg;
+        break;
+      }
+    }
+
+    if (currentMsg !== lastMsg) {
+      lastMsg = currentMsg;
+      robot.classList.remove('show-bubble');
+      setTimeout(() => {
+        bubble.textContent = currentMsg;
+        robot.classList.add('show-bubble');
+      }, 300);
+    }
+  }
+
+  // ===== SISTEMA DE INTERACCIÓN ROBOT + LOGIN (CORREGIDO) =====
+  let isLoginMode = false;
+  const loginModalEl = document.getElementById('loginModal');
+  
+  if (loginModalEl) {
+    const userInput = document.getElementById('username');
+    const passInput = document.getElementById('password');
+    const visorLight = document.querySelector('.visor-light');
+    const roleBtns = document.querySelectorAll('.role-btn-glass');
+    const togglePassBtn = document.getElementById('togglePassGlass');
+
+    const roleColors = {
+      'administrador': '#ffffff',
+      'empresa': '#10b981',
+      'desarrollador': '#3b82f6'
+    };
+
+    loginModalEl.addEventListener('show.bs.modal', () => {
+      isLoginMode = true;
+      robot.classList.add('login-mode');
+      robot.classList.remove('show-bubble');
+      
+      // Verificar estado de contraseña inmediatamente al abrir
+      setTimeout(() => {
+        handlePassEyes();
+        bubble.textContent = "Te ayudo a entrar... 🔐";
+        robot.classList.add('show-bubble');
+      }, 500);
+    });
+
+    loginModalEl.addEventListener('hide.bs.modal', () => {
+      isLoginMode = false;
+      robot.classList.remove('login-mode');
+      robot.classList.remove('covering-eyes');
+      updateRobotDialog();
+    });
+
+    const handlePassEyes = () => {
+      if (passInput && passInput.type === 'password') {
+        robot.classList.add('covering-eyes');
+        bubble.textContent = "No miraré tu clave... 👀";
+      } else {
+        robot.classList.remove('covering-eyes');
+        bubble.textContent = "¡Te veo! 🤖";
+      }
+    };
+
+    if (passInput) {
+      passInput.addEventListener('focus', handlePassEyes);
+      passInput.addEventListener('blur', () => robot.classList.remove('covering-eyes'));
+    }
+
+    if (togglePassBtn) {
+      togglePassBtn.addEventListener('click', () => {
+        setTimeout(handlePassEyes, 50);
+      });
+    }
+
+    if (userInput) {
+      userInput.addEventListener('focus', () => {
+        bubble.textContent = "¿Quién eres hoy? 🤔";
+      });
+    }
+
+    roleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const role = btn.dataset.role;
+        if (visorLight) visorLight.style.fill = roleColors[role] || '#fff';
+        const msgs = {
+          'administrador': "Control total iniciado.",
+          'empresa': "Buscando al mejor talento...",
+          'desarrollador': "¡Hola, dev! A codear."
+        };
+        bubble.textContent = msgs[role];
+      });
+    });
+  }
+
+  function animateRobot() {
+    if (isLoginMode) {
+      // En modo login, el robot no sigue el scroll, su posición es controlada por CSS .login-mode
+      requestAnimationFrame(animateRobot);
+      return;
+    }
+
+    const scrollY = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = maxScroll > 0 ? scrollY / maxScroll : 0;
+
+    const robotHeight = 130;
+    const initialTop = 180;
+    const safetyMargin = 40;
+    const dynamicRange = window.innerHeight - initialTop - robotHeight - safetyMargin;
+    const range = Math.max(0, dynamicRange);
+    
+    targetY = scrollPercent * range;
+
+    const deltaScroll = scrollY - lastScrollY;
+    lastScrollY = scrollY;
+
+    // Resorte
+    const force = (targetY - currentY) * stiffness;
+    velocityY = (velocityY + force) * damping;
+    currentY += velocityY;
+
+    // Visuals
+    if (Math.abs(velocityY) > 1.2 || Math.abs(deltaScroll) > 8) {
+      robot.classList.add('falling');
+      visuals.classList.remove('idle');
+      const tilt = Math.max(-12, Math.min(12, velocityY * 1.2 + deltaScroll * 0.4));
+      visuals.style.transform = `translateY(${currentY}px) rotate(${tilt}deg)`;
+    } else {
+      robot.classList.remove('falling');
+      if (Math.abs(velocityY) < precision) {
+        visuals.classList.add('idle');
+        visuals.style.transform = `translateY(${currentY}px)`;
+      } else {
+        visuals.style.transform = `translateY(${currentY}px)`;
+      }
+    }
+
+    updateRobotDialog();
+    requestAnimationFrame(animateRobot);
+  }
+
+  // Clic en el robot
+  robot.addEventListener('click', () => {
+    // Salto de alegría y cambio de velocidad de los anillos
+    velocityY = -22;
+    const funnyMsgs = ["Iniciando escaneo...","Analizando talento SENA","Núcleo estable.","100% Eficiencia."];
+    const originalMsg = bubble.textContent;
+    bubble.textContent = funnyMsgs[Math.floor(Math.random() * funnyMsgs.length)];
+    setTimeout(() => { bubble.textContent = originalMsg; }, 2000);
+  });
+
+  requestAnimationFrame(animateRobot);
 });
 </script>
 

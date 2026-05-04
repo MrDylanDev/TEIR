@@ -21,8 +21,27 @@
   <div class="right-side">
     <div class="form-container">
       <div class="login-box">
-        <h2>Login</h2>
-        
+        <h2>Iniciar Sesión</h2>
+
+        <!-- Botones de rol ARRIBA del formulario -->
+        <div class="role-selector">
+          <p class="role-label">Selecciona tu rol:</p>
+          <div class="role-buttons">
+            <button type="button" class="role-btn" data-role="desarrollador">
+              <span class="role-icon">&#128187;</span> Desarrollador
+            </button>
+            <button type="button" class="role-btn active" data-role="administrador">
+              <span class="role-icon">&#128737;</span> Administrador
+            </button>
+            <button type="button" class="role-btn" data-role="empresa">
+              <span class="role-icon">&#127970;</span> Empresa
+            </button>
+          </div>
+          <div class="role-active-indicator">
+            Ingresando como: <strong id="rol-display">Administrador</strong>
+          </div>
+        </div>
+
         {% if messages %}
           {% for message in messages %}
             <div class="alert alert-error">{{ message }}</div>
@@ -31,49 +50,50 @@
 
         <form method="post" action="{% url 'login' %}">
           {% csrf_token %}
-          
-          <!-- Campo oculto para el rol seleccionado -->
           <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="administrador">
 
           <div class="user-box">
             <input required type="text" id="username" name="username" value="{{ request.POST.username }}">
             <label>Usuario</label>
           </div>
-          
+
           <div class="user-box password-container">
             <input required type="password" id="password" name="password">
             <label>Contraseña</label>
             <button type="button" id="togglePass" class="toggle-btn">👁️</button>
           </div>
-          
-          <button type="submit" class="submit-btn">Aceptar</button>
+
+          <button type="submit" class="submit-btn">Ingresar</button>
         </form>
-        
+
         <div class="links">
           ¿No te has registrado? <a href="{% url 'registro' %}">Registrarse</a><br>
           ¿Olvidaste tu contraseña? <a href="{% url 'recuperar' %}">Recuperar</a>
         </div>
       </div>
-
-      <!-- Botones de rol -->
-      <div class="role-buttons">
-        <button type="button" class="role-btn" data-role="desarrollador">Desarrollador</button>
-        <button type="button" class="role-btn active" data-role="administrador">Administrador</button>
-        <button type="button" class="role-btn" data-role="empresa">Empresa</button>
-      </div>
     </div>
   </div>
 
   <script>
+    // --- MAPA DE ROLES A NOMBRES LEGIBLES ---
+    const roleNames = {
+      'administrador': 'Administrador',
+      'empresa': 'Empresa',
+      'desarrollador': 'Desarrollador'
+    };
+
     // Botones de rol
     const roleButtons = document.querySelectorAll('.role-btn');
     const rolInput = document.getElementById('rol_seleccionado');
+    const rolDisplay = document.getElementById('rol-display');
 
     roleButtons.forEach(btn => {
       btn.addEventListener('click', function() {
         roleButtons.forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        rolInput.value = this.dataset.role;
+        const rolValue = this.dataset.role;
+        rolInput.value = rolValue;
+        rolDisplay.textContent = roleNames[rolValue] || rolValue;
       });
     });
 

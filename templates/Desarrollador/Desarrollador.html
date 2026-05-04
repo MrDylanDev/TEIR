@@ -137,9 +137,9 @@
               <div class="mc-icon"><i class="fa fa-rocket"></i></div>
             </div>
             <div class="mc-value">{{ proyectos_activos_count }}</div>
-            <div class="mc-sub" style="color:rgba(255,255,255,0.4);">En desarrollo ahora</div>
+            <div class="mc-sub" style="color:rgba(255,255,255,0.5);">En desarrollo ahora</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card success">
             <div class="mc-header">
               <div class="mc-label">Completados</div>
               <div class="mc-icon"><i class="fa fa-trophy"></i></div>
@@ -147,7 +147,7 @@
             <div class="mc-value">{{ proyectos_completados }}</div>
             <div class="mc-sub">Proyectos finalizados</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card accent">
             <div class="mc-header">
               <div class="mc-label">Disponibles</div>
               <div class="mc-icon"><i class="fa fa-briefcase"></i></div>
@@ -155,7 +155,7 @@
             <div class="mc-value">{{ nuevos_proyectos }}</div>
             <div class="mc-sub">Para postularse</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card warning">
             <div class="mc-header">
               <div class="mc-label">Calificación</div>
               <div class="mc-icon"><i class="fa fa-star"></i></div>
@@ -203,7 +203,7 @@
           </div>
         </div>
         <div class="cards-grid">
-          <div class="project-card" style="border-left: 3px solid #111;">
+          <div class="project-card" style="border-left:3px solid var(--accent);">
             <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
               <div class="user-avatar" style="width:44px;height:44px;font-size:16px;"><i class="fa fa-shield-halved"></i></div>
               <div>
@@ -294,9 +294,7 @@
 
               <!-- Hitos -->
               <div style="margin-bottom:16px;">
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:10px;">
-                  Hitos del Proyecto
-                </div>
+              <div class="label-section">Hitos del Proyecto</div>
                 {% for hito in proyecto.hitos %}
                   <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);{% if hito.estado == 'completado' %}opacity:.5;{% endif %}">
                     <i class="fa {% if hito.estado == 'completado' %}fa-circle-check{% else %}fa-circle{% endif %}"

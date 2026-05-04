@@ -139,9 +139,9 @@
               <div class="mc-icon"><i class="fa fa-folder-open"></i></div>
             </div>
             <div class="mc-value">{{ total_proyectos }}</div>
-            <div class="mc-sub" style="color:rgba(255,255,255,0.4);">Publicados históricamente</div>
+            <div class="mc-sub" style="color:rgba(255,255,255,0.5);">Publicados históricamente</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card info">
             <div class="mc-header">
               <div class="mc-label">En Desarrollo</div>
               <div class="mc-icon"><i class="fa fa-code"></i></div>
@@ -149,7 +149,7 @@
             <div class="mc-value">{{ proyectos_activos }}</div>
             <div class="mc-sub">Proyectos en marcha</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card accent">
             <div class="mc-header">
               <div class="mc-label">Postulantes</div>
               <div class="mc-icon"><i class="fa fa-users"></i></div>
@@ -157,14 +157,12 @@
             <div class="mc-value">{{ total_postulaciones }}</div>
             <div class="mc-sub">Pendientes de revisar</div>
           </div>
-          <div class="metric-card">
+          <div class="metric-card {% if notificaciones_pendientes_count > 0 %}danger{% else %}success{% endif %}">
             <div class="mc-header">
               <div class="mc-label">Notificaciones</div>
               <div class="mc-icon"><i class="fa fa-bell"></i></div>
             </div>
-            <div class="mc-value" style="{% if notificaciones_pendientes_count > 0 %}color:var(--danger);{% endif %}">
-              {{ notificaciones_pendientes_count }}
-            </div>
+            <div class="mc-value">{{ notificaciones_pendientes_count }}</div>
             <div class="mc-sub">Sin leer</div>
           </div>
         </div>
