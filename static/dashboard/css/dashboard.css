@@ -1,12 +1,6 @@
-/* ================================================
-   TEM DASHBOARD — SHARED DESIGN SYSTEM
-   Estilo: Light Mode + Dark Sidebar (Premium)
-   Fuente: Inter (Google Fonts)
-================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ---- CSS VARIABLES ---- */
+/* ---- Css Variables ---- */
 :root {
   --sidebar-bg:     #0f1117;
   --sidebar-w:      240px;
@@ -37,7 +31,7 @@
   --info-light:     #eff6ff;
 }
 
-/* ---- RESET & BASE ---- */
+/* ---- Reset & Base ---- */
 *, *::before, *::after {
   margin: 0; padding: 0;
   box-sizing: border-box;
@@ -56,18 +50,12 @@ a { text-decoration: none; color: inherit; }
 button { font-family: inherit; cursor: pointer; }
 ul { list-style: none; }
 
-/* ================================================
-   LAYOUT: SIDEBAR + MAIN
-================================================ */
 .app-layout {
   display: flex;
   height: 100vh;
   overflow: hidden;
 }
 
-/* ================================================
-   SIDEBAR
-================================================ */
 .sidebar {
   width: var(--sidebar-w);
   background: var(--sidebar-bg);
@@ -199,9 +187,6 @@ ul { list-style: none; }
 .nav-item.danger { color: rgba(239,68,68,0.7); }
 .nav-item.danger:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
 
-/* ================================================
-   MAIN WRAPPER
-================================================ */
 .main-wrapper {
   flex: 1;
   display: flex;
@@ -210,9 +195,6 @@ ul { list-style: none; }
   min-width: 0;
 }
 
-/* ================================================
-   TOP HEADER
-================================================ */
 .top-header {
   height: var(--topbar-h);
   background: var(--card-bg);
@@ -305,9 +287,6 @@ ul { list-style: none; }
 .user-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
 .user-role { font-size: 11px; color: var(--text-secondary); }
 
-/* ================================================
-   CONTENT AREA
-================================================ */
 .main-content {
   flex: 1;
   overflow-y: auto;
@@ -349,9 +328,6 @@ ul { list-style: none; }
   margin-top: 3px;
 }
 
-/* ================================================
-   METRIC CARDS
-================================================ */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -417,9 +393,6 @@ ul { list-style: none; }
 .mc-value { font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1; }
 .mc-sub { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
 
-/* ================================================
-   CARDS GENÉRICAS
-================================================ */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -455,9 +428,6 @@ ul { list-style: none; }
   gap: 16px;
 }
 
-/* ================================================
-   TABLAS
-================================================ */
 .table-wrapper {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -521,9 +491,6 @@ ul { list-style: none; }
 .data-table tbody tr:nth-child(7)  { animation-delay: 0.28s; }
 .data-table tbody tr:nth-child(8)  { animation-delay: 0.32s; }
 
-/* ================================================
-   BADGES (PÍLDORAS DE ESTADO)
-================================================ */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -545,9 +512,6 @@ ul { list-style: none; }
 .badge-accepted { background: #dcfce7; color: #166534; }
 .badge-rejected { background: #fee2e2; color: #991b1b; }
 
-/* ================================================
-   BOTONES
-================================================ */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -589,9 +553,6 @@ ul { list-style: none; }
 .btn-sm { padding: 5px 12px; font-size: 12px; }
 .btn-full { width: 100%; justify-content: center; }
 
-/* ================================================
-   INPUTS
-================================================ */
 .form-input, .form-select, .form-textarea {
   width: 100%;
   padding: 10px 14px;
@@ -619,9 +580,6 @@ ul { list-style: none; }
 }
 .form-group { margin-bottom: 14px; }
 
-/* ================================================
-   MENSAJES DJANGO
-================================================ */
 .msg-error {
   padding: 12px 16px;
   background: #fef2f2;
@@ -644,9 +602,6 @@ ul { list-style: none; }
   margin-bottom: 12px;
 }
 
-/* ================================================
-   NOTIFICACIONES (lista)
-================================================ */
 .notif-list { padding: 0; }
 .notif-item {
   padding: 12px 0;
@@ -660,9 +615,6 @@ ul { list-style: none; }
 .notif-item:last-child { border-bottom: none; }
 .notif-item i { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
 
-/* ================================================
-   TARJETAS DE PROYECTOS / ITEMS
-================================================ */
 .project-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -676,9 +628,6 @@ ul { list-style: none; }
 .project-card-title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
 .project-card-sub { font-size: 12.5px; color: var(--text-secondary); }
 
-/* ================================================
-   EMPTY STATE
-================================================ */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -687,9 +636,6 @@ ul { list-style: none; }
 .empty-state i { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
 .empty-state p { font-size: 14px; }
 
-/* ================================================
-   MODAL (empresa)
-================================================ */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -718,9 +664,6 @@ ul { list-style: none; }
   color: var(--text-primary);
 }
 
-/* ================================================
-   CLASES UTILITARIAS
-================================================ */
 .grid-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -782,9 +725,6 @@ ul { list-style: none; }
   background: linear-gradient(90deg, var(--success), #4ade80);
 }
 
-/* ================================================
-   RESPONSIVE
-================================================ */
 @media (max-width: 768px) {
   .sidebar { width: 60px; }
   .sidebar-brand-text, .sidebar-brand-sub, .nav-item span, .sidebar-group-label { display: none; }
