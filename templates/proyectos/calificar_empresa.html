@@ -7,18 +7,8 @@
   <title>TEM | Calificar Empresa</title>
   <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{% static 'dashboard.css' %}">
-  <style>
-    .star-rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 10px; margin: 16px 0; }
-    .star-rating input { display: none; }
-    .star-rating label {
-      cursor: pointer; font-size: 32px; color: var(--border);
-      transition: color 0.2s;
-    }
-    .star-rating label:hover,
-    .star-rating label:hover ~ label,
-    .star-rating input:checked ~ label { color: #f59e0b; }
-  </style>
+  <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}">
+  <link rel="stylesheet" href="{% static 'dashboard/css/calificar.css' %}">
 </head>
 <body>
 <div class="app-layout">

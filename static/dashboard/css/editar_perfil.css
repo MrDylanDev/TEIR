@@ -1,0 +1,26 @@
+.profile-wrapper {
+  max-width: 650px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  display: block;
+  font-size: 14px;
+}
+
+.help-text {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.error-msg {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 5px;
+  font-weight: 500;
+}
