@@ -1,131 +1,245 @@
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Inter',sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
 }
 
-body{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#0b0b0d;
-color:#eaeaea;
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0b0b0d;
+  color: #eaeaea;
+  padding: 40px 16px;
 }
 
-/* Logo */
-.logo{
-position:absolute;
-top:40px;
-left:60px;
-font-size:18px;
-font-weight:500;
-letter-spacing:4px;
-opacity:.6;
+/* ── Logo ── */
+.logo {
+  position: absolute;
+  top: 40px;
+  left: 60px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  opacity: .6;
 }
 
-/* Container */
-.container{
-width:420px;
+/* ── Card principal ── */
+.register-container {
+  width: 100%;
+  max-width: 520px;
+  background: #111114;
+  padding: 50px 45px;
+  border-radius: 16px;
+  border: 1px solid #1c1c20;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+  position: relative;
 }
 
-/* Card */
-.form{
-background:#111114;
-padding:50px 45px;
-border-radius:16px;
-border:1px solid #1c1c20;
-display:flex;
-flex-direction:column;
-gap:30px;
-box-shadow:0 30px 80px rgba(0,0,0,0.7);
+/* ── Título ── */
+.register-container h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: -8px;
 }
 
-/* Header */
-.form-header h2{
-font-size:20px;
-font-weight:500;
-margin-bottom:6px;
+/* ── Subtítulo ── */
+.subtitle {
+  font-size: 13px;
+  color: #9a9a9a;
+  line-height: 1.6;
+  margin-bottom: 4px;
 }
 
-.form-header p{
-font-size:13px;
-color:#9a9a9a;
+/* ── Alertas (mensajes Django) ── */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Fields */
-.field{
-position:relative;
+.alert-success {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #4ade80;
 }
 
-.field input,
-.field select{
-width:100%;
-padding:18px 14px;
-background:#0f0f12;
-border:1px solid #222228;
-border-radius:8px;
-color:white;
-font-size:14px;
-outline:none;
-transition:border .25s ease, background .25s ease;
+.alert-error,
+.alert-warning {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
 }
 
-/* Focus limpio y profesional */
-.field input:focus,
-.field select:focus{
-border:1px solid #ffffff;
-background:#141418;
+/* ── Grid de campos ── */
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
 }
 
-/* Floating label minimal */
-.field label{
-position:absolute;
-left:14px;
-top:50%;
-transform:translateY(-50%);
-font-size:13px;
-color:#777;
-pointer-events:none;
-transition:.25s ease;
-background:#111114;
-padding:0 6px;
+/* ── Grupo de campo ── */
+.form-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.field input:focus + label,
-.field input:valid + label,
-.field select:focus + label,
-.field select:valid + label{
-top:-8px;
-font-size:11px;
-color:#ffffff;
+.form-group.full-width {
+  grid-column: 1 / -1;
 }
 
-/* Button elegante */
-button{
-margin-top:10px;
-padding:16px;
-border-radius:8px;
-border:1px solid #2a2a2f;
-background:#1a1a1f;
-color:white;
-font-weight:500;
-cursor:pointer;
-transition:all .25s ease;
+/* Botón full-width */
+button.full-width {
+  grid-column: 1 / -1;
 }
 
-button:hover{
-background:#ffffff;
-color:#0b0b0d;
+/* ── Labels ── */
+.form-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #777;
+  letter-spacing: .4px;
+  text-transform: uppercase;
 }
 
-button:active{
-transform:scale(.98);
+/* ── Inputs y Selects ── */
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 14px 14px;
+  background: #0f0f12;
+  border: 1px solid #222228;
+  border-radius: 8px;
+  color: #eaeaea;
+  font-size: 14px;
+  outline: none;
+  transition: border .25s ease, background .25s ease;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-/* Select options */
-select option{
-background:#111114;
-color:white;
+.form-group input::placeholder {
+  color: #44444a;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #ffffff;
+  background: #141418;
+}
+
+/* Estado error en el campo */
+.form-group.error input,
+.form-group.error select {
+  border-color: rgba(239, 68, 68, 0.6);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+/* ── Select flecha custom ── */
+.form-group select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23777' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+select option {
+  background: #111114;
+  color: #eaeaea;
+}
+
+/* ── Texto de ayuda ── */
+.form-group small {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* ── Errores de validación ── */
+.errorlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.errorlist li {
+  font-size: 11px;
+  color: #f87171;
+  margin-top: 2px;
+}
+
+/* ── Botón submit ── */
+button[type="submit"] {
+  width: 100%;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #2a2a2f;
+  background: #1a1a1f;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .25s ease;
+  letter-spacing: .3px;
+}
+
+button[type="submit"]:hover {
+  background: #ffffff;
+  color: #0b0b0d;
+  border-color: #ffffff;
+}
+
+button[type="submit"]:active {
+  transform: scale(.98);
+}
+
+/* ── Link de login ── */
+.login-link {
+  text-align: center;
+  font-size: 13px;
+  color: #555;
+  grid-column: 1 / -1;
+}
+
+.login-link a {
+  color: #9a9a9a;
+  text-decoration: none;
+  transition: color .2s ease;
+}
+
+.login-link a:hover {
+  color: #ffffff;
+}
+
+/* ── Responsive ── */
+@media (max-width: 540px) {
+  .register-container {
+    padding: 36px 24px;
+  }
+
+  form {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full-width,
+  button.full-width {
+    grid-column: 1;
+  }
+
+  .logo {
+    top: 20px;
+    left: 24px;
+  }
 }
