@@ -1,13 +1,11 @@
-// =========================================================
-// SCRIPT DE ANIMACIÓN DE APARICIÓN SUAVE REPETITIVA
-// =========================================================
+// Script de Animación de Aparición Suave Repetitiva
 
-// Espera a que el contenido esté completamente cargado
+// Espera a que el Contenido Esté Completamente Cargado
 document.addEventListener('DOMContentLoaded', () => {
 
   const faders = document.querySelectorAll('.fade-in');
 
-  // Configuración de activación de animación
+  // Configuración de Activación de Animación
   const appearOptions = {
     threshold: 0.2, 
     rootMargin: "0px 0px -50px 0px"
@@ -29,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   faders.forEach(fader => fader.style.opacity = "1");
 });
-// SCROLL SUAVE
+// Scroll Suave
 
 document.querySelectorAll("nav a").forEach(link=>{
 link.addEventListener("click",e=>{
@@ -40,7 +38,7 @@ document.querySelector(link.getAttribute("href"))
 });
 
 
-// CONTADORES ANIMADOS
+// Contadores Animados
 
 const counters=document.querySelectorAll("[data-num]");
 let started=false;
@@ -75,7 +73,7 @@ started=true;
 });
 
 
-// EFECTO PARALLAX HERO
+// Efecto Parallax Hero
 
 window.addEventListener("mousemove",e=>{
 document.querySelector(".mockup").style.transform=

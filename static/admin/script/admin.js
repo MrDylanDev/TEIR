@@ -1,7 +1,7 @@
-// ===== Variables globales =====
+// Variables Globales
 let usuarioEditandoId = null;
 
-// ===== Cargar usuarios al iniciar =====
+// Cargar Usuarios al Iniciar
 document.addEventListener('DOMContentLoaded', function() {
     cargarUsuarios();
     
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 
-// ===== Cargar usuarios desde la Base Dde datos =====
+// Cargar Usuarios desde la Base de Datos
 function cargarUsuarios() {
     fetch('/api/usuarios/')
         .then(response => response.json())
@@ -50,7 +50,7 @@ function cargarUsuarios() {
         });
 }
 
-// ===== Filtro de usuarios =====
+// Filtro de Usuarios
 function filterUsers() {
     const searchText = document.getElementById('searchInput').value.toLowerCase();
     const rows = document.querySelectorAll('#userTable tr');
@@ -61,7 +61,7 @@ function filterUsers() {
     });
 }
 
-// ===== Modal =====
+// Modal
 function openModal(usuario = null) {
     const modal = document.getElementById('userModal');
     modal.style.display = 'block';
@@ -98,7 +98,7 @@ function closeModal() {
     document.getElementById('userModal').style.display = 'none';
 }
 
-// ===== Guardar usuario (Crear) =====
+// Guardar Usuario (crear)
 function addUser() {
     // Validar campos
     const username = document.getElementById('name').value.trim();
@@ -142,7 +142,7 @@ function addUser() {
     });
 }
 
-// ===== Actualizar usuario (Editar) =====
+// Actualizar Usuario (editar)
 function actualizarUsuario() {
     if (!usuarioEditandoId) return;
     
@@ -183,7 +183,7 @@ function actualizarUsuario() {
     });
 }
 
-// ===== Editar usuario =====
+// Editar Usuario
 function editarUsuario(id) {
     fetch(`/api/usuarios/${id}/`)
         .then(response => response.json())
@@ -196,7 +196,7 @@ function editarUsuario(id) {
         });
 }
 
-// ===== Eliminar usuario =====
+// Eliminar Usuario
 function eliminarUsuario(id) {
     if (confirm('¿Estás seguro de eliminar este usuario?')) {
         fetch(`/api/usuarios/${id}/eliminar/`, {
@@ -221,7 +221,7 @@ function eliminarUsuario(id) {
     }
 }
 
-// ===== Función para obtener CSRF token =====
+// Función para Obtener CSRF Token
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -237,7 +237,7 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// ===== Cambiar entre secciones =====
+// Cambiar Entre Secciones
 function showSection(sectionId, element) {
     document.querySelectorAll('.section').forEach(s => {
         s.classList.remove('active');

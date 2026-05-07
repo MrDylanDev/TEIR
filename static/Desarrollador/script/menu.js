@@ -1,6 +1,4 @@
-// =========================================================
-// FUNCIONALIDAD DEL MENÚ DESPLEGABLE
-// =========================================================
+// Funcionalidad DEL Menú Desplegable
 
 // Selecciona todos los botones del menú
 const menuButtons = document.querySelectorAll(".menu-btn");

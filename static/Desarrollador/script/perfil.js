@@ -1,6 +1,4 @@
-// =========================================================
-// CAMBIO DE FOTO DE PERFIL
-// =========================================================
+// Cambio de Foto de Perfil
 const inputFoto = document.getElementById('input-foto');
 const btnFoto = document.getElementById('cambiar-foto');
 const imgFoto = document.getElementById('foto');
@@ -15,9 +13,7 @@ inputFoto.addEventListener('change', (e) => {
   }
 });
 
-// =========================================================
-// AGREGAR NUEVO ENLACE
-// =========================================================
+// Agregar Nuevo Enlace
 const btnAgregar = document.getElementById('agregar-enlace');
 const inputEnlace = document.getElementById('nuevo-enlace');
 const listaEnlaces = document.getElementById('lista-enlaces');

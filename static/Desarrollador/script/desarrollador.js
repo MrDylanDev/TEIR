@@ -16,3 +16,16 @@ function previewFoto(event) {
     };
     reader.readAsDataURL(event.target.files[0]);
 }
+
+function verSeccion(id, btn) {
+  document.querySelectorAll('.seccion-v').forEach(s => s.classList.remove('activa'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) target.classList.add('activa');
+  if (btn) btn.classList.add('active');
+}
+
+window.addEventListener('load', function() {
+  const s = new URLSearchParams(window.location.search).get('section');
+  if (s) verSeccion(s);
+});

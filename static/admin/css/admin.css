@@ -15,7 +15,7 @@ body {
   height: 100vh;
 }
 
-/* ===== SIDEBAR ===== */
+/* Sidebar */
 .sidebar {
   width: 230px;
   background-color: #000;
@@ -50,14 +50,14 @@ body {
   color: black;
 }
 
-/* ===== CONTENIDO PRINCIPAL ===== */
+/* Contenido Principal */
 .content {
   flex: 1;
   padding: 40px;
   overflow-y: auto;
 }
 
-/* ===== HEADER ===== */
+/* Header */
 .header {
   display: flex;
   justify-content: space-between;
@@ -86,7 +86,7 @@ body {
   background-color: #ddd;
 }
 
-/* ===== FILTRO DE BÚSQUEDA ===== */
+/* Filtro de Búsqueda */
 .filters {
   margin-bottom: 20px;
 }
@@ -106,7 +106,7 @@ body {
   border-color: white;
 }
 
-/* ===== TABLA ===== */
+/* Tabla */
 .table-container {
   background: #141414;
   border-radius: 12px;
@@ -142,7 +142,7 @@ tr:hover {
   background-color: #1a1a1a;
 }
 
-/* ===== BOTONES DE ACCIÓN ===== */
+/* Botones de Acción */
 .btn-edit, .btn-delete {
   padding: 6px 12px;
   margin: 0 3px;
@@ -172,7 +172,7 @@ tr:hover {
   background-color: #da190b;
 }
 
-/* ===== MODAL ===== */
+/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -266,7 +266,7 @@ tr:hover {
   background-color: #da190b;
 }
 
-/* ===== SECCIONES ===== */
+/* Secciones */
 .section {
   display: none;
 }
@@ -275,7 +275,7 @@ tr:hover {
   display: block;
 }
 
-/* ===== PROYECTOS (grid) ===== */
+/* Proyectos (grid) */
 .projects-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
