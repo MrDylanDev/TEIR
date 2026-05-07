@@ -13,7 +13,7 @@
 <body>
 <div class="app-layout">
 
-  <!-- ===== SIDEBAR ===== -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-brand">
       <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
@@ -78,10 +78,10 @@
     </div>
   </aside>
 
-  <!-- ===== MAIN WRAPPER ===== -->
+  <!-- Main Wrapper -->
   <div class="main-wrapper">
 
-    <!-- TOP HEADER -->
+    <!-- Top header -->
     <header class="top-header">
       <div class="top-header-title">
         Panel Corporativo
@@ -111,7 +111,7 @@
       </div>
     </header>
 
-    <!-- CONTENT -->
+    <!-- Content -->
     <main class="main-content">
 
       {% if messages %}
@@ -123,7 +123,7 @@
         {% endfor %}
       {% endif %}
 
-      <!-- ===== INICIO / DASHBOARD ===== -->
+      <!-- Inicio / Dashboard -->
       <section id="inicio" class="seccion-v activa">
         <div class="page-header">
           <div>
@@ -188,7 +188,7 @@
         </div>
       </section>
 
-      <!-- ===== CHAT ===== -->
+      <!-- Chat -->
       <section id="centro-chat" class="seccion-v">
         <div class="page-header">
           <div>
@@ -238,7 +238,7 @@
         </div>
       </section>
 
-      <!-- ===== OFERTAS ===== -->
+      <!-- Ofertas -->
       <section id="ofertas" class="seccion-v">
         <div class="page-header">
           <div>
@@ -271,7 +271,7 @@
         </div>
       </section>
 
-      <!-- ===== EN DESARROLLO ===== -->
+      <!-- EN Desarrollo -->
       <section id="desarrollo" class="seccion-v">
         <div class="page-header">
           <div>
@@ -337,7 +337,7 @@
         </div>
       </section>
 
-      <!-- ===== REPUTACIÓN ===== -->
+      <!-- Reputación -->
       <section id="reputacion" class="seccion-v">
         <div class="page-header">
           <div>
@@ -379,7 +379,7 @@
         </div>
       </section>
 
-      <!-- ===== HISTORIAL ===== -->
+      <!-- Historial -->
       <section id="historial" class="seccion-v">
         <div class="page-header">
           <div>
@@ -418,7 +418,7 @@
         </div>
       </section>
 
-      <!-- ===== PERFIL ===== -->
+      <!-- Perfil -->
       <section id="perfil" class="seccion-v">
         <div class="page-header">
           <div>
@@ -462,7 +462,7 @@
   </div><!-- fin main-wrapper -->
 </div><!-- fin app-layout -->
 
-<!-- MODAL NUEVO PROYECTO -->
+<!-- Modal nuevo proyecto -->
 <div id="modalProyecto" class="modal-overlay">
   <div class="modal-box">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -508,24 +508,6 @@
 </div>
 
 <script src="{% static 'empresa/script/empresa.js' %}"></script>
-<script>
-  function switchTab(id, btn) {
-    document.querySelectorAll('.seccion-v').forEach(s => s.classList.remove('activa'));
-    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-    const target = document.getElementById(id);
-    if (target) target.classList.add('activa');
-    if (btn) btn.classList.add('active');
-  }
-  function abrirModal() {
-    document.getElementById('modalProyecto').classList.add('open');
-  }
-  function cerrarModal() {
-    document.getElementById('modalProyecto').classList.remove('open');
-  }
-  window.onload = function() {
-    const s = new URLSearchParams(window.location.search).get('section');
-    if (s) switchTab(s);
-  };
-</script>
+<script src="{% static 'empresa/script/empresa.js' %}"></script>
 </body>
 </html>

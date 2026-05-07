@@ -13,7 +13,7 @@
 <body>
 <div class="app-layout">
 
-  <!-- ===== SIDEBAR ===== -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-brand">
       <img src="{% static 'IMG/Logo.jpg' %}" alt="TEM">
@@ -33,10 +33,10 @@
     </div>
   </aside>
 
-  <!-- ===== MAIN WRAPPER ===== -->
+  <!-- Main Wrapper -->
   <div class="main-wrapper">
 
-    <!-- TOP HEADER -->
+    <!-- Top header -->
     <header class="top-header">
       <div class="top-header-title">
         {% if es_grupal %}
@@ -53,7 +53,7 @@
       {% endif %}
     </header>
 
-    <!-- CHAT LAYOUT INNER -->
+    <!-- Chat layout inner -->
     <div class="chat-layout">
 
       <!-- Panel de Participantes -->
@@ -128,13 +128,10 @@
         </div>
       </div>
 
-    </div><!-- end chat-layout -->
-  </div><!-- end main-wrapper -->
-</div><!-- end app-layout -->
+    </div><!-- fin chat-layout -->
+  </div><!-- fin main-wrapper -->
+</div><!-- fin app-layout -->
 
-<script>
-  const container = document.getElementById('chat-container');
-  if (container) container.scrollTop = container.scrollHeight;
-</script>
+<script src="{% static 'dashboard/script/chat.js' %}"></script>
 </body>
 </html>

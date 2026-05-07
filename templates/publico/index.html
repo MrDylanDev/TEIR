@@ -15,7 +15,7 @@
 </head>
 <body>
 
-  <!-- ===== ROBOT ANDROIDE PREMIUM EVOLVED ===== -->
+  <!-- Robot Androide Premium Evolved -->
   <div id="scroll-robot">
     <div class="robot-container" id="robot-visuals">
       <div class="robot-bubble" id="robot-text">Iniciando protocolo de asistencia...</div>
@@ -44,10 +44,10 @@
           </filter>
         </defs>
 
-        <!-- CABEZA (CASCO) -->
+        <!-- Cabeza (casco) -->
         <g class="robot-head" style="transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);">
           <path d="M25 40 C 25 15, 75 15, 75 40 L 75 50 C 75 60, 25 60, 25 50 Z" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
-          <!-- VISOR CRISTAL LÍQUIDO -->
+          <!-- Visor cristal líquido -->
           <rect x="30" y="35" width="40" height="12" rx="6" fill="url(#visorGlass)"/>
           
           <!-- Efecto de Ojos Privados (X) -->
@@ -65,10 +65,10 @@
           <rect x="35" y="37" width="10" height="2" rx="1" fill="#fff" opacity="0.1"/>
         </g>
 
-        <!-- CUELLO -->
+        <!-- Cuello -->
         <rect x="45" y="58" width="10" height="6" fill="#1e293b"/>
 
-        <!-- TORSO SEGMENTADO -->
+        <!-- Torso segmentado -->
         <path d="M30 65 L 70 65 C 75 65, 75 95, 70 100 L 30 100 C 25 95, 25 65, 30 65" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
         <rect x="35" y="75" width="30" height="2" fill="#cbd5e1" opacity="0.5"/>
         <circle cx="50" cy="85" r="5" fill="#1e293b"/>
@@ -76,7 +76,7 @@
            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
         </circle>
 
-        <!-- BRAZOS ARTICULADOS -->
+        <!-- Brazos articulados -->
         <g id="arm-left" class="robot-arm" style="transform-origin: 22px 70px;">
            <circle cx="22" cy="70" r="4" fill="#1e293b"/>
            <path d="M22 70 L 12 90" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
@@ -88,7 +88,7 @@
            <circle cx="88" cy="90" r="4" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
         </g>
 
-        <!-- PROPULSOR (BASE) -->
+        <!-- Propulsor (base) -->
         <path d="M40 105 L 60 105 L 55 115 L 45 115 Z" fill="#1e293b"/>
         <path d="M42 115 Q 50 135, 58 115" stroke="#3b82f6" stroke-width="2" opacity="0.6">
            <animate attributeName="d" values="M42 115 Q 50 125, 58 115; M42 115 Q 50 145, 58 115; M42 115 Q 50 125, 58 115" dur="0.2s" repeatCount="indefinite"/>
@@ -104,7 +104,7 @@
   </div>
 {% endif %}
 
-<!-- ===== NAVBAR ===== -->
+<!-- Navbar -->
 <nav class="navbar-tem" id="navbar">
   <div class="nav-brand">TEM</div>
   <ul class="nav-links">
@@ -119,7 +119,7 @@
   </div>
 </nav>
 
-<!-- ===== HERO ===== -->
+<!-- Hero -->
 <section id="inicio" class="hero">
   <div class="hero-bg"></div>
   <div class="hero-content">
@@ -158,7 +158,7 @@
   </div>
 </section>
 
-<!-- ===== CÓMO FUNCIONA ===== -->
+<!-- Cómo Funciona -->
 <section id="como-funciona" class="section">
   <div class="section-inner reveal">
     <span class="eyebrow">Proceso</span>
@@ -194,7 +194,7 @@
   </div>
 </section>
 
-<!-- ===== FUNCIONALIDADES ===== -->
+<!-- Funcionalidades -->
 <section id="funcionalidades" class="features-section">
   <div class="section-inner">
     <div class="reveal">
@@ -237,7 +237,7 @@
   </div>
 </section>
 
-<!-- ===== ROLES ===== -->
+<!-- Roles -->
 <section class="roles-section">
   <div class="section-inner">
     <div class="reveal">
@@ -282,7 +282,7 @@
   </div>
 </section>
 
-<!-- ===== CASOS DE ÉXITO ===== -->
+<!-- Casos DE Éxito -->
 {% if casos_exito %}
 <section class="cases-section">
   <div class="section-inner">
@@ -307,8 +307,7 @@
 </section>
 {% endif %}
 
-
-<!-- ===== FOOTER ===== -->
+<!-- Footer -->
 <footer id="contacto">
   <div>
     <div class="footer-brand">TEM</div>
@@ -342,7 +341,7 @@
   </div>
 </footer>
 
-<!-- ===== MODAL LOGIN ===== -->
+<!-- Modal Login -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content glass-modal text-start">
@@ -384,282 +383,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-  // Navbar scroll effect
-  const navbar = document.getElementById('navbar');
-  window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 20);
-  });
-
-  // Animated counters
-  const counters = document.querySelectorAll('[data-count]');
-  const countObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        const target = parseInt(el.dataset.count);
-        let current = 0;
-        const step = Math.ceil(target / 50);
-        const timer = setInterval(() => {
-          current = Math.min(current + step, target);
-          el.textContent = current + (target >= 100 ? '+' : '');
-          if (current >= target) clearInterval(timer);
-        }, 30);
-        countObserver.unobserve(el);
-      }
-    });
-  }, { threshold: 0.5 });
-  counters.forEach(c => countObserver.observe(c));
-
-  // Scroll reveal
-  const reveals = document.querySelectorAll('.reveal');
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12 });
-  reveals.forEach(r => revealObserver.observe(r));
-
-  // Role selector
-  const roleButtons = document.querySelectorAll('.role-btn-glass');
-  const rolInput = document.getElementById('rol_seleccionado');
-  roleButtons.forEach(btn => {
-    btn.addEventListener('click', function () {
-      roleButtons.forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      rolInput.value = this.dataset.role;
-    });
-  });
-
-  // Toggle password
-  const togglePassBtn = document.getElementById('togglePassGlass');
-  const passInput = document.getElementById('password');
-  if (togglePassBtn && passInput) {
-    togglePassBtn.addEventListener('click', function () {
-      const isText = passInput.type === 'text';
-      passInput.type = isText ? 'password' : 'text';
-      this.innerHTML = isText ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
-    });
-  }
-
-  // Auto-open modal on login errors
-  const djangoMessages = document.getElementById('django-messages');
-  if (djangoMessages) {
-    const spans = djangoMessages.querySelectorAll('span');
-    let errorHtml = '';
-    spans.forEach(span => {
-      errorHtml += `
-        <div style="background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.35);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#fca5a5;display:flex;align-items:center;gap:8px;">
-          <i class="fa fa-circle-exclamation" style="color:#f87171;"></i>${span.textContent.trim()}
-        </div>`;
-    });
-    if (errorHtml) {
-      const form = document.querySelector('#loginModal form');
-      if (form) {
-        const container = document.createElement('div');
-        container.innerHTML = errorHtml;
-        form.insertBefore(container, form.firstChild);
-      }
-      new bootstrap.Modal(document.getElementById('loginModal')).show();
-    }
-  }
-
-  // Auto-open modal via URL parameter
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('login') === '1') {
-    new bootstrap.Modal(document.getElementById('loginModal')).show();
-  }
-
-  // ===== ROBOT INTELIGENTE CON SPRING PHYSICS Y DIÁLOGOS =====
-  const robot = document.getElementById('scroll-robot');
-  const visuals = document.getElementById('robot-visuals');
-  const bubble = document.getElementById('robot-text');
-  if (!robot || !visuals) return;
-
-  let currentY = 0;
-  let targetY = 0;
-  let velocityY = 0;
-  let lastScrollY = window.scrollY;
-
-  const stiffness = 0.08;
-  const damping = 0.82;
-  const precision = 0.01;
-
-  // Mapa de mensajes por sección (Cacheamos elementos para rendimiento)
-  const sections = [
-    { el: document.getElementById('inicio'), msg: '¡Hola! Bienvenido a TEM 🤖' },
-    { el: document.getElementById('como-funciona'), msg: 'Mira qué fácil es nuestro proceso' },
-    { el: document.getElementById('funcionalidades'), msg: 'Tenemos todo para tu proyecto' },
-    { el: document.getElementById('contacto'), msg: '¿Hablamos? ¡Escríbenos!' }
-  ].filter(s => s.el);
-
-  let lastMsg = "";
-
-  function updateRobotDialog() {
-    const scrollY = window.scrollY;
-    let currentMsg = "Explora la plataforma 🚀";
-
-    for (const s of sections) {
-      const rect = s.el.getBoundingClientRect();
-      if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
-        currentMsg = s.msg;
-        break;
-      }
-    }
-
-    if (currentMsg !== lastMsg) {
-      lastMsg = currentMsg;
-      robot.classList.remove('show-bubble');
-      setTimeout(() => {
-        bubble.textContent = currentMsg;
-        robot.classList.add('show-bubble');
-      }, 300);
-    }
-  }
-
-  // ===== SISTEMA DE INTERACCIÓN ROBOT + LOGIN (CORREGIDO) =====
-  let isLoginMode = false;
-  const loginModalEl = document.getElementById('loginModal');
-  
-  if (loginModalEl) {
-    const userInput = document.getElementById('username');
-    const passInput = document.getElementById('password');
-    const visorLight = document.querySelector('.visor-light');
-    const roleBtns = document.querySelectorAll('.role-btn-glass');
-    const togglePassBtn = document.getElementById('togglePassGlass');
-
-    const roleColors = {
-      'administrador': '#ffffff',
-      'empresa': '#10b981',
-      'desarrollador': '#3b82f6'
-    };
-
-    loginModalEl.addEventListener('show.bs.modal', () => {
-      isLoginMode = true;
-      robot.classList.add('login-mode');
-      robot.classList.remove('show-bubble');
-      
-      // Verificar estado de contraseña inmediatamente al abrir
-      setTimeout(() => {
-        handlePassEyes();
-        bubble.textContent = "Te ayudo a entrar... 🔐";
-        robot.classList.add('show-bubble');
-      }, 500);
-    });
-
-    loginModalEl.addEventListener('hide.bs.modal', () => {
-      isLoginMode = false;
-      robot.classList.remove('login-mode');
-      robot.classList.remove('covering-eyes');
-      updateRobotDialog();
-    });
-
-    const handlePassEyes = () => {
-      if (passInput && passInput.type === 'password') {
-        robot.classList.add('covering-eyes');
-        bubble.textContent = "No miraré tu clave... 👀";
-      } else {
-        robot.classList.remove('covering-eyes');
-        bubble.textContent = "¡Te veo! 🤖";
-      }
-    };
-
-    if (passInput) {
-      passInput.addEventListener('focus', handlePassEyes);
-      passInput.addEventListener('blur', () => robot.classList.remove('covering-eyes'));
-    }
-
-    if (togglePassBtn) {
-      togglePassBtn.addEventListener('click', () => {
-        setTimeout(handlePassEyes, 50);
-      });
-    }
-
-    if (userInput) {
-      userInput.addEventListener('focus', () => {
-        bubble.textContent = "¿Quién eres hoy? 🤔";
-      });
-    }
-
-    roleBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const role = btn.dataset.role;
-        if (visorLight) visorLight.style.fill = roleColors[role] || '#fff';
-        const msgs = {
-          'administrador': "Control total iniciado.",
-          'empresa': "Buscando al mejor talento...",
-          'desarrollador': "¡Hola, dev! A codear."
-        };
-        bubble.textContent = msgs[role];
-      });
-    });
-  }
-
-  function animateRobot() {
-    if (isLoginMode) {
-      // En modo login, el robot no sigue el scroll, su posición es controlada por CSS .login-mode
-      requestAnimationFrame(animateRobot);
-      return;
-    }
-
-    const scrollY = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = maxScroll > 0 ? scrollY / maxScroll : 0;
-
-    const robotHeight = 130;
-    const initialTop = 180;
-    const safetyMargin = 40;
-    const dynamicRange = window.innerHeight - initialTop - robotHeight - safetyMargin;
-    const range = Math.max(0, dynamicRange);
-    
-    targetY = scrollPercent * range;
-
-    const deltaScroll = scrollY - lastScrollY;
-    lastScrollY = scrollY;
-
-    // Resorte
-    const force = (targetY - currentY) * stiffness;
-    velocityY = (velocityY + force) * damping;
-    currentY += velocityY;
-
-    // Visuals
-    if (Math.abs(velocityY) > 1.2 || Math.abs(deltaScroll) > 8) {
-      robot.classList.add('falling');
-      visuals.classList.remove('idle');
-      const tilt = Math.max(-12, Math.min(12, velocityY * 1.2 + deltaScroll * 0.4));
-      visuals.style.transform = `translateY(${currentY}px) rotate(${tilt}deg)`;
-    } else {
-      robot.classList.remove('falling');
-      if (Math.abs(velocityY) < precision) {
-        visuals.classList.add('idle');
-        visuals.style.transform = `translateY(${currentY}px)`;
-      } else {
-        visuals.style.transform = `translateY(${currentY}px)`;
-      }
-    }
-
-    updateRobotDialog();
-    requestAnimationFrame(animateRobot);
-  }
-
-  // Clic en el robot
-  robot.addEventListener('click', () => {
-    // Salto de alegría y cambio de velocidad de los anillos
-    velocityY = -22;
-    const funnyMsgs = ["Iniciando escaneo...","Analizando talento SENA","Núcleo estable.","100% Eficiencia."];
-    const originalMsg = bubble.textContent;
-    bubble.textContent = funnyMsgs[Math.floor(Math.random() * funnyMsgs.length)];
-    setTimeout(() => { bubble.textContent = originalMsg; }, 2000);
-  });
-
-  requestAnimationFrame(animateRobot);
-});
-</script>
+<script src="{% static 'publico/script/index.js' %}"></script>
 
 </body>
 </html>

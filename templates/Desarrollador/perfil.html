@@ -4,13 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Perfil del Desarrollador</title>
-  <link rel="stylesheet" href="/estilos/perfil.css"> <!-- Enlace al archivo CSS -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'Desarrollador/css/perfil.css' %}">
 </head>
 <body>
 
-  <!-- =========================================================
-       BARRA DE NAVEGACIÓN SUPERIOR
-       ========================================================= -->
+  
   <nav class="navbar">
     <div class="logo">TEM</div> <!-- Nombre o logo del sitio -->
     <ul class="nav-links">
@@ -21,9 +20,7 @@
     </ul>
   </nav>
 
-  <!-- =========================================================
-       SECCIÓN PERFIL DEL DESARROLLADOR
-       ========================================================= -->
+  
   <section id="perfil" class="perfil">
     <div class="foto-perfil">
       <img src="/IMG/avatar.jpg" alt="Foto de perfil" id="foto">
@@ -43,9 +40,7 @@
     </div>
   </section>
 
-  <!-- =========================================================
-       SECCIÓN PROYECTOS ACTIVOS
-       ========================================================= -->
+  
   <section id="proyectos" class="proyectos">
     <h3>Proyectos Activos</h3>
 
@@ -71,9 +66,7 @@
     </div>
   </section>
 
-  <!-- =========================================================
-       SECCIÓN ENLACES PERSONALES
-       ========================================================= -->
+  
   <section id="enlaces" class="enlaces">
     <h3>Mis Enlaces</h3>
     <ul id="lista-enlaces">
@@ -88,9 +81,7 @@
     </div>
   </section>
 
-  <!-- =========================================================
-       SECCIÓN PROYECTOS COMPLETADOS
-       ========================================================= -->
+  
   <section id="completados" class="completados">
     <h3>Proyectos Completados</h3>
     <div class="contenedor-proyectos">
@@ -106,13 +97,11 @@
     </div>
   </section>
 
-  <!-- =========================================================
-       PIE DE PÁGINA
-       ========================================================= -->
+  
   <footer>
     <p>© 2025 TEM. Todos los derechos reservados.</p>
   </footer>
 
-  <script src="/scrips/perfil.js"></script> <!-- Enlace al archivo JavaScript -->
+  <script src="{% static 'Desarrollador/script/perfil.js' %}"></script>
 </body>
 </html>
