@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import pymysql
 from dotenv import load_dotenv
+from django.core.management.utils import get_random_secret_key
 
 load_dotenv()
 
@@ -12,9 +13,15 @@ pymysql.install_as_MySQLdb()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-7m_gsgijs4$xffuvqf6=3ybx(4$68n+p%r2(h)&kgpx*d*uat*')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
+
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = get_random_secret_key()
+    else:
+        raise ValueError("DJANGO_SECRET_KEY es obligatorio en producción. Verifica tu archivo .env")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
