@@ -1,5 +1,23 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import UserManager
+
+class UsuarioQuerySet(models.QuerySet):
+    def update(self, **kwargs):
+        """Sincroniza is_superuser cuando se cambia el rol via update().
+
+        QuerySet.update() bypasea save(), por lo que sin esto un cambio de rol
+        via .update(rol='empresa') dejaría is_superuser en True.
+        """
+        if 'rol' in kwargs:
+            kwargs['is_superuser'] = (kwargs['rol'] == 'administrador')
+        return super().update(**kwargs)
+
+
+class UsuarioManager(UserManager):
+    def get_queryset(self):
+        return UsuarioQuerySet(self.model, using=self._db)
+
 
 class Usuario(AbstractUser):
     # Campos heredados de AbstractUser que desactivamos para limpiar la DB
@@ -35,6 +53,8 @@ class Usuario(AbstractUser):
     token_recuperacion = models.CharField(max_length=255, null=True, blank=True)
     token_expiracion = models.DateTimeField(null=True, blank=True)
     intentos_fallidos = models.PositiveSmallIntegerField(default=0)
+
+    objects = UsuarioManager()
 
     def save(self, *args, **kwargs):
         # Sincronizar is_superuser con el rol: True solo si es administrador,
