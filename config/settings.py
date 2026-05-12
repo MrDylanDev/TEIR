@@ -23,6 +23,9 @@ if not SECRET_KEY:
     else:
         raise ValueError("DJANGO_SECRET_KEY es obligatorio en producción. Verifica tu archivo .env")
 
+if DEBUG is False and ALLOWED_HOSTS == ['*']:
+    raise ValueError("ALLOWED_HOSTS no puede ser '*' en producción. Define DJANGO_ALLOWED_HOSTS=localhost,tudominio.com")
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
