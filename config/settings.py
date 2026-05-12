@@ -14,17 +14,14 @@ pymysql.install_as_MySQLdb()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = get_random_secret_key()
     else:
         raise ValueError("DJANGO_SECRET_KEY es obligatorio en producción. Verifica tu archivo .env")
-
-if DEBUG is False and ALLOWED_HOSTS == ['*']:
-    raise ValueError("ALLOWED_HOSTS no puede ser '*' en producción. Define DJANGO_ALLOWED_HOSTS=localhost,tudominio.com")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
