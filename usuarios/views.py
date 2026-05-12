@@ -9,7 +9,12 @@ from django.db.models import Avg, Q, Count, Prefetch, OuterRef, Subquery
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
+from django.urls import reverse
+from datetime import timedelta
 import json
+import secrets
 
 from .forms import RegistroUsuarioForm, PerfilEmpresaForm, PerfilDesarrolladorForm
 from .models import Usuario, PerfilEmpresa, PerfilDesarrollador
@@ -142,11 +147,86 @@ def registro_view(request):
 
 def recuperar_view(request):
     if request.method == 'POST':
-        # Placeholder: Solo mostramos el mensaje sin realizar ninguna acción en la DB
-        messages.success(request, "Se han enviado instrucciones de recuperación a dev@pro.com")
+        email = request.POST.get('email')
+        try:
+            usuario = Usuario.objects.get(email=email)
+            token = secrets.token_urlsafe(32)
+            usuario.token_recuperacion = token
+            usuario.token_expiracion = timezone.now() + timedelta(hours=1)
+            usuario.save(update_fields=['token_recuperacion', 'token_expiracion'])
+            
+            enlace = request.build_absolute_uri(reverse('restablecer', args=[token]))
+            
+            mensaje = f"""
+Hola {usuario.nombre},
+
+Recibimos una solicitud para restablecer tu contraseña en TEM.
+Para elegir una nueva contraseña, haz clic en el siguiente enlace:
+
+{enlace}
+
+Este enlace expirará en 1 hora. Si no solicitaste este cambio, puedes ignorar este correo.
+
+Saludos,
+El equipo de TEM
+"""
+            send_mail(
+                'Restablecer tu contraseña en TEM',
+                mensaje,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+        except Usuario.DoesNotExist:
+            pass # No revelamos si el email existe o no por seguridad
+            
+        messages.success(request, "Si el correo electrónico existe en nuestra base de datos, recibirás instrucciones para restablecer tu contraseña.")
         return redirect('login')
             
     return render(request, 'publico/recuperarcon.html')
+
+def restablecer_view(request, token):
+    try:
+        usuario = Usuario.objects.get(token_recuperacion=token)
+        
+        # Verificar expiración
+        if usuario.token_expiracion and usuario.token_expiracion < timezone.now():
+            messages.error(request, "El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.")
+            return redirect('recuperar')
+            
+        if request.method == 'POST':
+            password = request.POST.get('password')
+            password_confirm = request.POST.get('password_confirm')
+            
+            if password != password_confirm:
+                messages.error(request, "Las contraseñas no coinciden.")
+                return render(request, 'publico/restablecercon.html', {'token': token})
+                
+            if len(password) < 8:
+                messages.error(request, "La contraseña debe tener al menos 8 caracteres.")
+                return render(request, 'publico/restablecercon.html', {'token': token})
+                
+            # Actualizar contraseña e invalidar token
+            usuario.set_password(password)
+            usuario.token_recuperacion = None
+            usuario.token_expiracion = None
+            # Resetear intentos fallidos por si estaba bloqueado temporalmente por contraseña incorrecta
+            usuario.intentos_fallidos = 0
+            if usuario.estado == 'suspendido' and not usuario.is_active:
+                # Si estaba suspendido por intentos, se reactiva
+                usuario.estado = 'activo'
+                usuario.is_active = True
+                
+            usuario.save()
+            
+            messages.success(request, "Tu contraseña ha sido restablecida exitosamente. Ahora puedes iniciar sesión.")
+            return redirect('login')
+            
+        return render(request, 'publico/restablecercon.html', {'token': token})
+        
+    except Usuario.DoesNotExist:
+        messages.error(request, "El enlace de recuperación es inválido o ya ha sido utilizado.")
+        return redirect('login')
 
 @login_required
 @requiere_usuario_activo
