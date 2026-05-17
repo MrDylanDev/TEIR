@@ -212,10 +212,11 @@ body {
   .role-pane { padding: 40px 30px; }
   .role-pane:first-child { border-right: none; border-bottom: 1px solid var(--border-dim); }
   .foot-grid { grid-template-columns: 1fr 1fr; }
-  .method-flow::before { left: 40px; }
-  .flow-step { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; position: relative; padding-left: 60px; }
-  .step-node { position: absolute; left: 0; top: 0; margin: 0; }
-  .step-content { width: 100%; text-align: left !important; }
+  .method-flow { padding: 40px 20px; }
+  .method-flow::before { left: 50%; top: 40px; bottom: 40px; transform: translateX(-50%); }
+  .flow-step { display: flex; flex-direction: column; align-items: center; gap: 20px; position: relative; padding-left: 0; }
+  .step-node { position: relative; order: -1; margin: 0 auto; z-index: 2; }
+  .step-content { width: 100%; text-align: center !important; }
   .empty-col { display: none; }
 }
 @media (max-width: 768px) {
