@@ -36,8 +36,9 @@
     <li><a href="#roles">Nodes</a></li>
   </ul>
   <div class="nav-right">
-    <button data-bs-toggle="modal" data-bs-target="#loginModal" class="nav-cta" style="background:transparent; border:none; border-right: 1px solid var(--border-dim);">[ AUTH ]</button>
-    <a href="{% url 'registro' %}" class="nav-cta">[ REGISTER ]</a>
+    <button data-bs-toggle="modal" data-bs-target="#loginModal" class="nav-cta border-right">[ AUTH ]</button>
+    <a href="{% url 'registro' %}" class="nav-cta border-right">[ REGISTER ]</a>
+    <button class="btn-mobile-menu" id="mobileMenuBtn">[ MENU ]</button>
   </div>
 </nav>
 
@@ -272,7 +273,18 @@
     });
   });
 
-  // Toggle Password
+  // Mobile Menu
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const navLinks = document.querySelector('.nav-links');
+  if (mobileMenuBtn && navLinks) {
+    mobileMenuBtn.addEventListener('click', function() {
+      navLinks.classList.toggle('active');
+    });
+    
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => navLinks.classList.remove('active'));
+    });
+  }
   const togglePassBtn = document.getElementById('togglePassTech');
   if (togglePassBtn) {
     togglePassBtn.addEventListener('click', function() {
