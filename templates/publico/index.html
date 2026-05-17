@@ -8,12 +8,19 @@
   <title>TEM | Talento Estratégico</title>
   <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <link rel="stylesheet" href="{% static 'publico/css/index.css' %}">
 </head>
 <body>
+
+<!-- Luces Volumétricas de Fondo -->
+<div class="lights-bg">
+  <div class="light-orb top"></div>
+  <div class="light-orb left"></div>
+  <div class="grid-bg"></div>
+</div>
 
 {% if messages %}
   <div id="django-messages" style="display:none;">
@@ -23,199 +30,234 @@
   </div>
 {% endif %}
 
-<!-- Navbar Radical -->
-<nav class="navbar-radical" id="navbar">
-  <div class="nav-brand">TEM / Core</div>
+<!-- Navbar -->
+<nav class="navbar-linear" id="navbar">
+  <div class="nav-brand">
+    <div class="brand-dot"></div> TEM
+  </div>
+  <ul class="nav-links">
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#caracteristicas">Características</a></li>
+    <li><a href="#metodologia">Metodología</a></li>
+    <li><a href="#roles">Soluciones</a></li>
+  </ul>
   <div class="nav-cta">
-    <button data-bs-toggle="modal" data-bs-target="#loginModal">Console</button>
-    <a href="{% url 'registro' %}">Deploy</a>
+    <button data-bs-toggle="modal" data-bs-target="#loginModal" class="btn-secondary" style="border:none; box-shadow:none; background:transparent;">Iniciar sesión</button>
+    <a href="{% url 'registro' %}" class="btn-secondary">Registrarse</a>
   </div>
 </nav>
 
-<!-- Hero Asimétrico -->
-<section class="hero-radical">
-  <div class="hero-left">
-    <h1 class="hero-title">
-      No más<br>
-      talento<br>
-      <span class="accent">estático.</span>
-    </h1>
-    <p class="hero-desc">
-      TEM rompe el ciclo tradicional de contratación y prácticas. Conectamos requerimientos corporativos complejos con células de ingeniería del SENA en tiempo real. Entornos ágiles, código auditable, resultados verificables.
-    </p>
-    <div style="display: flex; gap: 20px;">
-      <a href="{% url 'registro' %}" class="btn-solid">Inicializar Proyecto</a>
-      <button data-bs-toggle="modal" data-bs-target="#loginModal" class="btn-line">Acceder Terminal</button>
-    </div>
+<!-- Hero Section -->
+<section id="inicio" class="hero-linear">
+  <div class="hero-pill">
+    <i class="fa fa-sparkles pill-icon"></i> TEM Platform v2.0
   </div>
-  <div class="hero-right">
-    <div class="hero-visual">
-      <div style="position: absolute; top: 30px; left: -20px;" class="visual-tag">[SYS.INIT]</div>
-      <div style="position: absolute; bottom: 30px; right: -20px;" class="visual-tag">[AWAITING_INPUT]</div>
-      
-      <!-- Fake terminal lines -->
-      <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; font-family: monospace; color: rgba(255,255,255,0.4); font-size: 0.85rem;">
-        <div>> Booting TEM OS v2.0...</div>
-        <div>> Loading corporate_reqs.json... <span style="color: #0f0;">OK</span></div>
-        <div>> Matching SENA profiles... <span class="accent">8 MATCHES FOUND</span></div>
-        <div>> Establishing secure workspace...</div>
-        <div style="width: 50%; height: 2px; background: var(--accent); margin-top: 10px;"></div>
+  <h1 class="hero-title text-grad-silver">
+    Construye software con el <br>talento del mañana.
+  </h1>
+  <p class="hero-subtitle">
+    TEM es la infraestructura que conecta requerimientos empresariales con los desarrolladores más destacados del SENA. Entornos ágiles, código auditable y ejecución impecable.
+  </p>
+  <div class="hero-actions">
+    <a href="{% url 'registro' %}" class="btn-primary">Comenzar ahora</a>
+    <a href="#metodologia" class="btn-secondary">Explorar plataforma</a>
+  </div>
+
+  <!-- Dashboard Mockup -->
+  <div class="hero-mockup-wrapper">
+    <div class="mockup-glow"></div>
+    <div class="hero-mockup">
+      <div class="mockup-header">
+        <div class="mac-dots">
+          <div class="mac-dot" style="background:#ef4444;"></div>
+          <div class="mac-dot" style="background:#eab308;"></div>
+          <div class="mac-dot" style="background:#22c55e;"></div>
+        </div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-sidebar">
+          <div class="mockup-item active"></div>
+          <div class="mockup-item" style="width: 80%"></div>
+          <div class="mockup-item" style="width: 90%"></div>
+          <div class="mockup-item" style="width: 60%; margin-top: 20px;"></div>
+        </div>
+        <div class="mockup-main">
+          <div style="display: flex; justify-content: space-between;">
+            <div class="mockup-title"></div>
+            <div class="mockup-title" style="width: 80px; background: rgba(255,255,255,0.2);"></div>
+          </div>
+          <div class="mockup-grid">
+            <div class="mockup-card">
+              <div class="mc-line"></div>
+              <div class="mc-line large"></div>
+            </div>
+            <div class="mockup-card">
+              <div class="mc-line"></div>
+              <div class="mc-line large" style="width: 80%;"></div>
+            </div>
+            <div class="mockup-card">
+              <div class="mc-line"></div>
+              <div class="mc-line large" style="width: 40%;"></div>
+            </div>
+          </div>
+          <div class="mockup-list">
+            <!-- List items abstract -->
+            <div style="height: 40px; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 0 16px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.1);"></div>
+              <div style="width: 120px; height: 10px; background: rgba(255,255,255,0.4); border-radius: 4px;"></div>
+            </div>
+            <div style="height: 40px; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 0 16px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.1);"></div>
+              <div style="width: 180px; height: 10px; background: rgba(255,255,255,0.4); border-radius: 4px;"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Proceso Sticky Scroll -->
-<section class="process-section" id="metodologia">
-  <div class="process-left">
-    <!-- Blank space at top to let scrolling start -->
-    <div style="height: 30vh;"></div>
-    
-    <div class="step-block" data-step="1">
-      <div class="step-num">01 / ESPECIFICACIÓN</div>
-      <h2 class="step-title">Arquitectura<br>sobre papel.</h2>
-      <p class="step-desc">Toda línea de código comienza con un requerimiento claro. Las empresas definen los hitos del proyecto, el stack tecnológico y los criterios de aceptación. Sin ambigüedades.</p>
+<!-- Funcionalidades Glass -->
+<section id="caracteristicas" class="section-linear">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-label">Plataforma</div>
+      <h2 class="section-title text-grad-silver">Infraestructura diseñada para la velocidad.</h2>
+      <p class="section-desc">Herramientas de control y telemetría para liderar proyectos distribuidos con equipos emergentes.</p>
     </div>
-    
-    <div class="step-block" data-step="2">
-      <div class="step-num">02 / MATCHING</div>
-      <h2 class="step-title">Talento por<br>algoritmo.</h2>
-      <p class="step-desc">El sistema filtra y asigna a los aprendices del SENA que mejor encajan con el desafío técnico, basándose en su portafolio interno y métricas de proyectos previos.</p>
+
+    <div class="feature-grid">
+      <div class="glass-card feat-card">
+        <div class="feat-icon"><i class="fa fa-layer-group"></i></div>
+        <h3>Gestión de Hitos</h3>
+        <p>Descomposición de arquitecturas en tareas verificables. Monitoreo de estado en tiempo real con evidencias criptográficas de avance.</p>
+      </div>
+      <div class="glass-card feat-card">
+        <div class="feat-icon"><i class="fa fa-shield-halved"></i></div>
+        <h3>Workspaces Seguros</h3>
+        <p>Entornos cifrados de comunicación directa entre líderes empresariales y squads, manteniendo toda la IP bajo control.</p>
+      </div>
+      <div class="glass-card feat-card">
+        <div class="feat-icon"><i class="fa fa-chart-line"></i></div>
+        <h3>Analítica Avanzada</h3>
+        <p>Extracción de telemetría, exportación de logs y dashboards gerenciales para la toma de decisiones tácticas.</p>
+      </div>
     </div>
-    
-    <div class="step-block" data-step="3">
-      <div class="step-num">03 / EJECUCIÓN</div>
-      <h2 class="step-title">Ciclos<br>iterativos.</h2>
-      <p class="step-desc">Desarrollo ágil real. Aprobación de commits y merges por hitos. La empresa mantiene el control total de la propiedad intelectual mientras guía el progreso.</p>
-    </div>
-    
-    <div class="step-block" data-step="4">
-      <div class="step-num">04 / DEPLOYMENT</div>
-      <h2 class="step-title">Código<br>a producción.</h2>
-      <p class="step-desc">Finalización del proyecto con auditoría técnica. El aprendiz obtiene un historial inmutable de su aporte, y la empresa un producto funcional.</p>
-    </div>
-  </div>
-  
-  <div class="process-right">
-    <div class="visual-layer is-active" id="v-layer-1">01</div>
-    <div class="visual-layer" id="v-layer-2">02</div>
-    <div class="visual-layer" id="v-layer-3">03</div>
-    <div class="visual-layer" id="v-layer-4">04</div>
   </div>
 </section>
 
-<!-- Funcionalidades Typo Massive -->
-<section class="features-typo-section">
-  <div style="font-family: monospace; color: var(--accent); margin-bottom: 40px; font-size: 1.1rem; text-transform: uppercase;">/// INFRAESTRUCTURA DEL SISTEMA</div>
-  <ul class="features-list">
-    <li class="feature-item">
-      <div class="feature-hover-bg"></div>
-      <h3 class="f-title">Trazabilidad</h3>
-      <p class="f-desc">Historial criptográfico de cada asignación, commit y feedback realizado dentro del entorno del proyecto.</p>
-    </li>
-    <li class="feature-item">
-      <div class="feature-hover-bg"></div>
-      <h3 class="f-title">Workspaces</h3>
-      <p class="f-desc">Salas de control cifradas para la comunicación directa entre líderes técnicos empresariales y squads del SENA.</p>
-    </li>
-    <li class="feature-item">
-      <div class="feature-hover-bg"></div>
-      <h3 class="f-title">Analíticas</h3>
-      <p class="f-desc">Dashboards de telemetría en tiempo real sobre la velocidad de desarrollo y el estado de salud del código.</p>
-    </li>
-    <li class="feature-item">
-      <div class="feature-hover-bg"></div>
-      <h3 class="f-title">Roles</h3>
-      <p class="f-desc">Sistemas de permisos granulares (Admin, Sponsor, Dev) para garantizar la seguridad operativa y de datos.</p>
-    </li>
-  </ul>
-</section>
+<!-- Metodología Clean Timeline -->
+<section id="metodologia" class="section-linear" style="background: rgba(0,0,0,0.3); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-label">Metodología</div>
+      <h2 class="section-title text-grad-silver">Ingeniería de procesos.</h2>
+      <p class="section-desc">Un marco de trabajo estandarizado que garantiza calidad técnica y alineación absoluta de objetivos.</p>
+    </div>
 
-<!-- Roles Hover Expansion -->
-<section class="roles-expansion-section">
-  <div class="role-panel" onclick="window.location.href='{% url 'registro' %}'">
-    <div class="rp-header">
-      <span class="rp-label">Corporate Auth</span>
-      <i class="fa fa-building rp-icon"></i>
+    <div class="timeline-clean">
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <h4>1. Especificación Técnica</h4>
+        <p>Definición rigurosa de requerimientos, arquitectura esperada y criterios de aceptación en la plataforma. Eliminamos la ambigüedad desde el día cero.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <h4>2. Matching por Algoritmo</h4>
+        <p>Filtrado inteligente de perfiles técnicos del SENA mediante portafolios verificables y métricas de desempeño en proyectos anteriores.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <h4>3. Ejecución Iterativa</h4>
+        <p>Desarrollo ágil estructurado en sprints. Las aprobaciones parciales mitigan el riesgo de desviaciones y aseguran el alineamiento continuo.</p>
+      </div>
+      <div class="tl-item" style="margin-bottom: 0;">
+        <div class="tl-dot"></div>
+        <h4>4. Auditoría y Cierre</h4>
+        <p>Revisión de calidad del código finalizado. El desarrollador obtiene reputación inmutable, y la empresa un producto listo para producción.</p>
+      </div>
     </div>
-    <div class="rp-content">
-      <p class="rp-desc">Integra talento técnico crudo pero altamente motivado en tus pipelines de desarrollo, minimizando riesgos mediante nuestro marco de control estricto.</p>
-      <ul class="rp-list">
-        <li>Reducción masiva en costos de captación de talento JR.</li>
-        <li>Filtro automatizado por skills técnicas comprobadas.</li>
-        <li>Trazabilidad total sobre la propiedad intelectual.</li>
-      </ul>
-    </div>
-    <h3 class="rp-title">Empresas.</h3>
-  </div>
-  
-  <div class="role-panel" onclick="window.location.href='{% url 'registro' %}'">
-    <div class="rp-header">
-      <span class="rp-label">Developer Auth</span>
-      <i class="fa fa-code rp-icon"></i>
-    </div>
-    <div class="rp-content">
-      <p class="rp-desc">Abandona los laboratorios controlados y enfréntate a la deuda técnica, las arquitecturas heredadas y los deadlines de la industria real del software.</p>
-      <ul class="rp-list">
-        <li>Construcción de portafolio validado por empresas.</li>
-        <li>Feedback técnico directo de arquitectos Senior.</li>
-        <li>Ruta acelerada hacia la contratación formal.</li>
-      </ul>
-    </div>
-    <h3 class="rp-title">Técnicos.</h3>
   </div>
 </section>
 
-<!-- Final CTA Monolithic -->
-<section class="monolithic-cta">
-  <h2 class="cta-huge">Inicia<br>el <span>ciclo</span>.</h2>
-  <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-    <a href="{% url 'registro' %}" class="btn-solid" style="padding: 24px 60px; font-size: 1.25rem;">Registrar Usuario</a>
+<!-- Roles Simétricos -->
+<section id="roles" class="section-linear">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-label">Soluciones</div>
+      <h2 class="section-title text-grad-silver">Creación de valor mutuo.</h2>
+    </div>
+
+    <div class="roles-split">
+      <div class="glass-card role-box">
+        <i class="fa fa-building role-icon-lg"></i>
+        <h3>Corporativo</h3>
+        <p>Integra talento emergente motivado a tus ciclos de desarrollo. TEM estructura el marco para asegurar entregas predecibles.</p>
+        <ul class="role-list">
+          <li><i class="fa fa-check"></i> Reducción drástica del time-to-hire</li>
+          <li><i class="fa fa-check"></i> Retención total de propiedad intelectual</li>
+          <li><i class="fa fa-check"></i> Trazabilidad legal en el sistema</li>
+        </ul>
+        <a href="{% url 'registro' %}" class="btn-secondary" style="width: 100%;">Registrar empresa</a>
+      </div>
+      
+      <div class="glass-card role-box">
+        <i class="fa fa-code role-icon-lg"></i>
+        <h3>Desarrolladores</h3>
+        <p>Trasciende los laboratorios académicos. Enfréntate a deuda técnica, requerimientos reales y construye tu currículum.</p>
+        <ul class="role-list">
+          <li><i class="fa fa-check"></i> Entornos ágiles empresariales reales</li>
+          <li><i class="fa fa-check"></i> Feedback de líderes de tecnología</li>
+          <li><i class="fa fa-check"></i> Métricas de calidad públicas</li>
+        </ul>
+        <a href="{% url 'registro' %}" class="btn-secondary" style="width: 100%;">Crear perfil técnico</a>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- Footer Raw -->
-<footer class="footer-raw">
-  <div class="footer-grid">
-    <div class="fg-col">
-      <div style="font-size: 2rem; font-weight: 900; letter-spacing: -0.05em; color: #fff; margin-bottom: 20px;">TEM_</div>
-      <p class="dim" style="line-height: 1.6; max-width: 250px;">Ecosistema de intermediación técnica. Código, requerimientos, ejecución.</p>
+<!-- Footer -->
+<footer>
+  <div class="footer-wrapper">
+    <div class="foot-col">
+      <div class="foot-brand"><div class="brand-dot"></div> TEM</div>
+      <p class="foot-p">Infraestructura digital para la gestión de proyectos y talento tecnológico emergente.</p>
     </div>
-    <div class="fg-col">
-      <h4>Plataforma</h4>
+    <div class="foot-col">
+      <h5>Arquitectura</h5>
       <ul>
-        <li><a href="#metodologia">Engine</a></li>
-        <li><a href="#funcionalidades">Módulos</a></li>
-        <li><a href="#">Documentación</a></li>
+        <li><a href="#inicio">Core</a></li>
+        <li><a href="#caracteristicas">Características</a></li>
+        <li><a href="#metodologia">Metodología</a></li>
       </ul>
     </div>
-    <div class="fg-col">
-      <h4>Sinergia</h4>
+    <div class="foot-col">
+      <h5>Red</h5>
       <ul>
-        <li><a href="{% url 'registro' %}">Integración Corp</a></li>
-        <li><a href="{% url 'registro' %}">Onboarding Devs</a></li>
+        <li><a href="{% url 'registro' %}">Empresas</a></li>
+        <li><a href="{% url 'registro' %}">Desarrolladores</a></li>
       </ul>
     </div>
-    <div class="fg-col">
-      <h4>Sistema</h4>
+    <div class="foot-col">
+      <h5>Sistema</h5>
       <ul>
-        <li><a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Terminal Login</a></li>
-        <li><a href="{% url 'recuperar' %}">Reset Pass</a></li>
+        <li><a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Autenticación</a></li>
+        <li><a href="{% url 'recuperar' %}">Recuperación</a></li>
       </ul>
     </div>
   </div>
-  <div class="footer-bottom">
-    <span>BUILD_ID: 2026.TEM.CORE</span>
-    <span>© TEM ALGORITHMS</span>
+  <div class="footer-bot">
+    <span>© 2026 TEM Platform.</span>
+    <span>Ensamblado en Medellín, Colombia.</span>
   </div>
 </footer>
 
-<!-- Modal Login Radical -->
+<!-- Modal Linear -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content radical-modal">
+    <div class="modal-content modal-linear">
       <div class="modal-header">
-        <h4 class="modal-title">Auth</h4>
+        <h4 class="modal-title text-grad-silver">Autenticación</h4>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -223,28 +265,28 @@
           {% csrf_token %}
           <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="administrador">
           
-          <label class="radical-label">Entity Type</label>
-          <div class="role-selector-rad">
-            <button type="button" class="role-opt-rad" data-role="desarrollador">DEV</button>
-            <button type="button" class="role-opt-rad active" data-role="administrador">ADM</button>
-            <button type="button" class="role-opt-rad" data-role="empresa">CRP</button>
+          <div class="role-tabs">
+            <button type="button" class="role-tab" data-role="desarrollador">Técnico</button>
+            <button type="button" class="role-tab active" data-role="administrador">Admin</button>
+            <button type="button" class="role-tab" data-role="empresa">Empresa</button>
           </div>
           
-          <div style="margin-bottom: 30px;">
-            <label class="radical-label">Identifier</label>
-            <input required type="text" class="radical-input" id="username" name="username" placeholder="sys_admin" value="{{ request.POST.username }}">
+          <div style="margin-bottom: 20px;">
+            <label class="linear-label">Identificador</label>
+            <input required type="text" class="linear-input" id="username" name="username" placeholder="usuario@empresa.com" value="{{ request.POST.username }}">
           </div>
           
-          <div class="pwd-wrap">
-            <label class="radical-label">Passkey</label>
-            <input required type="password" class="radical-input" id="password" name="password" placeholder="••••••••">
-            <button type="button" id="togglePassRad" style="position: absolute; right: 0; bottom: 15px; background: none; border: none; color: var(--accent); cursor: pointer;"><i class="fa fa-eye"></i></button>
+          <div style="position: relative; margin-bottom: 10px;">
+            <label class="linear-label">Contraseña</label>
+            <input required type="password" class="linear-input" id="password" name="password" placeholder="••••••••">
+            <button type="button" id="togglePassLin" style="position: absolute; right: 15px; bottom: 12px; background: none; border: none; color: var(--text-secondary); cursor: pointer;"><i class="fa fa-eye"></i></button>
           </div>
           
-          <button type="submit" class="btn-submit-rad">Execute Login</button>
+          <button type="submit" class="btn-submit-linear">Iniciar sesión</button>
         </form>
-        <div style="margin-top: 30px; text-align: center; font-family: monospace; font-size: 0.85rem;">
-          <a href="{% url 'recuperar' %}" style="color: var(--text-dim); text-decoration: none;">> Init Password Recovery</a>
+        
+        <div style="margin-top: 24px; text-align: center;">
+          <a href="{% url 'recuperar' %}" style="color: var(--text-tertiary); font-size: 0.85rem; text-decoration: none; transition: color 0.2s;">¿Olvidaste tu contraseña?</a>
         </div>
       </div>
     </div>
@@ -255,16 +297,16 @@
 <script src="{% static 'publico/script/index.js' %}"></script>
 <script>
   // Role Selector
-  document.querySelectorAll('.role-opt-rad').forEach(btn => {
+  document.querySelectorAll('.role-tab').forEach(btn => {
     btn.addEventListener('click', function() {
-      document.querySelectorAll('.role-opt-rad').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.role-tab').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
       document.getElementById('rol_seleccionado').value = this.dataset.role;
     });
   });
 
   // Toggle Password
-  const togglePassBtn = document.getElementById('togglePassRad');
+  const togglePassBtn = document.getElementById('togglePassLin');
   if (togglePassBtn) {
     togglePassBtn.addEventListener('click', function() {
       const input = document.getElementById('password');
@@ -278,28 +320,6 @@
       }
     });
   }
-
-  // Sticky Scroll Logic
-  const steps = document.querySelectorAll('.step-block');
-  const visualLayers = document.querySelectorAll('.visual-layer');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        // Opacity of the text block
-        steps.forEach(s => s.classList.remove('is-active'));
-        entry.target.classList.add('is-active');
-        
-        // Show corresponding visual
-        const stepNum = entry.target.dataset.step;
-        visualLayers.forEach(v => v.classList.remove('is-active'));
-        const activeLayer = document.getElementById('v-layer-' + stepNum);
-        if(activeLayer) activeLayer.classList.add('is-active');
-      }
-    });
-  }, { threshold: 0.6 }); // Triggers when 60% of the block is visible
-
-  steps.forEach(step => observer.observe(step));
 </script>
 
 </body>
