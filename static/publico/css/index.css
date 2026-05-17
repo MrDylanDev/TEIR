@@ -158,12 +158,10 @@ body {
 .method-flow { border: 1px solid var(--border-dim); padding: 60px; display: flex; flex-direction: column; gap: 40px; background: rgba(0,0,0,0.6); position: relative; }
 .method-flow::before { content: ''; position: absolute; left: 50%; top: 60px; bottom: 60px; width: 1px; background: var(--border-mid); transform: translateX(-50%); }
 .flow-step { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 30px; align-items: center; }
-.step-node { width: 40px; height: 40px; background: var(--bg-app); border: 1px solid var(--border-high); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; z-index: 2; margin: 0 auto;}
+.step-node { grid-column: 2; width: 40px; height: 40px; background: var(--bg-app); border: 1px solid var(--border-high); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 0.85rem; z-index: 2; margin: 0 auto;}
 .step-content { padding: 30px; border: 1px solid var(--border-dim); background: var(--bg-app); }
 .flow-step:nth-child(even) .step-content { grid-column: 3; }
-.flow-step:nth-child(odd) .step-content { grid-column: 1; text-align: right; }
-.flow-step:nth-child(even) .empty-col { grid-column: 1; }
-.flow-step:nth-child(odd) .empty-col { grid-column: 3; }
+.flow-step:nth-child(odd) .step-content { grid-column: 1; text-align: right; grid-row: 1; }
 .step-content h4 { font-family: var(--font-mono); text-transform: uppercase; margin-bottom: 12px; font-size: 1rem; }
 .step-content p { color: var(--text-dim); font-size: 0.95rem; }
 
@@ -215,9 +213,8 @@ body {
   .method-flow { padding: 40px 20px; }
   .method-flow::before { left: 50%; top: 40px; bottom: 40px; transform: translateX(-50%); }
   .flow-step { display: flex; flex-direction: column; align-items: center; gap: 20px; position: relative; padding-left: 0; }
-  .step-node { position: relative; order: -1; margin: 0 auto; z-index: 2; }
+  .step-node { position: relative; margin: 0 auto; z-index: 2; }
   .step-content { width: 100%; text-align: center !important; }
-  .empty-col { display: none; }
 }
 @media (max-width: 768px) {
   .nav-tech { padding: 0 0 0 20px; }
