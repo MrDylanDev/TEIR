@@ -134,36 +134,26 @@ body {
 }
 .hero-actions { display: flex; gap: 16px; justify-content: center; }
 
-/* Dashboard Mockup (High Fidelity) */
-.hero-mockup-wrapper {
-  margin-top: 80px; width: 100%; max-width: 1100px; position: relative;
+/* Floating Hero Cards (Abstract) */
+.hero-abstract-cards {
+  position: relative; width: 100%; max-width: 800px; height: 300px; margin-top: 60px;
+  display: flex; justify-content: center; align-items: center; perspective: 1000px;
 }
-.hero-mockup {
-  position: relative; width: 100%; height: 500px; border-radius: 12px; overflow: hidden;
-  background: #09090b; border: 1px solid var(--border-subtle);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 30px 60px rgba(0,0,0,0.8);
+.hero-card {
+  position: absolute; width: 280px; padding: 24px; border-radius: 16px;
+  background: linear-gradient(180deg, rgba(24,24,27,0.7) 0%, rgba(24,24,27,0.3) 100%);
+  border: 1px solid var(--border-subtle); backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5);
+  display: flex; flex-direction: column; gap: 16px; transition: transform 0.5s ease;
 }
-.mockup-header {
-  height: 48px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; padding: 0 16px; background: rgba(255,255,255,0.02);
-}
-.mac-dots { display: flex; gap: 8px; }
-.mac-dot { width: 10px; height: 10px; border-radius: 50%; background: #3f3f46; }
-.mockup-body { display: flex; height: calc(100% - 48px); }
-.mockup-sidebar { width: 220px; border-right: 1px solid var(--border-subtle); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-.mockup-item { height: 28px; background: rgba(255,255,255,0.03); border-radius: 6px; }
-.mockup-item.active { background: rgba(255,255,255,0.1); }
-.mockup-main { flex: 1; padding: 30px; display: flex; flex-direction: column; gap: 20px; background: radial-gradient(circle at 50% -20%, rgba(255,255,255,0.05), transparent 50%); }
-.mockup-title { width: 200px; height: 20px; background: #fff; border-radius: 4px; opacity: 0.9; }
-.mockup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.mockup-card { height: 120px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05); }
-.mc-line { height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; }
-.mc-line.large { height: 24px; background: rgba(255,255,255,0.8); width: 60%; }
-.mockup-list { flex: 1; border: 1px solid var(--border-subtle); border-radius: 8px; background: rgba(255,255,255,0.01); }
-
-.mockup-glow {
-  position: absolute; bottom: -20%; left: 50%; transform: translateX(-50%);
-  width: 80%; height: 50%; background: var(--accent-glow); filter: blur(80px); z-index: -1; opacity: 0.6;
-}
+.hero-card:hover { transform: translateY(-10px) scale(1.05) rotate(0deg) !important; z-index: 10; border-color: var(--border-hover); }
+.hc-1 { transform: translateX(-160px) rotate(-8deg) scale(0.9); z-index: 1; }
+.hc-2 { transform: translateY(-20px) scale(1); z-index: 3; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 30px 60px rgba(0,0,0,0.8); border-color: rgba(255,255,255,0.12); }
+.hc-3 { transform: translateX(160px) rotate(8deg) scale(0.9); z-index: 2; }
+.hc-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); }
+.hc-title { font-size: 0.95rem; font-weight: 600; color: #fff; }
+.hc-line { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; width: 100%; }
+.hc-line.short { width: 60%; }
 
 /* Base Sections */
 .section-linear { padding: 120px 5%; position: relative; }
@@ -228,8 +218,9 @@ footer { border-top: 1px solid var(--border-subtle); padding: 60px 5% 40px; }
   .feature-grid { grid-template-columns: 1fr 1fr; }
   .roles-split { grid-template-columns: 1fr; }
   .footer-wrapper { grid-template-columns: 1fr 1fr; }
-  .hero-mockup { height: 400px; }
-  .mockup-sidebar { display: none; }
+  .hero-abstract-cards { height: 200px; }
+  .hc-1 { transform: translateX(-100px) rotate(-5deg) scale(0.8); }
+  .hc-3 { transform: translateX(100px) rotate(5deg) scale(0.8); }
 }
 @media (max-width: 768px) {
   .nav-links { display: none; }
@@ -240,4 +231,5 @@ footer { border-top: 1px solid var(--border-subtle); padding: 60px 5% 40px; }
   .timeline-clean::before { left: 16px; }
   .tl-dot { left: 10px; }
   .tl-item { padding-left: 40px; }
+  .hero-abstract-cards { display: none; }
 }
