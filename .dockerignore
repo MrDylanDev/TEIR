@@ -1,0 +1,60 @@
+# ===== Git =====
+.git
+.gitignore
+
+# ===== Python =====
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+*.egg-info
+*.egg
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ===== Entornos Virtuales =====
+venv/
+env/
+ENV/
+.venv/
+
+# ===== Variables de Entorno =====
+.env
+.env.local
+.env.production
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.gemini/
+
+# ===== Docker =====
+docker-compose.yml
+docker-compose.override.yml
+Dockerfile
+.dockerignore
+
+# ===== Base de Datos Local =====
+db.sqlite3
+*.mysql
+
+# ===== Documentación =====
+*.md
+LICENSE
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Archivos Temporales =====
+scratch/
+tmp/
+*.log
+
+# ===== Archivos compilados de static =====
+staticfiles/
