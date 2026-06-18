@@ -489,3 +489,230 @@ footer { border-top: 1px solid var(--border); padding: 60px; background: var(--b
   }
 }
 
+/* ============================================================
+   Mockup Interactivo de Proyecto (Hero Section)
+   ============================================================ */
+.hero-mockup-wrapper {
+  margin: 50px auto 20px;
+  max-width: 760px;
+  width: 100%;
+  perspective: 1000px;
+  animation: fadeInUpBlur 1.4s cubic-bezier(0.19, 1, 0.22, 1) 1s both;
+}
+.hero-mockup-card {
+  background: rgba(13, 13, 13, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 0 0 100px rgba(59, 130, 246, 0.08);
+  backdrop-filter: blur(20px);
+  text-align: left;
+  transform: rotateX(8deg);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  will-change: transform;
+}
+.hero-mockup-card:hover {
+  transform: rotateX(0deg) translateY(-5px);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.95), 0 0 120px rgba(59, 130, 246, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.mockup-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 42px;
+}
+.mockup-dots {
+  display: flex;
+  gap: 6px;
+  margin-right: 24px;
+}
+.mockup-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.mockup-dots .dot.red { background: #ff5f56; }
+.mockup-dots .dot.yellow { background: #ffbd2e; }
+.mockup-dots .dot.green { background: #27c93f; }
+
+.mockup-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mockup-tab.active {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--white);
+  border-bottom: 2px solid var(--white);
+}
+
+.mockup-body {
+  padding: 24px;
+}
+.mockup-main {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+}
+.mockup-project {
+  display: flex;
+  flex-direction: column;
+}
+.proj-badge {
+  align-self: flex-start;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.proj-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.proj-desc {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.proj-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.meta-item i {
+  font-size: 14px;
+}
+.proj-progress-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+}
+.bar-label span {
+  color: var(--white);
+}
+.bar-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  border-radius: 10px;
+  position: relative;
+}
+
+.mockup-activity {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+.act-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+.act-box {
+  display: flex;
+  flex-direction: column;
+}
+.act-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.act-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.act-user {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--white);
+}
+.act-role {
+  font-size: 10.5px;
+  color: var(--text-3);
+  font-weight: 400;
+}
+.act-desc {
+  font-size: 12px;
+  color: var(--text-2);
+  font-style: italic;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  margin-bottom: 12px;
+}
+.act-status {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.act-status.success {
+  color: #ffbd2e;
+}
+
+@media (max-width: 768px) {
+  .mockup-main {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
