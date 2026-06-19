@@ -282,6 +282,27 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // Mockup Tabs Toggle
+  const mockupTabs = document.querySelectorAll('.mockup-tab');
+  const projectContent = document.getElementById('mockup-project-content');
+  const chatContent = document.getElementById('mockup-chat-content');
+
+  mockupTabs.forEach(tab => {
+    tab.addEventListener('click', function () {
+      mockupTabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      const targetTab = this.getAttribute('data-tab');
+      if (targetTab === 'chat') {
+        if (projectContent) projectContent.style.display = 'none';
+        if (chatContent) chatContent.style.display = 'flex';
+      } else {
+        if (projectContent) projectContent.style.display = 'grid';
+        if (chatContent) chatContent.style.display = 'none';
+      }
+    });
+  });
+
   requestAnimationFrame(animateRobot);
 });
 

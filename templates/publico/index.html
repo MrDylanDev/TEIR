@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="{% static 'publico/css/index.css' %}?v=4">
+  <link rel="stylesheet" href="{% static 'publico/css/index.css' %}?v=5">
 </head>
 <body>
 
@@ -139,51 +139,7 @@
       TEM une a empresas con los mejores desarrolladores aprendices del SENA. Gestiona proyectos, postulaciones, avances y contratos en un solo lugar.
     </p>
 
-    <!-- Ventana de Demo Interactiva (Mockup) -->
-    <div class="hero-mockup-wrapper">
-      <div class="hero-mockup-card">
-        <div class="mockup-header">
-          <div class="mockup-dots">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-          </div>
-          <div class="mockup-tab active"><i class="fa fa-folder-open"></i> Proyecto_SENA.py</div>
-          <div class="mockup-tab"><i class="fa fa-message"></i> Chat</div>
-        </div>
-        <div class="mockup-body">
-          <div class="mockup-main">
-            <div class="mockup-project">
-              <div class="proj-badge">Activo</div>
-              <h4 class="proj-title">E-Commerce con Backend Django & MySQL</h4>
-              <p class="proj-desc">Desarrollo de pasarela de pagos, catálogo reactivo y panel administrativo para PYME de Medellín.</p>
-              
-              <div class="proj-meta">
-                <div class="meta-item"><i class="fa fa-user-graduate"></i> <span>2 Aprendices</span></div>
-                <div class="meta-item"><i class="fa fa-clock"></i> <span>Hito 2/4</span></div>
-              </div>
-              
-              <div class="proj-progress-bar">
-                <div class="bar-label">Progreso del Sprint <span>50%</span></div>
-                <div class="bar-track"><div class="bar-fill" style="width: 50%;"></div></div>
-              </div>
-            </div>
-            
-            <div class="mockup-activity">
-              <div class="act-title">Último Avance</div>
-              <div class="act-box">
-                <div class="act-header">
-                  <div class="act-avatar">D</div>
-                  <div class="act-user">Diego Rendón <span class="act-role">(Aprendiz)</span></div>
-                </div>
-                <p class="act-desc">"Se integró el modelo de base de datos MySQL en Docker y se crearon los endpoints principales de la API."</p>
-                <div class="act-status success"><i class="fa fa-circle-check"></i> Esperando Aprobación de Empresa</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
     <div class="hero-scroll">
       <a href="#como-funciona" class="scroll-arrow">
         <i class="fa fa-chevron-down"></i>
@@ -360,6 +316,100 @@
 </section>
 {% endif %}
 
+<!-- Ejemplo de Proyecto (Mockup) -->
+<section class="section" id="ejemplo-proyecto">
+  <div class="section-inner reveal text-center">
+    <span class="eyebrow">Ejemplo de Proyecto</span>
+    <div class="section-title">Así funciona la plataforma</div>
+    <p class="section-sub mx-auto">Te mostramos una vista previa de cómo las empresas y los desarrolladores gestionan y monitorean el progreso de cada hito en tiempo real.</p>
+    
+    <div class="hero-mockup-wrapper" style="margin-top: 48px;">
+      <div class="hero-mockup-card">
+        <div class="mockup-header">
+          <div class="mockup-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="mockup-tab active" data-tab="project"><i class="fa fa-folder-open"></i> Proyecto_SENA.py</div>
+          <div class="mockup-tab" data-tab="chat"><i class="fa fa-message"></i> Chat</div>
+        </div>
+        <div class="mockup-body">
+          <!-- Pestaña Proyecto -->
+          <div class="mockup-main" id="mockup-project-content">
+            <div class="mockup-project">
+              <div class="proj-badge">Activo</div>
+              <h4 class="proj-title">E-Commerce con Backend Django & MySQL</h4>
+              <p class="proj-desc">Desarrollo de pasarela de pagos, catálogo reactivo y panel administrativo para PYME de Medellín.</p>
+              
+              <div class="proj-meta">
+                <div class="meta-item"><i class="fa fa-user-graduate"></i> <span>2 Aprendices</span></div>
+                <div class="meta-item"><i class="fa fa-clock"></i> <span>Hito 2/4</span></div>
+              </div>
+              
+              <div class="proj-progress-bar">
+                <div class="bar-label">Progreso del Sprint <span>50%</span></div>
+                <div class="bar-track"><div class="bar-fill" style="width: 50%;"></div></div>
+              </div>
+            </div>
+            
+            <div class="mockup-activity">
+              <div class="act-title">Último Avance</div>
+              <div class="act-box">
+                <div class="act-header">
+                  <div class="act-avatar">D</div>
+                  <div class="act-user">Diego Rendón <span class="act-role">(Aprendiz)</span></div>
+                </div>
+                <p class="act-desc">"Se integró el modelo de base de datos MySQL en Docker y se crearon los endpoints principales de la API."</p>
+                <div class="act-status success"><i class="fa fa-circle-check"></i> Esperando Aprobación de Empresa</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña Chat (Ejemplo Interactivo) -->
+          <div class="mockup-chat" id="mockup-chat-content" style="display: none;">
+            <div class="chat-container">
+              <div class="chat-header-info">
+                <div class="chat-title-info">
+                  <span class="chat-active-dot"></span>
+                  <strong>Marta Gómez (Empresa - Tech Solutions)</strong>
+                </div>
+                <span class="chat-project-tag">Proyecto Activo</span>
+              </div>
+              <div class="chat-messages">
+                <div class="chat-msg received">
+                  <div class="msg-meta">Marta Gómez (Empresa) • 10:42 AM</div>
+                  <div class="msg-bubble">
+                    Hola Diego, ¿cómo vas con el backend? ¿Lograste levantar la base de datos con Docker y conectar Django?
+                  </div>
+                </div>
+                
+                <div class="chat-msg sent">
+                  <div class="msg-meta">Tú (Diego) • 10:45 AM</div>
+                  <div class="msg-bubble">
+                    Hola Marta, ¡sí! Todo funcionando. Configuré la base de datos MySQL 8.0 en Docker y creé las tablas. Acabo de subir el avance del Hito 2 en la plataforma para tu revisión.
+                  </div>
+                </div>
+
+                <div class="chat-msg received">
+                  <div class="msg-meta">Marta Gómez (Empresa) • 10:48 AM</div>
+                  <div class="msg-bubble">
+                    ¡Espectacular! Ya veo la notificación de tu avance. Voy a revisar el endpoint de la API y aprobar tu entrega hoy mismo. ¡Excelente trabajo!
+                  </div>
+                </div>
+              </div>
+              <div class="chat-input-area">
+                <input type="text" class="chat-input-field" placeholder="Escribe un mensaje de ejemplo..." disabled>
+                <button class="chat-send-btn" disabled><i class="fa fa-paper-plane"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Footer -->
 <footer id="contacto">
   <div>
@@ -436,7 +486,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'publico/script/index.js' %}?v=4"></script>
+<script src="{% static 'publico/script/index.js' %}?v=5"></script>
 
 </body>
 </html>
