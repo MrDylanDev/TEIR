@@ -40,4 +40,8 @@ scratch/
 .env
 mysql_data/
 
+# AI Tools
+.atl/
+.pi/
+
 
