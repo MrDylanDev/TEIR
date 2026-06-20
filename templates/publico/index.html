@@ -4,98 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TEM — Plataforma que conecta empresas con los mejores desarrolladores aprendices del SENA. Gestiona proyectos, contrataciones y avances en un solo lugar.">
-  <title>TEM | Plataforma de Talento Tecnológico</title>
+  <meta name="description" content="TEM — Plataforma que conecta empresas con los mejores desarrolladores aprendices del SENA.">
+  <title>TEM // SYSTEM.ROOT</title>
   <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <link rel="stylesheet" href="{% static 'publico/css/index.css' %}">
 </head>
 <body>
 
-  <!-- Robot Androide Premium Evolved -->
-  <div id="scroll-robot">
-    <div class="robot-container" id="robot-visuals">
-      <div class="robot-bubble" id="robot-text">Iniciando protocolo de asistencia...</div>
-      
-      <!-- Partículas decorativas -->
-      <div class="data-particle" style="--dx:-40px; --dy:-40px; animation-delay:0.1s"></div>
-      <div class="data-particle" style="--dx:40px; --dy:-50px; animation-delay:0.5s"></div>
-      <div class="data-particle" style="--dx:-30px; --dy:50px; animation-delay:0.9s"></div>
+<!-- Blueprint Background -->
+<div class="tech-bg"></div>
 
-      <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ffffff"/>
-            <stop offset="100%" stop-color="#e2e8f0"/>
-          </linearGradient>
-          <linearGradient id="visorGlass" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#0f172a"/>
-            <stop offset="50%" stop-color="#1e293b"/>
-            <stop offset="100%" stop-color="#020617"/>
-          </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-
-        <!-- Cabeza (casco) -->
-        <g class="robot-head" style="transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);">
-          <path d="M25 40 C 25 15, 75 15, 75 40 L 75 50 C 75 60, 25 60, 25 50 Z" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
-          <!-- Visor cristal líquido -->
-          <rect x="30" y="35" width="40" height="12" rx="6" fill="url(#visorGlass)"/>
-          
-          <!-- Efecto de Ojos Privados (X) -->
-          <g class="privacy-shutter">
-             <line x1="38" y1="39" x2="44" y2="43" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
-             <line x1="44" y1="39" x2="38" y2="43" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
-             <line x1="56" y1="39" x2="62" y2="43" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
-             <line x1="62" y1="39" x2="56" y2="43" stroke="#ff3333" stroke-width="2" stroke-linecap="round"/>
-          </g>
-
-          <circle class="visor-light" cx="50" cy="41" r="2.5" fill="#fff" filter="url(#glow)">
-             <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
-          </circle>
-          <!-- Reflejo en visor -->
-          <rect x="35" y="37" width="10" height="2" rx="1" fill="#fff" opacity="0.1"/>
-        </g>
-
-        <!-- Cuello -->
-        <rect x="45" y="58" width="10" height="6" fill="#1e293b"/>
-
-        <!-- Torso segmentado -->
-        <path d="M30 65 L 70 65 C 75 65, 75 95, 70 100 L 30 100 C 25 95, 25 65, 30 65" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
-        <rect x="35" y="75" width="30" height="2" fill="#cbd5e1" opacity="0.5"/>
-        <circle cx="50" cy="85" r="5" fill="#1e293b"/>
-        <circle cx="50" cy="85" r="2" fill="#fff">
-           <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-
-        <!-- Brazos articulados -->
-        <g id="arm-left" class="robot-arm" style="transform-origin: 22px 70px;">
-           <circle cx="22" cy="70" r="4" fill="#1e293b"/>
-           <path d="M22 70 L 12 90" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
-           <circle cx="12" cy="90" r="4" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
-        </g>
-        <g id="arm-right" class="robot-arm" style="transform-origin: 78px 70px;">
-           <circle cx="78" cy="70" r="4" fill="#1e293b"/>
-           <path d="M78 70 L 88 90" stroke="#1e293b" stroke-width="4" stroke-linecap="round"/>
-           <circle cx="88" cy="90" r="4" fill="url(#bodyGrad)" stroke="#cbd5e1" stroke-width="0.5"/>
-        </g>
-
-        <!-- Propulsor (base) -->
-        <path d="M40 105 L 60 105 L 55 115 L 45 115 Z" fill="#1e293b"/>
-        <path d="M42 115 Q 50 135, 58 115" stroke="#3b82f6" stroke-width="2" opacity="0.6">
-           <animate attributeName="d" values="M42 115 Q 50 125, 58 115; M42 115 Q 50 145, 58 115; M42 115 Q 50 125, 58 115" dur="0.2s" repeatCount="indefinite"/>
-        </path>
-      </svg>
-    </div>
-  </div>
 {% if messages %}
   <div id="django-messages" style="display:none;">
     {% for message in messages %}
@@ -105,277 +25,232 @@
 {% endif %}
 
 <!-- Navbar -->
-<nav class="navbar-tem" id="navbar">
-  <div class="nav-brand">TEM</div>
+<nav class="nav-tech" id="navbar">
+  <div class="nav-brand">
+    <div class="brand-square blink"></div> TEM_CORE
+  </div>
   <ul class="nav-links">
-    <li><a href="#nosotros">Nosotros</a></li>
-    <li><a href="#como-funciona">Proceso</a></li>
-    <li><a href="#funcionalidades">Plataforma</a></li>
-    <li><a href="#contacto">Contacto</a></li>
+    <li><a href="#inicio">Init</a></li>
+    <li><a href="#caracteristicas">Specs</a></li>
+    <li><a href="#metodologia">Process</a></li>
+    <li><a href="#roles">Nodes</a></li>
   </ul>
-  <div class="nav-cta">
-    <button class="btn-nav-login" data-bs-toggle="modal" data-bs-target="#loginModal">Iniciar sesión</button>
-    <a href="{% url 'registro' %}" class="btn-nav-register">Registrarse</a>
+  <div class="nav-right">
+    <button data-bs-toggle="modal" data-bs-target="#loginModal" class="nav-cta border-right">[ AUTH ]</button>
+    <a href="{% url 'registro' %}" class="nav-cta border-right">[ REGISTER ]</a>
+    <button class="btn-mobile-menu" id="mobileMenuBtn">[ MENU ]</button>
   </div>
 </nav>
 
-<!-- Hero -->
-<section id="inicio" class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-content">
-    <div class="hero-badge">Plataforma SENA × Empresas</div>
-    <h1>
-      <span class="word-reveal"><span>Conecta Talento</span></span>
-      <span class="word-reveal" style="animation-delay: 0.2s;"><span style="animation-delay: 0.2s;">con <em>Oportunidades Reales</em></span></span>
-    </h1>
-    <p class="hero-sub">
-      TEM une a empresas con los mejores desarrolladores aprendices del SENA. Gestiona proyectos, postulaciones, avances y contratos en un solo lugar.
-    </p>
-    <div class="hero-scroll">
-      <a href="#como-funciona" class="scroll-arrow">
-        <i class="fa fa-chevron-down"></i>
-      </a>
-    </div>
-
-    <div class="hero-stats">
-      <div>
-        <div class="hero-stat-num" data-count="100">0</div>
-        <div class="hero-stat-label">Proyectos publicados</div>
-      </div>
-      <div>
-        <div class="hero-stat-num" data-count="200">0</div>
-        <div class="hero-stat-label">Desarrolladores activos</div>
-      </div>
-      <div>
-        <div class="hero-stat-num" data-count="50">0</div>
-        <div class="hero-stat-label">Empresas registradas</div>
-      </div>
-      <div>
-        <div class="hero-stat-num" data-count="4">0</div>
-        <div class="hero-stat-label">Países alcanzados</div>
-      </div>
-    </div>
+<!-- Hero Section -->
+<section id="inicio" class="hero-tech">
+  <div class="hero-sys-status">
+    <div class="status-indicator blink"></div>
+    <span>SYS.BOOT_SEQUENCE ... [OK]</span>
+  </div>
+  
+  <h1 class="hero-title">
+    Ensamblaje de código.<br>Cero fricción.
+  </h1>
+  
+  <p class="hero-subtitle">
+    // ACCESO RESTRINGIDO A INFRAESTRUCTURA DE ALTO RENDIMIENTO.<br>
+    Conecta requerimientos corporativos directamente con la matriz de talento élite del SENA. Sin burocracia, puro código.
+  </p>
+  
+  <div class="hero-actions">
+    <a href="{% url 'registro' %}" class="btn-tech">
+      <span>Inicializar Proyecto</span>
+    </a>
+    <a href="#metodologia" class="btn-tech-sec">
+      [ Leer Specs ]
+    </a>
   </div>
 </section>
 
-<!-- Cómo Funciona -->
-<section id="como-funciona" class="section">
-  <div class="section-inner reveal">
-    <span class="eyebrow">Proceso</span>
-    <div class="section-title">Simple, rápido y transparente</div>
-    <p class="section-sub">Desde la publicación de un proyecto hasta el cierre exitoso, todo ocurre dentro de la plataforma.</p>
-
-    <div class="panel-grid steps-grid reveal">
-      <div class="panel-cell">
-        <div class="cell-num">Paso 01</div>
-        <div class="cell-icon"><i class="fa fa-building"></i></div>
-        <div class="cell-title">Empresa publica un proyecto</div>
-        <p class="cell-desc">Define los requisitos, el tipo de solución y los hitos entregables. Queda visible para todos los desarrolladores disponibles.</p>
-      </div>
-      <div class="panel-cell">
-        <div class="cell-num">Paso 02</div>
-        <div class="cell-icon"><i class="fa fa-paper-plane"></i></div>
-        <div class="cell-title">Desarrolladores se postulan</div>
-        <p class="cell-desc">Los aprendices exploran proyectos, revisan detalles y envían su postulación con carta de motivación y portafolio.</p>
-      </div>
-      <div class="panel-cell">
-        <div class="cell-num">Paso 03</div>
-        <div class="cell-icon"><i class="fa fa-handshake"></i></div>
-        <div class="cell-title">La empresa selecciona</div>
-        <p class="cell-desc">Revisa perfiles, calificaciones y experiencia. Acepta al candidato ideal y se genera el contrato automáticamente.</p>
-      </div>
-      <div class="panel-cell">
-        <div class="cell-num">Paso 04</div>
-        <div class="cell-icon"><i class="fa fa-chart-line"></i></div>
-        <div class="cell-title">Seguimiento en tiempo real</div>
-        <p class="cell-desc">Chat integrado, registro de avances por hito, revisión y aprobación. Todo trazable y documentado.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Funcionalidades -->
-<section id="funcionalidades" class="features-section">
+<!-- Características -->
+<section id="caracteristicas" class="section-tech">
   <div class="section-inner">
-    <div class="reveal">
-      <span class="eyebrow">Plataforma</span>
-      <div class="section-title">Todo lo que necesitas, sin fricción</div>
-      <p class="section-sub">Herramientas pensadas para gestionar el ciclo completo de un proyecto freelance con aprendices SENA.</p>
+    <div class="section-head">
+      <span class="sh-label">// MODULE_01: SPECIFICATIONS</span>
+      <h2 class="sh-title">Arquitectura Estricta.</h2>
     </div>
-    <div class="panel-grid features-grid reveal">
-      <div class="panel-cell">
-        <div class="cell-icon"><i class="fa fa-magnifying-glass"></i></div>
-        <div class="cell-title">Exploración de Proyectos</div>
-        <p class="cell-desc">Filtra por tipo de solución, prioridad y fecha. Los desarrolladores encuentran oportunidades que se ajustan a sus habilidades.</p>
+
+    <div class="feat-grid">
+      <div class="feat-box tech-frame">
+        <span class="feat-id">FEAT_01</span>
+        <div class="feat-icon"><i class="fa fa-server"></i></div>
+        <h3 class="feat-title">Trazabilidad Total</h3>
+        <p class="feat-desc">Logs criptográficos de cada commit, issue y avance. Nada queda fuera del registro del sistema central.</p>
       </div>
-      <div class="panel-cell">
-        <div class="cell-icon"><i class="fa fa-users"></i></div>
-        <div class="cell-title">Gestión de Equipos</div>
-        <p class="cell-desc">Organiza desarrolladores en grupos o parejas de trabajo, asigna hitos específicos a cada equipo y monitorea el progreso.</p>
+      <div class="feat-box tech-frame">
+        <span class="feat-id">FEAT_02</span>
+        <div class="feat-icon"><i class="fa fa-shield-halved"></i></div>
+        <h3 class="feat-title">Protocolo IP</h3>
+        <p class="feat-desc">Contratos inteligentes y asignación estricta de propiedad intelectual. Código bloqueado para el cliente corporativo.</p>
       </div>
-      <div class="panel-cell">
-        <div class="cell-icon"><i class="fa fa-flag-checkered"></i></div>
-        <div class="cell-title">Hitos Entregables</div>
-        <p class="cell-desc">Define objetivos claros con etapas. Cada avance reportado por el desarrollador queda en espera de aprobación de la empresa.</p>
-      </div>
-      <div class="panel-cell">
-        <div class="cell-icon"><i class="fa fa-message"></i></div>
-        <div class="cell-title">Mensajería Integrada</div>
-        <p class="cell-desc">Chat privado y espacio grupal por proyecto. Comunicación clara y trazable sin salir de la plataforma.</p>
-      </div>
-      <div class="panel-cell">
-        <div class="cell-icon"><i class="fa fa-star"></i></div>
-        <div class="cell-title">Sistema de Calificaciones</div>
-        <p class="cell-desc">Al finalizar, empresas y desarrolladores se califican mutuamente. La reputación impacta la visibilidad futura en la plataforma.</p>
-      </div>
-      <div class="panel-cell">
-        <div class="cell-icon"><i class="fa fa-shield-halved"></i></div>
-        <div class="cell-title">Panel Administrativo</div>
-        <p class="cell-desc">Supervisión completa: reportes en CSV, auditoría de usuarios, gestión de roles y monitoreo de proyectos en tiempo real.</p>
+      <div class="feat-box tech-frame">
+        <span class="feat-id">FEAT_03</span>
+        <div class="feat-icon"><i class="fa fa-microchip"></i></div>
+        <h3 class="feat-title">Matching Algorítmico</h3>
+        <p class="feat-desc">Asignación de perfiles técnicos (Backend, Frontend, Cloud) basada en requerimientos de la matriz corporativa.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Roles -->
-<section class="roles-section">
+<!-- Metodología -->
+<section id="metodologia" class="section-tech" style="background: rgba(0,0,0,0.4);">
   <div class="section-inner">
-    <div class="reveal">
-      <span class="eyebrow">Roles</span>
-      <div class="section-title">Diseñado para ambas partes</div>
+    <div class="section-head text-center" style="align-items: center;">
+      <span class="sh-label">// MODULE_02: PROCESS_FLOW</span>
+      <h2 class="sh-title">Pipeline de Ejecución.</h2>
     </div>
-    <div class="panel-grid roles-grid reveal">
 
-      <div class="panel-cell role-card">
-        <div class="cell-num">Para Empresas</div>
-        <div class="role-title">Soy una Empresa</div>
-        <p class="role-desc">Accedo a talento calificado SENA, publico proyectos y gestiono todo el equipo desde mi panel.</p>
-        <ul class="role-features">
-          <li>Publica proyectos detallados con hitos</li>
-          <li>Revisa perfiles y postulaciones</li>
-          <li>Contrata con un clic</li>
-          <li>Aprueba entregables y da feedback</li>
-          <li>Califica el desempeño al finalizar</li>
-        </ul>
-        <a href="{% url 'registro' %}" class="btn-role">
-          Registrar mi Empresa <i class="fa fa-arrow-right"></i>
-        </a>
-      </div>
-
-      <div class="panel-cell role-card">
-        <div class="cell-num">Para Desarrolladores</div>
-        <div class="role-title">Soy Desarrollador</div>
-        <p class="role-desc">Aplico a proyectos reales, reporto mi progreso y construyo reputación con cada entrega exitosa.</p>
-        <ul class="role-features">
-          <li>Explora cientos de proyectos activos</li>
-          <li>Postúlate con tu portafolio</li>
-          <li>Reporta avances por hito</li>
-          <li>Chat directo con la empresa</li>
-          <li>Construye tu historial y reputación</li>
-        </ul>
-        <a href="{% url 'registro' %}" class="btn-role">
-          Crear mi Perfil <i class="fa fa-arrow-right"></i>
-        </a>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- Casos DE Éxito -->
-{% if casos_exito %}
-<section class="cases-section">
-  <div class="section-inner">
-    <div class="reveal">
-      <span class="eyebrow">Proyectos Completados</span>
-      <div class="section-title">Resultados reales en la plataforma</div>
-    </div>
-    <div class="panel-grid cases-grid reveal">
-      {% for caso in casos_exito %}
-        <div class="panel-cell case-card">
-          <div class="case-stars">★ ★ ★ ★ ★</div>
-          <div class="case-title">{{ caso.titulo }}</div>
-          <div class="case-type">{{ caso.tipo_solucion }}</div>
-          <div class="case-meta">
-            <div>Empresa: <strong>{{ caso.empresa_nombre }}</strong></div>
-            <div style="margin-top:4px;">Desarrollador: <strong>{{ caso.desarrollador_nombre }}</strong></div>
-          </div>
+    <div class="method-flow">
+      <div class="flow-step">
+        <div class="step-node">01</div>
+        <div class="step-content tech-frame">
+          <h4>[ DEFINE_SPECS ]</h4>
+          <p>La entidad corporativa inyecta los requerimientos técnicos y la arquitectura esperada en el sistema. Ambigüedad = 0.</p>
         </div>
-      {% endfor %}
+      </div>
+      <div class="flow-step">
+        <div class="step-node">02</div>
+        <div class="step-content tech-frame">
+          <h4>[ SQUAD_MATCH ]</h4>
+          <p>El sistema compila un equipo de aprendices élite del SENA cuyas métricas de rendimiento se alinean con la solicitud.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-node">03</div>
+        <div class="step-content tech-frame">
+          <h4>[ SPRINT_EXEC ]</h4>
+          <p>Ejecución iterativa controlada. Los supervisores corporativos aprueban PRs directamente en la interfaz segura.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-node">04</div>
+        <div class="step-content tech-frame">
+          <h4>[ DEPLOY_&_ARCHIVE ]</h4>
+          <p>El código pasa a producción. Se emiten los certificados de reputación y la transferencia de IP se bloquea.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
-{% endif %}
+
+<!-- Soluciones / Roles -->
+<section id="roles" class="section-tech">
+  <div class="section-inner">
+    <div class="section-head">
+      <span class="sh-label">// MODULE_03: NODE_TYPES</span>
+      <h2 class="sh-title">Parámetros de Red.</h2>
+    </div>
+
+    <div class="roles-wrapper">
+      <div class="role-pane tech-frame">
+        <div class="rp-header">
+          <span class="rp-label">NODE_TYPE: CORPORATE</span>
+          <h3 class="rp-title">Empresa</h3>
+          <p class="rp-desc">Acelera tu roadmap inyectando fuerza laboral técnica validada en tus repositorios de código. Menos entrevistas, más commits.</p>
+        </div>
+        <ul class="rp-data">
+          <li><span>TIME_TO_HIRE</span> <span>-80%</span></li>
+          <li><span>IP_OWNERSHIP</span> <span>100%</span></li>
+          <li><span>AGILE_READY</span> <span>TRUE</span></li>
+        </ul>
+        <a href="{% url 'registro' %}" class="btn-tech-sec" style="margin-top: 40px; width: 100%;">[ INJECT_REQUIREMENT ]</a>
+      </div>
+      
+      <div class="role-pane tech-frame">
+        <div class="rp-header">
+          <span class="rp-label">NODE_TYPE: DEVELOPER</span>
+          <h3 class="rp-title">Técnicos</h3>
+          <p class="rp-desc">Sube de nivel trabajando en entornos empresariales de alta presión. Acumula métricas reales, no solo laboratorios.</p>
+        </div>
+        <ul class="rp-data">
+          <li><span>REAL_PROJECTS</span> <span>TRUE</span></li>
+          <li><span>CTO_FEEDBACK</span> <span>DIRECT</span></li>
+          <li><span>REP_SCORE</span> <span>PUBLIC</span></li>
+        </ul>
+        <a href="{% url 'registro' %}" class="btn-tech" style="margin-top: 40px; width: 100%;"><span>INIT_PROFILE</span></a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- Footer -->
-<footer id="contacto">
-  <div>
-    <div class="footer-brand">TEM</div>
-    <p class="footer-tagline">Plataforma de gestión de proyectos que conecta aprendices SENA con empresas. Medellín — Colombia.</p>
+<footer class="foot-tech">
+  <div class="foot-grid">
+    <div class="foot-col">
+      <div class="foot-brand"><div class="brand-square"></div> TEM_CORE</div>
+      <p class="foot-desc">Infraestructura de control para la sincronización de talento técnico y pipelines de desarrollo B2B.</p>
+    </div>
+    <div class="foot-col">
+      <h5>// DATA</h5>
+      <ul>
+        <li><a href="#inicio">Boot</a></li>
+        <li><a href="#caracteristicas">Specs</a></li>
+        <li><a href="#metodologia">Process</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>// NODES</h5>
+      <ul>
+        <li><a href="{% url 'registro' %}">Corporate</a></li>
+        <li><a href="{% url 'registro' %}">Devs</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>// SECURE</h5>
+      <ul>
+        <li><a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Auth_Login</a></li>
+        <li><a href="{% url 'recuperar' %}">Key_Recover</a></li>
+      </ul>
+    </div>
   </div>
-  <div>
-    <div class="footer-heading">Plataforma</div>
-    <ul class="footer-links">
-      <li><a href="#como-funciona">Cómo funciona</a></li>
-      <li><a href="#funcionalidades">Funcionalidades</a></li>
-      <li><a href="{% url 'registro' %}">Registrarse</a></li>
-    </ul>
-  </div>
-  <div>
-    <div class="footer-heading">Roles</div>
-    <ul class="footer-links">
-      <li><a href="{% url 'registro' %}">Soy Empresa</a></li>
-      <li><a href="{% url 'registro' %}">Soy Desarrollador</a></li>
-    </ul>
-  </div>
-  <div>
-    <div class="footer-heading">Acceso</div>
-    <ul class="footer-links">
-      <li><a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Iniciar Sesión</a></li>
-      <li><a href="{% url 'recuperar' %}">Recuperar Contraseña</a></li>
-    </ul>
-  </div>
-  <div class="footer-copy">
-    <p>© 2026 TEM — TechnoEmprende. Todos los derechos reservados.</p>
-    <p>Medellín, Colombia 🇨🇴</p>
+  <div class="foot-bot">
+    <span>SYS.VER: 2.0.44</span>
+    <span>LOCATION: MEDELLIN_COL</span>
   </div>
 </footer>
 
-<!-- Modal Login -->
-<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true" data-bs-theme="dark">
+<!-- Modal Tech -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content glass-modal text-start">
-      <div class="modal-header border-0 pb-0">
-        <div>
-          <h4 class="modal-title fw-bold">Bienvenido de vuelta</h4>
-          <p class="text-white-50 mb-0 mt-1" style="font-size:0.85rem;">Selecciona tu rol para continuar</p>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="filter:invert(1) grayscale(100%) brightness(200%);"></button>
+    <div class="modal-content modal-tech tech-frame">
+      <div class="modal-header">
+        <h4 class="modal-title">SECURE_AUTH_REQUIRED</h4>
+        <button type="button" class="btn-close btn-close-tech" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body pt-4">
+      <div class="modal-body">
         <form method="POST" action="{% url 'login' %}">
           {% csrf_token %}
           <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="administrador">
-          <div class="role-btn-group">
-            <button type="button" class="role-btn-glass" data-role="desarrollador">Desarrollador</button>
-            <button type="button" class="role-btn-glass active" data-role="administrador">Admin</button>
-            <button type="button" class="role-btn-glass" data-role="empresa">Empresa</button>
+          
+          <div class="tabs-tech">
+            <button type="button" class="tab-tech" data-role="desarrollador">DEV</button>
+            <button type="button" class="tab-tech active" data-role="administrador">ROOT</button>
+            <button type="button" class="tab-tech" data-role="empresa">CORP</button>
           </div>
-          <div class="mb-3 text-start">
-            <label class="form-label text-white-50 mb-1" style="font-size:13px;">Usuario</label>
-            <input required type="text" class="form-control glass-input" id="username" name="username"
-              placeholder="Ingresa tu usuario" value="{{ request.POST.username }}">
+          
+          <div style="margin-bottom: 24px;">
+            <label class="label-tech">USER_ID</label>
+            <input required type="text" class="input-tech" id="username" name="username" placeholder="user@domain.com" value="{{ request.POST.username }}">
           </div>
-          <div class="mb-4 password-container-glass text-start">
-            <label class="form-label text-white-50 mb-1" style="font-size:13px;">Contraseña</label>
-            <input required type="password" class="form-control glass-input" id="password" name="password" placeholder="••••••••">
-            <button type="button" id="togglePassGlass" class="toggle-btn-glass"><i class="fa fa-eye"></i></button>
+          
+          <div style="position: relative; margin-bottom: 16px;">
+            <label class="label-tech">PASS_KEY</label>
+            <input required type="password" class="input-tech" id="password" name="password" placeholder="••••••••">
+            <button type="button" id="togglePassTech" style="position: absolute; right: 15px; bottom: 12px; background: none; border: none; color: var(--text-dim); cursor: pointer;"><i class="fa fa-eye"></i></button>
           </div>
-          <button type="submit" class="btn btn-glass-submit w-100 mb-3 mt-2">Iniciar Sesión</button>
+          
+          <button type="submit" class="btn-submit-tech">[ EXECUTE_LOGIN ]</button>
         </form>
-        <div class="glass-links text-center mt-2 pb-2" style="font-size:14px;">
-          <span class="text-white-50">¿No tienes cuenta?</span> <a href="{% url 'registro' %}">Regístrate</a><br>
-          <a href="{% url 'recuperar' %}" class="mt-3 d-inline-block">¿Olvidaste tu contraseña?</a>
+        
+        <div style="margin-top: 24px; text-align: center;">
+          <a href="{% url 'recuperar' %}" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none; font-family: var(--font-mono); text-transform: uppercase;">REQUEST_NEW_KEY</a>
         </div>
       </div>
     </div>
@@ -384,6 +259,43 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'publico/script/index.js' %}"></script>
+<script>
+  // Role Selector
+  document.querySelectorAll('.tab-tech').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-tech').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById('rol_seleccionado').value = this.dataset.role;
+    });
+  });
+
+  // Mobile Menu
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const navLinks = document.querySelector('.nav-links');
+  if (mobileMenuBtn && navLinks) {
+    mobileMenuBtn.addEventListener('click', function() {
+      navLinks.classList.toggle('active');
+    });
+    
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => navLinks.classList.remove('active'));
+    });
+  }
+  const togglePassBtn = document.getElementById('togglePassTech');
+  if (togglePassBtn) {
+    togglePassBtn.addEventListener('click', function() {
+      const input = document.getElementById('password');
+      const icon = this.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    });
+  }
+</script>
 
 </body>
 </html>
