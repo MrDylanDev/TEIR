@@ -4,7 +4,7 @@
 # ============================================================
 
 # -------------------- STAGE 1: Builder --------------------
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 # Evitar prompts interactivos
 ENV DEBIAN_FRONTEND=noninteractive
@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 
 # -------------------- STAGE 2: Production --------------------
-FROM python:3.12-slim AS production
+FROM python:3.14-slim AS production
 
 # Metadatos de la imagen
 LABEL maintainer="TEIR Team"
@@ -67,10 +67,7 @@ RUN chmod +x /entrypoint.sh
 RUN mkdir -p /app/staticfiles /app/media/perfiles && \
     chown -R appuser:appuser /app
 
-# Recoger archivos estáticos durante el build
-RUN python manage.py collectstatic --noinput 2>/dev/null || true
-
-# Asegurar permisos después de collectstatic
+# Asegurar permisos en directorios de runtime
 RUN chown -R appuser:appuser /app/staticfiles /app/media
 
 # Cambiar al usuario no-root

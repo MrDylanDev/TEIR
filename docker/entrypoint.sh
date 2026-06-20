@@ -1,18 +1,18 @@
 #!/bin/bash
 # ============================================================
 # TEIR - Docker Entrypoint
-# InicializaciÃ³n automÃ¡tica del contenedor web
+# Inicializacion automatica del contenedor web
 # ============================================================
 
 set -e
 
 echo "============================================"
-echo "  ðŸš€ TEIR - Iniciando aplicaciÃ³n..."
+echo "  TEIR - Iniciando aplicacion..."
 echo "============================================"
 
-# ---- 1. Esperar a que MySQL estÃ© listo ----
+# ---- 1. Esperar a que MySQL este listo ----
 echo ""
-echo "â³ Esperando conexiÃ³n con MySQL..."
+echo "Esperando conexion con MySQL..."
 
 MAX_RETRIES=30
 RETRY_COUNT=0
@@ -30,33 +30,33 @@ print('OK')
 " 2>/dev/null; do
     RETRY_COUNT=$((RETRY_COUNT + 1))
     if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
-        echo "âŒ No se pudo conectar a MySQL despuÃ©s de $MAX_RETRIES intentos"
+        echo "[ERROR] No se pudo conectar a MySQL despues de $MAX_RETRIES intentos"
         exit 1
     fi
-    echo "   Intento $RETRY_COUNT/$MAX_RETRIES - MySQL no estÃ¡ listo, esperando 2s..."
+    echo "   Intento $RETRY_COUNT/$MAX_RETRIES - MySQL no esta listo, esperando 2s..."
     sleep 2
 done
 
-echo "âœ… ConexiÃ³n con MySQL establecida"
+echo "[OK] Conexion con MySQL establecida"
 
 # ---- 2. Aplicar migraciones ----
 echo ""
-echo "ðŸ“¦ Aplicando migraciones de Django..."
+echo "Aplicando migraciones de Django..."
 python manage.py migrate --noinput
-echo "âœ… Migraciones aplicadas correctamente"
+echo "[OK] Migraciones aplicadas correctamente"
 
-# ---- 3. Recoger archivos estÃ¡ticos ----
+# ---- 3. Recoger archivos estaticos ----
 echo ""
-echo "ðŸ“ Recolectando archivos estÃ¡ticos..."
+echo "Recolectando archivos estaticos..."
 python manage.py collectstatic --noinput
-echo "âœ… Archivos estÃ¡ticos recolectados"
+echo "[OK] Archivos estaticos recolectados"
 
 # ---- 4. Iniciar Gunicorn ----
 echo ""
 echo "============================================"
-echo "  âœ… TEIR listo - Iniciando Gunicorn"
-echo "  ðŸ“¡ Escuchando en 0.0.0.0:8000"
-echo "  ðŸ‘· Workers: 3"
+echo "  TEIR listo - Iniciando Gunicorn"
+echo "  Escuchando en 0.0.0.0:8000"
+echo "  Workers: 3"
 echo "============================================"
 echo ""
 
