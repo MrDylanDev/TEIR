@@ -24,6 +24,10 @@ ENV/
 .env.local
 .env.production
 
+# ===== OpenCode / AI Tools =====
+.atl/
+.pi/
+
 # ===== IDE =====
 .vscode/
 .idea/

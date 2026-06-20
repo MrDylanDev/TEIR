@@ -113,7 +113,13 @@ AUTH_USER_MODEL = 'usuarios.Usuario'
 SESSION_COOKIE_AGE = 3600
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://0.0.0.0:8000']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://localhost',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1',
+    'http://0.0.0.0:8000',
+]
 
 from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
