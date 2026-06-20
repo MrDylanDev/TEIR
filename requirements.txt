@@ -3,3 +3,4 @@ pymysql
 python-dotenv
 cryptography
 Pillow
+gunicorn>=22.0.0

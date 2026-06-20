@@ -1019,23 +1019,6 @@ SET @saved_cs_client     = @@character_set_client;
  1 AS `promedio`*/;
 SET character_set_client = @saved_cs_client;
 
---
--- Temporary view structure for view `v_dashboard_admin`
---
-
-DROP TABLE IF EXISTS `v_dashboard_admin`;
-/*!50001 DROP VIEW IF EXISTS `v_dashboard_admin`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `v_dashboard_admin` AS SELECT 
- 1 AS `total_usuarios`,
- 1 AS `total_empresas`,
- 1 AS `total_desarrolladores`,
- 1 AS `total_proyectos`,
- 1 AS `proyectos_publicados`,
- 1 AS `proyectos_en_desarrollo`,
- 1 AS `proyectos_finalizados`*/;
-SET character_set_client = @saved_cs_client;
 
 --
 -- Temporary view structure for view `v_dashboard_desarrollador`
@@ -1631,23 +1614,6 @@ USE `tem_dbv2`;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
---
--- Final view structure for view `v_dashboard_admin`
---
-
-/*!50001 DROP VIEW IF EXISTS `v_dashboard_admin`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `v_dashboard_admin` AS select (select count(0) from `usuarios`) AS `total_usuarios`,(select count(0) from `usuarios` where (`usuarios`.`rol` = 'empresa')) AS `total_empresas`,(select count(0) from `usuarios` where (`usuarios`.`rol` = 'desarrollador')) AS `total_desarrolladores`,(select count(0) from `proyectos`) AS `total_proyectos`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'publicado')) AS `proyectos_publicados`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'en_desarrollo')) AS `proyectos_en_desarrollo`,(select count(0) from `proyectos` where (`proyectos`.`estado` = 'finalizado')) AS `proyectos_finalizados` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
 -- Final view structure for view `v_dashboard_desarrollador`

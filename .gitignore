@@ -36,4 +36,8 @@ db.sqlite3
 # Tem_bd.sql está incluido intencionalmente para la clonación rápida
 scratch/
 
+# Docker
+.env
+mysql_data/
+
 
