@@ -1,274 +1,299 @@
-document.addEventListener("DOMContentLoaded", function () {
+/* =========================================
+   TEM // SYSTEM.ROOT — Landing Interactions
+   ========================================= */
+document.addEventListener('DOMContentLoaded', function () {
 
-  // Navbar Scroll Effect
-  const navbar = document.getElementById('navbar');
-  window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 20);
-  });
+  /* ============================
+     HERO REEL — frame cycler
+     ============================ */
+  const frames = document.querySelectorAll('.reel-frame');
+  const chapterNum = document.getElementById('chapterNum');
+  const reelProgress = document.getElementById('reelProgress');
+  if (frames.length && chapterNum && reelProgress) {
+    let currentFrame = 0;
+    const frameDuration = 5000;
+    let frameTimer = 0;
+    let lastTime = performance.now();
 
-  // Animated Counters
-  const counters = document.querySelectorAll('[data-count]');
-  const countObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const el = entry.target;
-        const target = parseInt(el.dataset.count);
-        let current = 0;
-        const step = Math.ceil(target / 50);
-        const timer = setInterval(() => {
-          current = Math.min(current + step, target);
-          el.textContent = current + (target >= 100 ? '+' : '');
-          if (current >= target) clearInterval(timer);
-        }, 30);
-        countObserver.unobserve(el);
+    function showFrame(idx) {
+      frames.forEach((f, i) => f.classList.toggle('active', i === idx));
+      chapterNum.textContent = String(idx + 1).padStart(2, '0');
+    }
+
+    function tickReel(now) {
+      const dt = now - lastTime;
+      lastTime = now;
+      frameTimer += dt;
+      const pct = Math.min((frameTimer / frameDuration) * 100, 100);
+      reelProgress.style.width = pct + '%';
+
+      if (frameTimer >= frameDuration) {
+        frameTimer = 0;
+        currentFrame = (currentFrame + 1) % frames.length;
+        showFrame(currentFrame);
       }
-    });
-  }, { threshold: 0.5 });
-  counters.forEach(c => countObserver.observe(c));
+      requestAnimationFrame(tickReel);
+    }
+    requestAnimationFrame(tickReel);
+  }
 
-  // Scroll Reveal
-  const reveals = document.querySelectorAll('.reveal');
+  /* ============================
+     REVEAL ON SCROLL
+     ============================ */
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
+        entry.target.classList.add('in-view');
         revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12 });
-  reveals.forEach(r => revealObserver.observe(r));
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
-  // Role Selector
-  const roleButtons = document.querySelectorAll('.role-btn-glass');
-  const rolInput = document.getElementById('rol_seleccionado');
-  roleButtons.forEach(btn => {
-    btn.addEventListener('click', function () {
-      roleButtons.forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      rolInput.value = this.dataset.role;
-    });
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => {
+    revealObserver.observe(el);
   });
 
-  // Toggle Password
-  const togglePassBtn = document.getElementById('togglePassGlass');
-  const passInput = document.getElementById('password');
-  if (togglePassBtn && passInput) {
-    togglePassBtn.addEventListener('click', function () {
-      const isText = passInput.type === 'text';
-      passInput.type = isText ? 'password' : 'text';
-      this.innerHTML = isText ? '<i class="fa fa-eye"></i>' : '<i class="fa fa-eye-slash"></i>';
-    });
-  }
+  /* ============================
+     NUMBER COUNTERS
+     ============================ */
+  const counters = document.querySelectorAll('.number-display');
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const raw = el.dataset.count;
+        const suffix = el.dataset.suffix || '';
+        const numeric = parseFloat(raw);
+        if (isNaN(numeric)) { counterObserver.unobserve(el); return; }
 
-  // Auto-open Modal On Login Errors
-  const djangoMessages = document.getElementById('django-messages');
-  if (djangoMessages) {
-    const spans = djangoMessages.querySelectorAll('span');
-    let errorHtml = '';
-    spans.forEach(span => {
-      errorHtml += `
-        <div style="background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.35);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#fca5a5;display:flex;align-items:center;gap:8px;">
-          <i class="fa fa-circle-exclamation" style="color:#f87171;"></i>${span.textContent.trim()}
-        </div>`;
-    });
-    if (errorHtml) {
-      const form = document.querySelector('#loginModal form');
-      if (form) {
-        const container = document.createElement('div');
-        container.innerHTML = errorHtml;
-        form.insertBefore(container, form.firstChild);
+        const duration = 1800;
+        const start = performance.now();
+
+        function step(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const value = Math.floor(eased * numeric);
+          if (progress < 1) {
+            el.textContent = value + suffix;
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = raw + suffix;
+          }
+        }
+        requestAnimationFrame(step);
+        counterObserver.unobserve(el);
       }
-      new bootstrap.Modal(document.getElementById('loginModal')).show();
-    }
-  }
-
-  // Auto-open Modal Via URL Parameter
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('login') === '1') {
-    new bootstrap.Modal(document.getElementById('loginModal')).show();
-  }
-
-  // Robot Inteligente con Spring Physics y Diálogos
-  const robot = document.getElementById('scroll-robot');
-  const visuals = document.getElementById('robot-visuals');
-  const bubble = document.getElementById('robot-text');
-  if (!robot || !visuals) return;
-
-  let currentY = 0;
-  let targetY = 0;
-  let velocityY = 0;
-  let lastScrollY = window.scrollY;
-
-  const stiffness = 0.08;
-  const damping = 0.82;
-  const precision = 0.01;
-
-  // Mapa de Mensajes por Sección (cacheamos Elementos para Rendimiento)
-  const sections = [
-    { el: document.getElementById('inicio'), msg: '¡Hola! Bienvenido a TEM 🤖' },
-    { el: document.getElementById('como-funciona'), msg: 'Mira qué fácil es nuestro proceso' },
-    { el: document.getElementById('funcionalidades'), msg: 'Tenemos todo para tu proyecto' },
-    { el: document.getElementById('contacto'), msg: '¿Hablamos? ¡Escríbenos!' }
-  ].filter(s => s.el);
-
-  let lastMsg = "";
-
-  function updateRobotDialog() {
-    const scrollY = window.scrollY;
-    let currentMsg = "Explora la plataforma 🚀";
-
-    for (const s of sections) {
-      const rect = s.el.getBoundingClientRect();
-      if (rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
-        currentMsg = s.msg;
-        break;
-      }
-    }
-
-    if (currentMsg !== lastMsg) {
-      lastMsg = currentMsg;
-      robot.classList.remove('show-bubble');
-      setTimeout(() => {
-        bubble.textContent = currentMsg;
-        robot.classList.add('show-bubble');
-      }, 300);
-    }
-  }
-
-  // Sistema de Interacción Robot + Login (corregido)
-  let isLoginMode = false;
-  const loginModalEl = document.getElementById('loginModal');
-  
-  if (loginModalEl) {
-    const userInput = document.getElementById('username');
-    const passInput = document.getElementById('password');
-    const visorLight = document.querySelector('.visor-light');
-    const roleBtns = document.querySelectorAll('.role-btn-glass');
-    const togglePassBtn = document.getElementById('togglePassGlass');
-
-    const roleColors = {
-      'administrador': '#ffffff',
-      'empresa': '#10b981',
-      'desarrollador': '#3b82f6'
-    };
-
-    loginModalEl.addEventListener('show.bs.modal', () => {
-      isLoginMode = true;
-      robot.classList.add('login-mode');
-      robot.classList.remove('show-bubble');
-      
-      // Verificar Estado de Contraseña Inmediatamente al Abrir
-      setTimeout(() => {
-        handlePassEyes();
-        bubble.textContent = "Te ayudo a entrar... 🔐";
-        robot.classList.add('show-bubble');
-      }, 500);
     });
+  }, { threshold: 0.4 });
 
-    loginModalEl.addEventListener('hide.bs.modal', () => {
-      isLoginMode = false;
-      robot.classList.remove('login-mode');
-      robot.classList.remove('covering-eyes');
-      updateRobotDialog();
-    });
+  counters.forEach(c => counterObserver.observe(c));
 
-    const handlePassEyes = () => {
-      if (passInput && passInput.type === 'password') {
-        robot.classList.add('covering-eyes');
-        bubble.textContent = "No miraré tu clave... 👀";
-      } else {
-        robot.classList.remove('covering-eyes');
-        bubble.textContent = "¡Te veo! 🤖";
+  /* ============================
+     STICKY CTA BAR
+     ============================ */
+  const stickyCta = document.getElementById('stickyCta');
+  const heroSection = document.getElementById('inicio');
+  const bookingAnchor = document.getElementById('comenzar');
+
+  if (stickyCta && heroSection) {
+    let heroPassed = false;
+    let atBooking = false;
+
+    const stickyObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.target === heroSection) heroPassed = !entry.isIntersecting;
+        if (entry.target === bookingAnchor) atBooking = entry.isIntersecting;
+        updateSticky();
+      });
+    }, { threshold: 0 });
+
+    stickyObserver.observe(heroSection);
+    if (bookingAnchor) stickyObserver.observe(bookingAnchor);
+
+    function updateSticky() {
+      stickyCta.classList.toggle('visible', heroPassed && !atBooking);
+    }
+  }
+
+  /* ============================
+     GRAIN PARALLAX
+     ============================ */
+  const grain = document.getElementById('grain');
+  if (grain) {
+    let targetY = 0, currentY = 0;
+    window.addEventListener('scroll', () => {
+      targetY = window.scrollY * 0.12;
+    }, { passive: true });
+
+    function animateGrain() {
+      currentY += (targetY - currentY) * 0.06;
+      grain.style.transform = 'translateY(' + currentY + 'px)';
+      requestAnimationFrame(animateGrain);
+    }
+    animateGrain();
+  }
+
+  /* ============================
+     HERO REEL PARALLAX
+     ============================ */
+  const reelContainer = document.getElementById('reelContainer');
+  if (reelContainer) {
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      if (scrolled < window.innerHeight) {
+        reelContainer.style.transform = 'translateY(' + (scrolled * 0.25) + 'px)';
       }
-    };
+    }, { passive: true });
+  }
 
-    if (passInput) {
-      passInput.addEventListener('focus', handlePassEyes);
-      passInput.addEventListener('blur', () => robot.classList.remove('covering-eyes'));
+  /* ============================
+     STORIES CAROUSEL — drag/snap
+     ============================ */
+  class StoriesCarousel {
+    constructor(track, opts = {}) {
+      this.track = track;
+      if (!track) return;
+      this.cards = Array.from(track.children);
+      if (this.cards.length === 0) return;
+      this.currentIndex = 0;
+      this.isDown = false;
+      this.startX = 0; this.startOffset = 0; this.currentX = 0;
+      this.velocity = 0; this.lastX = 0; this.lastTime = 0;
+      this.cardWidth = 0; this.maxScroll = 0;
+      this.autoAdvance = opts.autoAdvance !== false;
+      this.autoInterval = opts.interval || 4500;
+      this.autoTimer = null;
+      this.pauseAuto = false;
+      this.init();
     }
 
-    if (togglePassBtn) {
-      togglePassBtn.addEventListener('click', () => {
-        setTimeout(handlePassEyes, 50);
+    init() {
+      this.calculateDimensions();
+      this.bindEvents();
+      this.buildDots();
+      this.startAuto();
+      window.addEventListener('resize', () => {
+        this.calculateDimensions();
+        this.clamp();
+        this.applyTransform(0);
       });
     }
 
-    if (userInput) {
-      userInput.addEventListener('focus', () => {
-        bubble.textContent = "¿Quién eres hoy? 🤔";
+    calculateDimensions() {
+      if (this.cards.length === 0) return;
+      const trackStyle = window.getComputedStyle(this.track);
+      const gap = parseFloat(trackStyle.gap) || 24;
+      const paddingLeft = parseFloat(trackStyle.paddingLeft) || 0;
+      this.cardWidth = this.cards[0].offsetWidth + gap;
+      const containerWidth = this.track.parentElement.offsetWidth;
+      const totalWidth = (this.cards.length * this.cardWidth) - gap + paddingLeft * 2;
+      this.maxScroll = Math.max(0, totalWidth - containerWidth);
+    }
+
+    bindEvents() {
+      const down = (e) => this.handleDown(e);
+      const move = (e) => this.handleMove(e);
+      const up = () => this.handleUp();
+
+      this.track.addEventListener('mousedown', down);
+      this.track.addEventListener('touchstart', down, { passive: true });
+      window.addEventListener('mousemove', move);
+      window.addEventListener('touchmove', move, { passive: false });
+      window.addEventListener('mouseup', up);
+      window.addEventListener('touchend', up);
+      window.addEventListener('touchcancel', up);
+
+      this.track.addEventListener('mouseenter', () => this.pauseAuto = true);
+      this.track.addEventListener('mouseleave', () => this.pauseAuto = false);
+
+      const prev = document.getElementById('storyPrev');
+      const next = document.getElementById('storyNext');
+      if (prev) prev.addEventListener('click', () => this.goTo(this.currentIndex - 1));
+      if (next) next.addEventListener('click', () => this.goTo(this.currentIndex + 1));
+    }
+
+    handleDown(e) {
+      this.isDown = true;
+      this.track.classList.add('dragging');
+      const x = e.type.includes('touch') ? e.touches[0].pageX : e.pageX;
+      this.startX = x; this.startOffset = this.currentX;
+      this.lastX = x; this.lastTime = Date.now();
+      this.velocity = 0; this.stopAuto();
+    }
+
+    handleMove(e) {
+      if (!this.isDown) return;
+      if (e.cancelable) e.preventDefault();
+      const x = e.type.includes('touch') ? e.touches[0].pageX : e.pageX;
+      const delta = x - this.startX;
+      let newX = this.startOffset + delta;
+      if (newX > 0) newX = newX * 0.3;
+      else if (newX < -this.maxScroll) { const over = newX + this.maxScroll; newX = -this.maxScroll + over * 0.3; }
+      const now = Date.now();
+      const dt = now - this.lastTime;
+      if (dt > 0) this.velocity = (x - this.lastX) / dt;
+      this.lastX = x; this.lastTime = now;
+      this.currentX = newX;
+      this.applyTransform(0);
+    }
+
+    handleUp() {
+      if (!this.isDown) return;
+      this.isDown = false;
+      this.track.classList.remove('dragging');
+      let target = this.currentX + this.velocity * 350;
+      const snapIndex = Math.round(-target / this.cardWidth);
+      const clampedIndex = Math.max(0, Math.min(this.cards.length - 1, snapIndex));
+      let snappedX = -clampedIndex * this.cardWidth;
+      if (snappedX > 0) snappedX = 0;
+      if (snappedX < -this.maxScroll) snappedX = -this.maxScroll;
+      this.currentX = snappedX; this.currentIndex = clampedIndex;
+      this.applyTransform(600); this.updateDots();
+      setTimeout(() => this.startAuto(), 1800);
+    }
+
+    goTo(idx) {
+      this.currentIndex = Math.max(0, Math.min(this.cards.length - 1, idx));
+      let target = -this.currentIndex * this.cardWidth;
+      if (target > 0) target = 0;
+      if (target < -this.maxScroll) target = -this.maxScroll;
+      this.currentX = target; this.applyTransform(600); this.updateDots();
+      this.stopAuto(); setTimeout(() => this.startAuto(), 2500);
+    }
+
+    clamp() {
+      if (this.currentX > 0) this.currentX = 0;
+      if (this.currentX < -this.maxScroll) this.currentX = -this.maxScroll;
+    }
+
+    applyTransform(duration) {
+      this.track.style.transition = duration > 0 ? 'transform ' + duration + 'ms cubic-bezier(0.16, 1, 0.3, 1)' : 'none';
+      this.track.style.transform = 'translateX(' + this.currentX + 'px)';
+    }
+
+    buildDots() {
+      const container = document.getElementById('storyDots');
+      if (!container) return;
+      container.innerHTML = '';
+      this.cards.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'carousel-dot';
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => this.goTo(i));
+        container.appendChild(dot);
       });
     }
 
-    roleBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const role = btn.dataset.role;
-        if (visorLight) visorLight.style.fill = roleColors[role] || '#fff';
-        const msgs = {
-          'administrador': "Control total iniciado.",
-          'empresa': "Buscando al mejor talento...",
-          'desarrollador': "¡Hola, dev! A codear."
-        };
-        bubble.textContent = msgs[role];
-      });
-    });
-  }
-
-  function animateRobot() {
-    if (isLoginMode) {
-      // En Modo Login, el Robot No Sigue el Scroll, Su Posición Es Controlada por CSS .login-mode
-      requestAnimationFrame(animateRobot);
-      return;
+    updateDots() {
+      const dots = document.querySelectorAll('#storyDots .carousel-dot');
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === this.currentIndex));
     }
 
-    const scrollY = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = maxScroll > 0 ? scrollY / maxScroll : 0;
-
-    const robotHeight = 130;
-    const initialTop = 180;
-    const safetyMargin = 40;
-    const dynamicRange = window.innerHeight - initialTop - robotHeight - safetyMargin;
-    const range = Math.max(0, dynamicRange);
-    
-    targetY = scrollPercent * range;
-
-    const deltaScroll = scrollY - lastScrollY;
-    lastScrollY = scrollY;
-
-    // Resorte
-    const force = (targetY - currentY) * stiffness;
-    velocityY = (velocityY + force) * damping;
-    currentY += velocityY;
-
-    // Visuals
-    if (Math.abs(velocityY) > 1.2 || Math.abs(deltaScroll) > 8) {
-      robot.classList.add('falling');
-      visuals.classList.remove('idle');
-      const tilt = Math.max(-12, Math.min(12, velocityY * 1.2 + deltaScroll * 0.4));
-      visuals.style.transform = `translateY(${currentY}px) rotate(${tilt}deg)`;
-    } else {
-      robot.classList.remove('falling');
-      if (Math.abs(velocityY) < precision) {
-        visuals.classList.add('idle');
-        visuals.style.transform = `translateY(${currentY}px)`;
-      } else {
-        visuals.style.transform = `translateY(${currentY}px)`;
-      }
-    }
-
-    updateRobotDialog();
-    requestAnimationFrame(animateRobot);
+    startAuto() { if (!this.autoAdvance) return; this.stopAuto(); this.autoTimer = setInterval(() => { if (this.pauseAuto || this.isDown) return; this.goTo((this.currentIndex + 1) % this.cards.length); }, this.autoInterval); }
+    stopAuto() { if (this.autoTimer) { clearInterval(this.autoTimer); this.autoTimer = null; } }
   }
 
-  // Clic en el Robot
-  robot.addEventListener('click', () => {
-    // Salto de Alegría y Cambio de Velocidad de los Anillos
-    velocityY = -22;
-    const funnyMsgs = ["Iniciando escaneo...","Analizando talento SENA","Núcleo estable.","100% Eficiencia."];
-    const originalMsg = bubble.textContent;
-    bubble.textContent = funnyMsgs[Math.floor(Math.random() * funnyMsgs.length)];
-    setTimeout(() => { bubble.textContent = originalMsg; }, 2000);
-  });
+  new StoriesCarousel(document.getElementById('storyTrack'), { interval: 4500 });
 
-  requestAnimationFrame(animateRobot);
 });

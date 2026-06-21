@@ -13,7 +13,9 @@
 </head>
 <body>
 
-<!-- Blueprint Background -->
+<!-- Textures -->
+<div class="grain" id="grain"></div>
+<div class="scan-line"></div>
 <div class="tech-bg"></div>
 
 {% if messages %}
@@ -24,16 +26,20 @@
   </div>
 {% endif %}
 
-<!-- Navbar -->
+<!-- ==================== NAVBAR ==================== -->
 <nav class="nav-tech" id="navbar">
-  <div class="nav-brand">
+  <a href="#inicio" class="nav-brand">
     <div class="brand-square blink"></div> TEM_CORE
-  </div>
-  <ul class="nav-links">
+    <div class="brand-dot"></div>
+  </a>
+  <ul class="nav-links" id="navLinks">
     <li><a href="#inicio">Init</a></li>
-    <li><a href="#caracteristicas">Specs</a></li>
+    <li><a href="#modulos">Modules</a></li>
+    <li><a href="#sistemas">Systems</a></li>
     <li><a href="#metodologia">Process</a></li>
     <li><a href="#roles">Nodes</a></li>
+    <li><a href="#testimonios">Proof</a></li>
+    <li><a href="#comenzar">Start</a></li>
   </ul>
   <div class="nav-right">
     <button data-bs-toggle="modal" data-bs-target="#loginModal" class="nav-cta border-right">[ AUTH ]</button>
@@ -42,113 +48,447 @@
   </div>
 </nav>
 
-<!-- Hero Section -->
-<section id="inicio" class="hero-tech">
-  <div class="hero-sys-status">
-    <div class="status-indicator blink"></div>
-    <span>SYS.BOOT_SEQUENCE ... [OK]</span>
+<!-- ==================== HERO ==================== -->
+<section id="inicio" class="hero-section">
+  <div id="reelContainer">
+    <div class="reel-frame active">
+      <div class="frame-bg" style="background: radial-gradient(ellipse at 30% 50%, #0a2a1a 0%, #051005 50%, #000 100%);"></div>
+    </div>
+    <div class="reel-frame">
+      <div class="frame-bg" style="background: radial-gradient(ellipse at 70% 40%, #0a1f2a 0%, #030a08 50%, #000 100%);"></div>
+    </div>
+    <div class="reel-frame">
+      <div class="frame-bg" style="background: radial-gradient(ellipse at 50% 60%, #0f2a15 0%, #020a05 50%, #000 100%);"></div>
+    </div>
+    <div class="reel-frame">
+      <div class="frame-bg" style="background: radial-gradient(ellipse at 20% 70%, #0a1f18 0%, #050a08 50%, #000 100%);"></div>
+    </div>
   </div>
-  
-  <h1 class="hero-title">
-    Ensamblaje de código.<br>Cero fricción.
-  </h1>
-  
-  <p class="hero-subtitle">
-    // ACCESO RESTRINGIDO A INFRAESTRUCTURA DE ALTO RENDIMIENTO.<br>
-    Conecta requerimientos corporativos directamente con la matriz de talento élite del SENA. Sin burocracia, puro código.
-  </p>
-  
-  <div class="hero-actions">
-    <a href="{% url 'registro' %}" class="btn-tech">
-      <span>Inicializar Proyecto</span>
-    </a>
-    <a href="#metodologia" class="btn-tech-sec">
-      [ Leer Specs ]
-    </a>
+
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content in-view">
+    <div class="hero-sys-status">
+      <div class="status-indicator blink"></div>
+      <span>SYS.BOOT_SEQUENCE ... [OK]</span>
+      <span style="margin-left:12px;display:inline-flex;align-items:center;gap:8px;">
+        <span class="rec-dot" style="vertical-align:middle;"></span>
+        <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--fg-dim);letter-spacing:0.15em;">REEL · LIVE</span>
+      </span>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="headline-line"><span>BUILT BY</span></span>
+      <span class="headline-line"><span class="text-stroke">DISCIPLINE.</span></span>
+      <span class="headline-line"><span>FORGED IN <span style="color:var(--accent);">CODE.</span></span></span>
+    </h1>
+
+    <p class="hero-subtitle">
+      // ACCESO RESTRINGIDO A INFRAESTRUCTURA DE ALTO RENDIMIENTO.<br>
+      Conecta requerimientos corporativos directamente con la matriz de talento élite del SENA. Sin burocracia, puro código.
+    </p>
+
+    <div class="hero-actions">
+      <a href="{% url 'registro' %}" class="btn-tech pulse-btn">
+        <span>Inicializar Proyecto</span>
+      </a>
+      <a href="#metodologia" class="btn-tech-sec">[ Leer Specs ]</a>
+    </div>
+
+    <!-- Bottom strip: tech stack + reel progress -->
+    <div class="hero-bottom-strip">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;">
+          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--border-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--fg);">JD</div>
+          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--border-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--fg);margin-left:-12px;">ML</div>
+          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--border-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--fg);margin-left:-12px;">AR</div>
+          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--border-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--fg);margin-left:-12px;">CP</div>
+          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.8rem;font-weight:700;margin-left:-12px;">+50</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;">Talento SENA verificado</div>
+          <div style="font-family:var(--font-main);font-size:0.82rem;font-weight:600;">Perfiles activos</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="hero-reel-bar">
+          <span class="rec-dot"></span>
+          <span id="chapterNum">01</span><span class="text-muted">/04</span>
+          <div class="hero-progress-bar">
+            <div class="hero-progress-fill" id="reelProgress"></div>
+          </div>
+        </div>
+        <button id="sysToggle" style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);border:1px solid var(--border-mid);padding:8px 14px;cursor:pointer;transition:border-color 0.3s;">
+          <div class="wave-bars" id="waveBars">
+            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+          </div>
+          <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--fg-dim);letter-spacing:0.15em;text-transform:uppercase;" id="sysLabel">Muted</span>
+          <i class="fa fa-volume-xmark" style="font-size:0.6rem;color:var(--fg-dim);" id="sysIcon"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Marquee -->
+  <div class="hero-marquee">
+    <div class="marquee-track">
+      <span>TRACEABILITY</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>SECURE CONTRACTS</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>ALGORITHMIC MATCHING</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>AGILE PIPELINE</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>SENA ELITE TALENT</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>ZERO BUREAUCRACY</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>TRACEABILITY</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>SECURE CONTRACTS</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>ALGORITHMIC MATCHING</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>AGILE PIPELINE</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>SENA ELITE TALENT</span><span style="color:var(--accent);padding:0 8px;">/</span>
+      <span>ZERO BUREAUCRACY</span><span style="color:var(--accent);padding:0 8px;">/</span>
+    </div>
   </div>
 </section>
 
-<!-- Características -->
-<section id="caracteristicas" class="section-tech">
+<!-- ==================== STATS ==================== -->
+<section class="stats-section">
+  <div class="stats-grid in-view" style="max-width:1400px;margin:0 auto;">
+    <div class="stat-item">
+      <div class="stat-number number-display" data-count="12" data-suffix="" style="color:var(--fg);">0</div>
+      <div class="stat-label">Meses operando</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number number-display" data-count="35" data-suffix="" style="color:var(--accent);">0</div>
+      <div class="stat-label">Funcionalidades activas</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number number-display" data-count="99" data-suffix="%" style="color:var(--fg);">0</div>
+      <div class="stat-label">Uptime del sistema</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number number-display" data-count="3" data-suffix="" style="color:var(--fg);">0</div>
+      <div class="stat-label">Tipos de nodo</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PLATFORM MODULES ==================== -->
+<section id="modulos" class="section-tech">
   <div class="section-inner">
-    <div class="section-head">
-      <span class="sh-label">// MODULE_01: SPECIFICATIONS</span>
-      <h2 class="sh-title">Arquitectura Estricta.</h2>
+    <!-- Asymmetric header: IRONFORGE-style 5/7 split -->
+    <div class="reveal modules-header">
+      <div class="modules-header-left">
+        <span class="section-marker"><span>// MODULE_01: CORE_SYSTEMS</span></span>
+        <h2 class="sh-title">Tres sistemas.<br><span class="text-stroke">Un solo resultado:</span><br><span style="color:var(--accent);">control total.</span></h2>
+      </div>
+      <div class="modules-header-right">
+        <p class="modules-header-desc">Cada módulo del ecosistema TEM está diseñado con un propósito específico. Elegí el área que necesitás y explorá sus capacidades técnicas.</p>
+        <div class="goal-pills" style="margin-top:20px;">
+          <span class="goal-pill active">Todos</span>
+          <span class="goal-pill">Gestión</span>
+          <span class="goal-pill">Seguridad</span>
+          <span class="goal-pill">Trazabilidad</span>
+        </div>
+      </div>
     </div>
 
-    <div class="feat-grid">
-      <div class="feat-box tech-frame">
-        <span class="feat-id">FEAT_01</span>
-        <div class="feat-icon"><i class="fa fa-server"></i></div>
-        <h3 class="feat-title">Trazabilidad Total</h3>
-        <p class="feat-desc">Logs criptográficos de cada commit, issue y avance. Nada queda fuera del registro del sistema central.</p>
-      </div>
-      <div class="feat-box tech-frame">
-        <span class="feat-id">FEAT_02</span>
-        <div class="feat-icon"><i class="fa fa-shield-halved"></i></div>
-        <h3 class="feat-title">Protocolo IP</h3>
-        <p class="feat-desc">Contratos inteligentes y asignación estricta de propiedad intelectual. Código bloqueado para el cliente corporativo.</p>
-      </div>
-      <div class="feat-box tech-frame">
-        <span class="feat-id">FEAT_03</span>
-        <div class="feat-icon"><i class="fa fa-microchip"></i></div>
-        <h3 class="feat-title">Matching Algorítmico</h3>
-        <p class="feat-desc">Asignación de perfiles técnicos (Backend, Frontend, Cloud) basada en requerimientos de la matriz corporativa.</p>
-      </div>
+    <div class="reveal-stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+
+      <article class="module-card notch-corner group">
+        <div class="module-img-box">
+          <img src="{% static 'IMG/website.png' %}" class="module-img" alt="Gestión de proyectos" loading="lazy">
+          <div class="module-img-overlay"></div>
+          <div class="module-label">01 / GESTIÓN</div>
+          <div class="module-tag">CORE</div>
+        </div>
+        <div class="module-body">
+          <h3 class="module-title">PROJECT HUB</h3>
+          <p class="module-desc">Gestión completa del ciclo de vida del proyecto. Registro, postulaciones, asignación de equipos y seguimiento de avances en tiempo real.</p>
+          <div class="module-stats-grid">
+            <div><div class="module-stat-val accent">100%</div><div class="module-stat-label">Cobertura</div></div>
+            <div><div class="module-stat-val">4</div><div class="module-stat-label">Fases</div></div>
+            <div><div class="module-stat-val">3</div><div class="module-stat-label">Roles</div></div>
+          </div>
+          <a href="{% url 'registro' %}" class="module-link">
+            <span>Explorar sistema</span>
+            <i class="fa fa-arrow-right"></i>
+          </a>
+        </div>
+      </article>
+
+      <article class="module-card notch-corner group">
+        <div class="module-img-box">
+          <img src="{% static 'IMG/automatizacion.png' %}" class="module-img" alt="Seguridad" loading="lazy">
+          <div class="module-img-overlay"></div>
+          <div class="module-label">02 / SEGURIDAD</div>
+          <div class="module-tag">CRÍTICO</div>
+        </div>
+        <div class="module-body">
+          <h3 class="module-title">GUARDIAN PROTOCOL</h3>
+          <p class="module-desc">Protección de propiedad intelectual, contratos inteligentes, logs de auditoría inmutables y control de acceso por roles.</p>
+          <div class="module-stats-grid">
+            <div><div class="module-stat-val accent">100%</div><div class="module-stat-label">IP segura</div></div>
+            <div><div class="module-stat-val">3</div><div class="module-stat-label">Niveles</div></div>
+            <div><div class="module-stat-val">24/7</div><div class="module-stat-label">Monitor</div></div>
+          </div>
+          <a href="{% url 'registro' %}" class="module-link">
+            <span>Explorar sistema</span>
+            <i class="fa fa-arrow-right"></i>
+          </a>
+        </div>
+      </article>
+
+      <article class="module-card notch-corner group">
+        <div class="module-img-box">
+          <img src="{% static 'IMG/ia.png' %}" class="module-img" alt="Trazabilidad" loading="lazy">
+          <div class="module-img-overlay"></div>
+          <div class="module-label">03 / TRAZABILIDAD</div>
+          <div class="module-tag">AVANZADO</div>
+        </div>
+        <div class="module-body">
+          <h3 class="module-title">TRACE ENGINE</h3>
+          <p class="module-desc">Métricas de rendimiento por desarrollador, historial completo de commits y avances, reportes exportables.</p>
+          <div class="module-stats-grid">
+            <div><div class="module-stat-val accent">+85%</div><div class="module-stat-label">Visibilidad</div></div>
+            <div><div class="module-stat-val">100%</div><div class="module-stat-label">Auditable</div></div>
+            <div><div class="module-stat-val">PDF</div><div class="module-stat-label">Export</div></div>
+          </div>
+          <a href="{% url 'registro' %}" class="module-link">
+            <span>Explorar sistema</span>
+            <i class="fa fa-arrow-right"></i>
+          </a>
+        </div>
+      </article>
+
     </div>
   </div>
 </section>
 
-<!-- Metodología -->
+<!-- ==================== FLIP CARDS — CORE SYSTEMS ==================== -->
+<section id="sistemas" class="section-tech" style="background:var(--bg-darker);">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <span class="section-marker"><span>// MODULE_02: SYSTEM_CORE</span></span>
+      <h2 class="sh-title">Módulos que <span style="color:var(--accent);">construyen</span><br>módulos que <span class="text-stroke">transforman.</span></h2>
+    </div>
+    <div class="reveal" style="margin-bottom:24px;">
+      <p style="font-family:var(--font-mono);font-size:0.82rem;color:var(--fg-dim);line-height:1.6;">Cada módulo del sistema está diseñado para un propósito específico dentro del ecosistema TEM. Hacé hover sobre cada tarjeta para ver sus capacidades internas.</p>
+    </div>
+
+    <div class="reveal-stagger" style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
+
+      <!-- System 1: Project Manager -->
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front flip-front">
+            <div class="flip-img-box">
+              <img src="{% static 'IMG/website.png' %}" alt="Project Manager" loading="lazy">
+              <div class="flip-label">/ 01</div>
+              <div class="flip-badge">CORE</div>
+              <div class="flip-specialty">Gestión & Seguimiento</div>
+            </div>
+            <div class="flip-info">
+              <div>
+                <h3 class="flip-name">PROJECT<br>MANAGER</h3>
+                <p class="flip-role">Registro · Avances · Hitos</p>
+              </div>
+              <div class="flip-meta">
+                <span class="flip-meta-stats">3 ENTIDADES · CRUD</span>
+                <span class="flip-meta-hint">HOVER →</span>
+              </div>
+            </div>
+          </div>
+          <div class="flip-face flip-back flip-back-content">
+            <div class="flip-back-label">/ Project Manager — Specs</div>
+            <h3 class="flip-back-title">Capacidades</h3>
+            <ul class="flip-back-list">
+              <li><i class="fa fa-circle-check"></i> Registro completo de proyectos</li>
+              <li><i class="fa fa-circle-check"></i> Sistema de hitos y entregables</li>
+              <li><i class="fa fa-circle-check"></i> Avances con evidencia en tiempo real</li>
+              <li><i class="fa fa-circle-check"></i> Dashboard por rol (Admin/Empresa/Dev)</li>
+            </ul>
+            <div class="flip-back-footer">
+              <div class="flip-back-sig">Signature Module</div>
+              <div class="flip-back-sig-name">PROJECT HUB</div>
+              <div class="flip-back-sig-desc">Ciclo completo de gestión con trazabilidad criptográfica.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System 2: User Core -->
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front flip-front">
+            <div class="flip-img-box">
+              <img src="{% static 'IMG/Personalizado.png' %}" alt="User Core" loading="lazy">
+              <div class="flip-label">/ 02</div>
+              <div class="flip-badge">AUTH</div>
+              <div class="flip-specialty">Usuarios & Permisos</div>
+            </div>
+            <div class="flip-info">
+              <div>
+                <h3 class="flip-name">USER<br>CORE</h3>
+                <p class="flip-role">Auth · Roles · Recuperación</p>
+              </div>
+              <div class="flip-meta">
+                <span class="flip-meta-stats">3 ROLES · JWT</span>
+                <span class="flip-meta-hint">HOVER →</span>
+              </div>
+            </div>
+          </div>
+          <div class="flip-face flip-back flip-back-content">
+            <div class="flip-back-label">/ User Core — Specs</div>
+            <h3 class="flip-back-title">Capacidades</h3>
+            <ul class="flip-back-list">
+              <li><i class="fa fa-circle-check"></i> Registro con perfiles (Dev/Empresa)</li>
+              <li><i class="fa fa-circle-check"></i> Autenticación segura con sesiones</li>
+              <li><i class="fa fa-circle-check"></i> Recuperación de contraseña</li>
+              <li><i class="fa fa-circle-check"></i> Suspensión y bloqueo de cuentas</li>
+            </ul>
+            <div class="flip-back-footer">
+              <div class="flip-back-sig">Signature Module</div>
+              <div class="flip-back-sig-name">GUARDIAN AUTH</div>
+              <div class="flip-back-sig-desc">Control de acceso multi-rol con protección CSRF.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System 3: Match Engine -->
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front flip-front">
+            <div class="flip-img-box">
+              <img src="{% static 'IMG/automatizacion.png' %}" alt="Match Engine" loading="lazy">
+              <div class="flip-label">/ 03</div>
+              <div class="flip-badge">MATCH</div>
+              <div class="flip-specialty">Postulaciones & Contratos</div>
+            </div>
+            <div class="flip-info">
+              <div>
+                <h3 class="flip-name">MATCH<br>ENGINE</h3>
+                <p class="flip-role">Postular · Contratar · Evaluar</p>
+              </div>
+              <div class="flip-meta">
+                <span class="flip-meta-stats">3 FLUJOS · SP</span>
+                <span class="flip-meta-hint">HOVER →</span>
+              </div>
+            </div>
+          </div>
+          <div class="flip-face flip-back flip-back-content">
+            <div class="flip-back-label">/ Match Engine — Specs</div>
+            <h3 class="flip-back-title">Capacidades</h3>
+            <ul class="flip-back-list">
+              <li><i class="fa fa-circle-check"></i> Postulación algorítmica a proyectos</li>
+              <li><i class="fa fa-circle-check"></i> Contratación con reglas de IP</li>
+              <li><i class="fa fa-circle-check"></i> Evaluación de empresas por devs</li>
+              <li><i class="fa fa-circle-check"></i> Estados transicionales con triggers</li>
+            </ul>
+            <div class="flip-back-footer">
+              <div class="flip-back-sig">Signature Module</div>
+              <div class="flip-back-sig-name">MATCH ALGORITHM</div>
+              <div class="flip-back-sig-desc">Asignación inteligente con stored procedures.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System 4: Comms Hub -->
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front flip-front">
+            <div class="flip-img-box">
+              <img src="{% static 'IMG/ia.png' %}" alt="Comms Hub" loading="lazy">
+              <div class="flip-label">/ 04</div>
+              <div class="flip-badge">COMMS</div>
+              <div class="flip-specialty">Mensajería & Notificaciones</div>
+            </div>
+            <div class="flip-info">
+              <div>
+                <h3 class="flip-name">COMMS<br>HUB</h3>
+                <p class="flip-role">Chat · Notif · Auditoría</p>
+              </div>
+              <div class="flip-meta">
+                <span class="flip-meta-stats">TIEMPO REAL · LOGS</span>
+                <span class="flip-meta-hint">HOVER →</span>
+              </div>
+            </div>
+          </div>
+          <div class="flip-face flip-back flip-back-content">
+            <div class="flip-back-label">/ Comms Hub — Specs</div>
+            <h3 class="flip-back-title">Capacidades</h3>
+            <ul class="flip-back-list">
+              <li><i class="fa fa-circle-check"></i> Chat en tiempo real (sala_chat)</li>
+              <li><i class="fa fa-circle-check"></i> Sistema de notificaciones por rol</li>
+              <li><i class="fa fa-circle-check"></i> Logs de auditoría completos</li>
+              <li><i class="fa fa-circle-check"></i> Favoritos y seguimiento</li>
+            </ul>
+            <div class="flip-back-footer">
+              <div class="flip-back-sig">Signature Module</div>
+              <div class="flip-back-sig-name">COMMS ENGINE</div>
+              <div class="flip-back-sig-desc">Comunicación sincrónica con trazabilidad completa.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== METHODOLOGY ==================== -->
 <section id="metodologia" class="section-tech" style="background: rgba(0,0,0,0.4);">
   <div class="section-inner">
-    <div class="section-head text-center" style="align-items: center;">
-      <span class="sh-label">// MODULE_02: PROCESS_FLOW</span>
+    <div class="section-head reveal" style="align-items: center; text-align: center;">
+      <span class="section-marker"><span>// MODULE_03: PROCESS_FLOW</span></span>
       <h2 class="sh-title">Pipeline de Ejecución.</h2>
     </div>
+    <p class="reveal" style="font-family:var(--font-mono);font-size:0.85rem;color:var(--fg-dim);text-align:center;max-width:520px;margin:-20px auto 50px;line-height:1.6;">
+      Cuatro fases. Desde el requerimiento hasta la producción. Sin burocracia, puro código.
+    </p>
 
-    <div class="method-flow">
+    <div class="method-flow reveal-stagger">
       <div class="flow-step">
-        <div class="step-node">01</div>
+        <div class="step-node"><i class="fa fa-file-code"></i></div>
         <div class="step-content tech-frame">
-          <h4>[ DEFINE_SPECS ]</h4>
-          <p>La entidad corporativa inyecta los requerimientos técnicos y la arquitectura esperada en el sistema. Ambigüedad = 0.</p>
+          <h4>[ 01 · DEFINE_SPECS ]</h4>
+          <p>La empresa inyecta requerimientos técnicos en el sistema. Ambigüedad = 0.</p>
         </div>
       </div>
       <div class="flow-step">
-        <div class="step-node">02</div>
+        <div class="step-node"><i class="fa fa-users"></i></div>
         <div class="step-content tech-frame">
-          <h4>[ SQUAD_MATCH ]</h4>
-          <p>El sistema compila un equipo de aprendices élite del SENA cuyas métricas de rendimiento se alinean con la solicitud.</p>
+          <h4>[ 02 · SQUAD_MATCH ]</h4>
+          <p>El sistema compila un equipo élite del SENA con métricas alineadas a la solicitud.</p>
         </div>
       </div>
       <div class="flow-step">
-        <div class="step-node">03</div>
+        <div class="step-node"><i class="fa fa-code-pull-request"></i></div>
         <div class="step-content tech-frame">
-          <h4>[ SPRINT_EXEC ]</h4>
-          <p>Ejecución iterativa controlada. Los supervisores corporativos aprueban PRs directamente en la interfaz segura.</p>
+          <h4>[ 03 · SPRINT_EXEC ]</h4>
+          <p>Ejecución iterativa. El supervisor corporativo aprueba PRs directamente.</p>
         </div>
       </div>
       <div class="flow-step">
-        <div class="step-node">04</div>
+        <div class="step-node"><i class="fa fa-rocket"></i></div>
         <div class="step-content tech-frame">
-          <h4>[ DEPLOY_&_ARCHIVE ]</h4>
-          <p>El código pasa a producción. Se emiten los certificados de reputación y la transferencia de IP se bloquea.</p>
+          <h4>[ 04 · DEPLOY_&amp;_ARCHIVE ]</h4>
+          <p>Código a producción. IP bloqueada. Certificados de reputación emitidos.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Soluciones / Roles -->
+<!-- ==================== ROLES ==================== -->
 <section id="roles" class="section-tech">
   <div class="section-inner">
-    <div class="section-head">
-      <span class="sh-label">// MODULE_03: NODE_TYPES</span>
+    <div class="section-head reveal">
+      <span class="section-marker"><span>// MODULE_04: NODE_TYPES</span></span>
       <h2 class="sh-title">Parámetros de Red.</h2>
     </div>
 
-    <div class="roles-wrapper">
+    <div class="roles-wrapper reveal">
       <div class="role-pane tech-frame">
         <div class="rp-header">
           <span class="rp-label">NODE_TYPE: CORPORATE</span>
@@ -162,7 +502,6 @@
         </ul>
         <a href="{% url 'registro' %}" class="btn-tech-sec" style="margin-top: 40px; width: 100%;">[ INJECT_REQUIREMENT ]</a>
       </div>
-      
       <div class="role-pane tech-frame">
         <div class="rp-header">
           <span class="rp-label">NODE_TYPE: DEVELOPER</span>
@@ -180,19 +519,304 @@
   </div>
 </section>
 
-<!-- Footer -->
+<!-- ==================== TESTIMONIALS ==================== -->
+<section id="testimonios" class="section-tech story-section" style="background: rgba(0,0,0,0.4);">
+  <div class="section-inner" style="margin-bottom: 48px;">
+    <div class="section-head reveal">
+      <span class="section-marker"><span>// MODULE_05: PROOF_OF_WORK</span></span>
+      <h2 class="sh-title">Resultados <span style="color:var(--accent);">comprobables.</span></h2>
+    </div>
+    <div class="reveal" style="max-width: 600px;">
+      <p style="font-family:var(--font-mono);font-size:0.85rem;color:var(--fg-dim);line-height:1.6;">Cada caso representa una implementación real documentada por el sistema. Arrastrá el carrusel para explorar.</p>
+      <p style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:8px;">
+        <i class="fa fa-hand-pointer" style="color:var(--accent);"></i> Drag · Swipe · Auto-advance
+      </p>
+    </div>
+  </div>
+
+  <div style="position: relative; overflow: hidden;">
+    <div class="story-track" id="storyTrack">
+
+      <article class="story-card">
+        <div class="story-img-box">
+          <img src="{% static 'IMG/website.png' %}" class="story-img" alt="FINTECH" loading="lazy">
+          <div class="story-img-tag">CASE / 01</div>
+          <div class="story-img-badge">-80% TIME</div>
+        </div>
+        <div class="story-body">
+          <div class="story-name">FINTECH COLOMBIA</div>
+          <div class="story-role">Backend · 6 meses</div>
+          <p class="story-quote">"El equipo del SENA entregó una API de pagos más robusta que la de nuestro proveedor anterior. En 6 meses teníamos producción."</p>
+          <div class="story-stats">
+            <div><div class="story-stat-val">100%</div><div class="story-stat-label">On time</div></div>
+            <div><div class="story-stat-val">3</div><div class="story-stat-label">Devs</div></div>
+            <div><div class="story-stat-val">6</div><div class="story-stat-label">Meses</div></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="story-card">
+        <div class="story-img-box">
+          <img src="{% static 'IMG/automatizacion.png' %}" class="story-img" alt="ECOMMERCE" loading="lazy">
+          <div class="story-img-tag">CASE / 02</div>
+          <div class="story-img-badge">+34% CONV</div>
+        </div>
+        <div class="story-body">
+          <div class="story-name">ECOMMERCE NACIONAL</div>
+          <div class="story-role">Frontend · 4 meses</div>
+          <p class="story-quote">"Rediseñamos todo el checkout con un equipo de 2 devs del SENA. La tasa de conversión subió 34% en el primer trimestre."</p>
+          <div class="story-stats">
+            <div><div class="story-stat-val">+34%</div><div class="story-stat-label">Conversión</div></div>
+            <div><div class="story-stat-val">2</div><div class="story-stat-label">Devs</div></div>
+            <div><div class="story-stat-val">4</div><div class="story-stat-label">Meses</div></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="story-card">
+        <div class="story-img-box">
+          <img src="{% static 'IMG/ia.png' %}" class="story-img" alt="AGROTECH" loading="lazy">
+          <div class="story-img-tag">CASE / 03</div>
+          <div class="story-img-badge">-60% COST</div>
+        </div>
+        <div class="story-body">
+          <div class="story-name">AGROTECH STARTUP</div>
+          <div class="story-role">Full Stack · 8 meses</div>
+          <p class="story-quote">"Necesitábamos un dashboard IoT para monitoreo de cultivos. El squad del SENA armó una solución mejor que la que cotizamos afuera."</p>
+          <div class="story-stats">
+            <div><div class="story-stat-val">-60%</div><div class="story-stat-label">Costo vs ext</div></div>
+            <div><div class="story-stat-val">4</div><div class="story-stat-label">Devs</div></div>
+            <div><div class="story-stat-val">8</div><div class="story-stat-label">Meses</div></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="story-card">
+        <div class="story-img-box">
+          <img src="{% static 'IMG/Personalizado.png' %}" class="story-img" alt="LOGISTICA" loading="lazy">
+          <div class="story-img-tag">CASE / 04</div>
+          <div class="story-img-badge">-93% DEPLOY</div>
+        </div>
+        <div class="story-body">
+          <div class="story-name">LOGÍSTICA EXPRESS</div>
+          <div class="story-role">Cloud & DevOps · 5 meses</div>
+          <p class="story-quote">"Migraron nuestra infraestructura a AWS con CI/CD completo. El tiempo de deploy pasó de 2 horas a 8 minutos."</p>
+          <div class="story-stats">
+            <div><div class="story-stat-val">-93%</div><div class="story-stat-label">Deploy time</div></div>
+            <div><div class="story-stat-val">2</div><div class="story-stat-label">Devs</div></div>
+            <div><div class="story-stat-val">5</div><div class="story-stat-label">Meses</div></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="story-card">
+        <div class="story-img-box">
+          <div style="width:100%;height:100%;background:radial-gradient(circle at 40% 30%, #0a201a, #000);"></div>
+          <div class="story-img-tag">CASE / 05</div>
+          <div class="story-img-badge">50K+ USERS</div>
+        </div>
+        <div class="story-body">
+          <div class="story-name">EDTECH PLATFORM</div>
+          <div class="story-role">Mobile & API · 7 meses</div>
+          <p class="story-quote">"El squad desarrolló nuestra app de quizzes interactivos con +50k usuarios. Estabilidad y performance impecables desde el día 1."</p>
+          <div class="story-stats">
+            <div><div class="story-stat-val">50k+</div><div class="story-stat-label">Usuarios</div></div>
+            <div><div class="story-stat-val">5</div><div class="story-stat-label">Devs</div></div>
+            <div><div class="story-stat-val">7</div><div class="story-stat-label">Meses</div></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="story-card">
+        <div class="story-img-box">
+          <div style="width:100%;height:100%;background:radial-gradient(circle at 60% 50%, #0a1a18, #000);"></div>
+          <div class="story-img-tag">CASE / 06</div>
+          <div class="story-img-badge">2M REG/DAY</div>
+        </div>
+        <div class="story-body">
+          <div class="story-name">INSURTECH CORP</div>
+          <div class="story-role">Data Engineering · 6 meses</div>
+          <p class="story-quote">"Implementaron nuestro pipeline de datos con Python y Airflow. Procesamos 2M de registros diarios sin incidencias."</p>
+          <div class="story-stats">
+            <div><div class="story-stat-val">2M</div><div class="story-stat-label">Registros/día</div></div>
+            <div><div class="story-stat-val">3</div><div class="story-stat-label">Devs</div></div>
+            <div><div class="story-stat-val">6</div><div class="story-stat-label">Meses</div></div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <div style="max-width: 1200px; margin: 32px auto 0; padding: 0 5%;">
+      <div class="carousel-controls">
+        <div class="carousel-dots" id="storyDots"></div>
+        <div class="carousel-btns">
+          <button class="carousel-btn" id="storyPrev">&larr;</button>
+          <button class="carousel-btn" id="storyNext">&rarr;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CTA / COMENZAR ==================== -->
+<section id="comenzar" class="section-tech" style="background: var(--bg-darker);">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <span class="section-marker"><span>// MODULE_06: BEGIN_PROTOCOL</span></span>
+      <h2 class="sh-title">STOP WAITING.<br><span class="text-stroke">START</span> <span style="color:var(--accent);">FORGING.</span></h2>
+    </div>
+
+    <div class="booking-layout reveal">
+      <div class="booking-panel">
+        <div class="booking-label">// Solicitud de proyecto</div>
+        <h3 class="booking-title">REGISTRAR PROYECTO</h3>
+        <p class="booking-desc">Describí tu requerimiento técnico. Un squad de talento SENA será asignado en menos de 48 horas. Sin costo. Sin compromiso.</p>
+
+        <form id="projectForm" style="display:flex;flex-direction:column;gap:20px;">
+          <div class="form-row">
+            <div style="flex:1;">
+              <label class="form-label">Nombre de empresa</label>
+              <input type="text" class="form-input" placeholder="Nombre corporativo" required>
+            </div>
+            <div style="flex:1;">
+              <label class="form-label">Email de contacto</label>
+              <input type="email" class="form-input" placeholder="cto@empresa.com" required>
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label">Tipo de proyecto</label>
+            <div class="goal-pills" id="projectTypeSelector">
+              <span class="goal-pill active" data-type="web">Web App</span>
+              <span class="goal-pill" data-type="api">API Backend</span>
+              <span class="goal-pill" data-type="mobile">Mobile</span>
+              <span class="goal-pill" data-type="data">Data / AI</span>
+              <span class="goal-pill" data-type="devops">DevOps</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label">Stack tecnológico</label>
+            <div class="goal-pills">
+              <span class="goal-pill active">Python / Django</span>
+              <span class="goal-pill">React / Node</span>
+              <span class="goal-pill">Flutter</span>
+              <span class="goal-pill">Cloud AWS</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label">Tamaño del equipo</label>
+            <div class="time-slots">
+              <label class="time-slot">
+                <input type="radio" name="teamSize" class="sr-only" checked>
+                <span>2-3 DEVS<br><small>Startup</small></span>
+              </label>
+              <label class="time-slot">
+                <input type="radio" name="teamSize" class="sr-only">
+                <span>4-6 DEVS<br><small>Standard</small></span>
+              </label>
+              <label class="time-slot">
+                <input type="radio" name="teamSize" class="sr-only">
+                <span>7-10 DEVS<br><small>Enterprise</small></span>
+              </label>
+              <label class="time-slot">
+                <input type="radio" name="teamSize" class="sr-only">
+                <span>10+ DEVS<br><small>Scale</small></span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="pulse-btn btn-submit-booking">
+            <span>ENVIAR SOLICITUD</span>
+            <i class="fa fa-arrow-right"></i>
+          </button>
+
+          <p style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);text-align:center;letter-spacing:0.1em;text-transform:uppercase;">
+            Sin costo · Sin compromiso · Respuesta en 24-48h
+          </p>
+        </form>
+      </div>
+
+      <!-- Info Panels -->
+      <div class="booking-info">
+        <div class="info-card">
+          <div class="info-label">/ Platform Status</div>
+          <h4 class="info-title">SISTEMA ACTIVO</h4>
+          <p class="info-text">Procesando solicitudes · Medellín, CO<br>Cobertura nacional · Remoto</p>
+          <div style="display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:0.65rem;color:var(--accent);margin-top:12px;letter-spacing:0.1em;">
+            <span class="rec-dot" style="vertical-align:middle;"></span>
+            <span>LIVE · ACEPTANDO PROYECTOS</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-label">/ Response Time</div>
+          <h4 class="info-title">TIEMPOS DE RESPUESTA</h4>
+          <div class="info-rows">
+            <div class="info-row">
+              <span>Evaluación inicial</span>
+              <span>24 horas</span>
+            </div>
+            <div class="info-row">
+              <span>Asignación de squad</span>
+              <span>48 horas</span>
+            </div>
+            <div class="info-row">
+              <span>Primer sprint</span>
+              <span>5 días</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-label">/ Direct Line</div>
+          <h4 class="info-title">CONTACTO DIRECTO</h4>
+          <div class="info-rows">
+            <a href="mailto:contacto@tem-platform.com" class="info-link">
+              <i class="fa fa-envelope"></i>
+              <span>contacto@tem-platform.com</span>
+            </a>
+            <a href="#" class="info-link" data-bs-toggle="modal" data-bs-target="#loginModal">
+              <i class="fa fa-lock"></i>
+              <span>Portal administrativo</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
 <footer class="foot-tech">
   <div class="foot-grid">
     <div class="foot-col">
       <div class="foot-brand"><div class="brand-square"></div> TEM_CORE</div>
-      <p class="foot-desc">Infraestructura de control para la sincronización de talento técnico y pipelines de desarrollo B2B.</p>
+      <p class="foot-desc">Infraestructura de control para la sincronización de talento técnico y pipelines de desarrollo B2B. Construido en Medellín, Colombia.</p>
+      <div class="foot-socials">
+        <a href="#" class="foot-social"><i class="fab fa-github"></i></a>
+        <a href="#" class="foot-social"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="foot-social"><i class="fab fa-x-twitter"></i></a>
+        <a href="#" class="foot-social"><i class="fab fa-discord"></i></a>
+      </div>
+      <div class="newsletter-box">
+        <p>// Mantenete sincronizado</p>
+        <form class="newsletter-form">
+          <input type="email" placeholder="tu@email.com">
+          <button type="submit"><i class="fa fa-arrow-right"></i></button>
+        </form>
+      </div>
     </div>
     <div class="foot-col">
       <h5>// DATA</h5>
       <ul>
         <li><a href="#inicio">Boot</a></li>
-        <li><a href="#caracteristicas">Specs</a></li>
+        <li><a href="#modulos">Modules</a></li>
+        <li><a href="#sistemas">Systems</a></li>
         <li><a href="#metodologia">Process</a></li>
+        <li><a href="#testimonios">Proof</a></li>
       </ul>
     </div>
     <div class="foot-col">
@@ -200,6 +824,8 @@
       <ul>
         <li><a href="{% url 'registro' %}">Corporate</a></li>
         <li><a href="{% url 'registro' %}">Devs</a></li>
+        <li><a href="#">Admin Root</a></li>
+        <li><a href="#">API Access</a></li>
       </ul>
     </div>
     <div class="foot-col">
@@ -207,16 +833,33 @@
       <ul>
         <li><a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Auth_Login</a></li>
         <li><a href="{% url 'recuperar' %}">Key_Recover</a></li>
+        <li><a href="{% url 'registro' %}">Register_Node</a></li>
       </ul>
     </div>
   </div>
   <div class="foot-bot">
-    <span>SYS.VER: 2.0.44</span>
+    <span>SYS.VER: 2.1.0</span>
     <span>LOCATION: MEDELLIN_COL</span>
   </div>
 </footer>
 
-<!-- Modal Tech -->
+<!-- ==================== STICKY CTA ==================== -->
+<div class="sticky-cta" id="stickyCta">
+  <div class="sticky-bar">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <span class="rec-dot"></span>
+      <div>
+        <div class="sticky-text">Iniciar proyecto ahora</div>
+        <div class="sticky-sub">Sin costo · Sin compromiso · Respuesta en 24-48h</div>
+      </div>
+    </div>
+    <a href="{% url 'registro' %}" class="btn-tech pulse-btn" style="white-space:nowrap;">
+      <span>REGISTER NODE</span>
+    </a>
+  </div>
+</div>
+
+<!-- ==================== LOGIN MODAL ==================== -->
 <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content modal-tech tech-frame">
@@ -228,31 +871,44 @@
         <form method="POST" action="{% url 'login' %}">
           {% csrf_token %}
           <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="administrador">
-          
+
           <div class="tabs-tech">
             <button type="button" class="tab-tech" data-role="desarrollador">DEV</button>
             <button type="button" class="tab-tech active" data-role="administrador">ROOT</button>
             <button type="button" class="tab-tech" data-role="empresa">CORP</button>
           </div>
-          
+
           <div style="margin-bottom: 24px;">
             <label class="label-tech">USER_ID</label>
             <input required type="text" class="input-tech" id="username" name="username" placeholder="user@domain.com" value="{{ request.POST.username }}">
           </div>
-          
+
           <div style="position: relative; margin-bottom: 16px;">
             <label class="label-tech">PASS_KEY</label>
             <input required type="password" class="input-tech" id="password" name="password" placeholder="••••••••">
-            <button type="button" id="togglePassTech" style="position: absolute; right: 15px; bottom: 12px; background: none; border: none; color: var(--text-dim); cursor: pointer;"><i class="fa fa-eye"></i></button>
+            <button type="button" id="togglePassTech" style="position: absolute; right: 15px; bottom: 12px; background: none; border: none; color: var(--fg-dim); cursor: pointer;"><i class="fa fa-eye"></i></button>
           </div>
-          
+
           <button type="submit" class="btn-submit-tech">[ EXECUTE_LOGIN ]</button>
         </form>
-        
+
         <div style="margin-top: 24px; text-align: center;">
-          <a href="{% url 'recuperar' %}" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none; font-family: var(--font-mono); text-transform: uppercase;">REQUEST_NEW_KEY</a>
+          <a href="{% url 'recuperar' %}" style="color: var(--muted); font-size: 0.72rem; text-decoration: none; font-family: var(--font-mono); text-transform: uppercase;">REQUEST_NEW_KEY</a>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TOAST ==================== -->
+<div class="toast-tech" id="toast">
+  <div style="display:flex; align-items:flex-start; gap:12px;">
+    <div style="width:28px; height:28px; background:var(--accent); display:flex; align-items:center; justify-content:center;">
+      <i class="fa fa-check" style="color:#000; font-size:0.7rem;"></i>
+    </div>
+    <div>
+      <div id="toastTitle" style="font-family:var(--font-display); font-size:0.9rem; font-weight:700;">Solicitud recibida</div>
+      <div id="toastMsg" style="font-size:0.8rem; color:var(--fg-dim); margin-top:4px;">El equipo evaluará tu proyecto en 24-48h.</div>
     </div>
   </div>
 </div>
@@ -260,7 +916,29 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'publico/script/index.js' %}"></script>
 <script>
-  // Role Selector
+  // === SYS TOGGLE (mute/sound wave bars) ===
+  (function() {
+    const btn = document.getElementById('sysToggle');
+    const bars = document.getElementById('waveBars');
+    const label = document.getElementById('sysLabel');
+    const icon = document.getElementById('sysIcon');
+    let active = false;
+    if (btn) btn.addEventListener('click', function() {
+      active = !active;
+      bars.classList.toggle('unmuted', active);
+      label.textContent = active ? 'Sound On' : 'Muted';
+      icon.className = active ? 'fa fa-volume-high' : 'fa fa-volume-xmark';
+      icon.style.color = active ? 'var(--accent)' : 'var(--fg-dim)';
+      btn.style.borderColor = active ? 'var(--accent)' : '';
+    });
+  })();
+
+  // === HEADLINE CHAR REVEAL (triggers after 400ms) ===
+  setTimeout(function() {
+    document.querySelector('.hero-content').classList.add('in-view');
+  }, 400);
+
+  // === Role Selector ===
   document.querySelectorAll('.tab-tech').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.tab-tech').forEach(b => b.classList.remove('active'));
@@ -269,30 +947,75 @@
     });
   });
 
-  // Mobile Menu
+  // === Mobile Menu ===
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-  const navLinks = document.querySelector('.nav-links');
-  if (mobileMenuBtn && navLinks) {
-    mobileMenuBtn.addEventListener('click', function() {
-      navLinks.classList.toggle('active');
-    });
-    
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => navLinks.classList.remove('active'));
+  const navLinksEl = document.getElementById('navLinks');
+  if (mobileMenuBtn && navLinksEl) {
+    mobileMenuBtn.addEventListener('click', () => navLinksEl.classList.toggle('active'));
+    navLinksEl.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => navLinksEl.classList.remove('active'));
     });
   }
+
+  // === Toggle Password ===
   const togglePassBtn = document.getElementById('togglePassTech');
   if (togglePassBtn) {
     togglePassBtn.addEventListener('click', function() {
       const input = document.getElementById('password');
-      const icon = this.querySelector('i');
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
-      } else {
-        input.type = 'password';
-        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      const ico = this.querySelector('i');
+      if (input.type === 'password') { input.type = 'text'; ico.classList.replace('fa-eye', 'fa-eye-slash'); }
+      else { input.type = 'password'; ico.classList.replace('fa-eye-slash', 'fa-eye'); }
+    });
+  }
+
+  // === Django Messages Modal ===
+  const djangoMsgs = document.getElementById('django-messages');
+  if (djangoMsgs) {
+    const spans = djangoMsgs.querySelectorAll('span');
+    let err = '';
+    spans.forEach(s => { err += '<div style="background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.15);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--fg-dim);display:flex;align-items:center;gap:8px;"><i class="fa fa-circle-exclamation" style="color:var(--accent);"></i>' + s.textContent.trim() + '</div>'; });
+    if (err) {
+      const form = document.querySelector('#loginModal form');
+      if (form) { const c = document.createElement('div'); c.innerHTML = err; form.insertBefore(c, form.firstChild); }
+      new bootstrap.Modal(document.getElementById('loginModal')).show();
+    }
+  }
+
+  // === URL param modal ===
+  if (new URLSearchParams(window.location.search).get('login') === '1') {
+    new bootstrap.Modal(document.getElementById('loginModal')).show();
+  }
+
+  // === Goal Pills ===
+  document.querySelectorAll('.goal-pills .goal-pill').forEach(pill => {
+    pill.addEventListener('click', function() {
+      const parent = this.parentElement;
+      parent.querySelectorAll('.goal-pill').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // === Flip Cards Touch ===
+  document.querySelectorAll('.flip-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      if (window.matchMedia('(hover: none)').matches && !e.target.closest('a')) {
+        card.classList.toggle('flipped');
       }
+    });
+  });
+
+  // === Project Form ===
+  const projectForm = document.getElementById('projectForm');
+  const toast = document.getElementById('toast');
+  if (projectForm && toast) {
+    projectForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      document.getElementById('toastTitle').textContent = 'Solicitud recibida';
+      document.getElementById('toastMsg').textContent = 'Un squad será asignado a tu proyecto en 24-48h.';
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 4500);
+      projectForm.reset();
+      document.querySelectorAll('#projectTypeSelector .goal-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
     });
   }
 </script>
