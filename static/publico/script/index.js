@@ -4,6 +4,14 @@
 document.addEventListener('DOMContentLoaded', function () {
 
   /* ============================
+     MARQUEE — clone for seamless loop
+     ============================ */
+  const marqueeTrack = document.getElementById('marqueeTrack');
+  if (marqueeTrack) {
+    marqueeTrack.innerHTML = marqueeTrack.innerHTML + marqueeTrack.innerHTML;
+  }
+
+  /* ============================
      HERO REEL — frame cycler
      ============================ */
   const frames = document.querySelectorAll('.reel-frame');
@@ -11,30 +19,38 @@ document.addEventListener('DOMContentLoaded', function () {
   const reelProgress = document.getElementById('reelProgress');
   if (frames.length && chapterNum && reelProgress) {
     let currentFrame = 0;
-    const frameDuration = 5000;
-    let frameTimer = 0;
-    let lastTime = performance.now();
+    const frameDuration = 8000;
+    let frameStartTime = performance.now();
 
     function showFrame(idx) {
-      frames.forEach((f, i) => f.classList.toggle('active', i === idx));
+      frames.forEach((f, i) => {
+        f.classList.toggle('active', i === idx);
+        f.style.opacity = i === idx ? '1' : '0';
+        f.style.zIndex = i === idx ? 2 : 1;
+      });
+      const newImg = frames[idx].querySelector('img');
+      if (newImg) newImg.style.transform = 'scale(1.0)';
       chapterNum.textContent = String(idx + 1).padStart(2, '0');
+      frameStartTime = performance.now();
     }
 
-    function tickReel(now) {
-      const dt = now - lastTime;
-      lastTime = now;
-      frameTimer += dt;
-      const pct = Math.min((frameTimer / frameDuration) * 100, 100);
+    setInterval(function() {
+      currentFrame = (currentFrame + 1) % frames.length;
+      showFrame(currentFrame);
+    }, frameDuration);
+
+    function tickZoom() {
+      const elapsed = performance.now() - frameStartTime;
+      const progress = Math.min(elapsed / frameDuration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const scale = 1.0 + eased * 0.15;
+      const activeImg = document.querySelector('.reel-frame.active img');
+      if (activeImg) activeImg.style.transform = 'scale(' + scale + ')';
+      const pct = Math.min(progress * 100, 100);
       reelProgress.style.width = pct + '%';
-
-      if (frameTimer >= frameDuration) {
-        frameTimer = 0;
-        currentFrame = (currentFrame + 1) % frames.length;
-        showFrame(currentFrame);
-      }
-      requestAnimationFrame(tickReel);
+      requestAnimationFrame(tickZoom);
     }
-    requestAnimationFrame(tickReel);
+    requestAnimationFrame(tickZoom);
   }
 
   /* ============================

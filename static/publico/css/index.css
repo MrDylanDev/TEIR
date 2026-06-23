@@ -70,7 +70,7 @@ body {
 
 /* ========== ANIMATIONS ========== */
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-@keyframes kenburns { 0% { transform: scale(1.06) translate(0, 0); } 100% { transform: scale(1.2) translate(-3%, -3%); } }
+@keyframes kenburns { 0% { transform: scale(1.0); } 100% { transform: scale(1.15); } }
 @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 @keyframes pulse-cta {
   0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow), 0 0 40px var(--accent-glow); }
@@ -304,15 +304,14 @@ body {
 }
 .reel-frame {
   position: absolute; inset: 0; opacity: 0;
-  transition: opacity 1.8s ease-in-out;
+  transition: opacity 0.8s ease;
 }
 .reel-frame.active { opacity: 1; }
-.reel-frame .frame-bg {
-  width: 100%; height: 100%;
+.reel-frame img {
+  width: 100%; height: 100%; object-fit: cover;
   filter: grayscale(100%) contrast(1.5) brightness(0.35);
-  transform: scale(1.06); background-size: cover; background-position: center;
+  transform: scale(1.0);
 }
-.reel-frame.active .frame-bg { animation: kenburns 10s ease-out forwards; }
 
 .hero-overlay {
   position: absolute; inset: 0; z-index: 2;
@@ -378,6 +377,7 @@ body {
   display: flex; animation: marquee 35s linear infinite; width: max-content;
 }
 .marquee-track span { padding: 0 20px; white-space: nowrap; }
+.marquee-sep { color: var(--accent); padding: 0 8px; }
 
 /* ========== STATS SECTION ========== */
 .stats-section {
@@ -938,4 +938,32 @@ body {
   .time-slots { grid-template-columns: repeat(2, 1fr); }
   .flip-card { height: 440px; }
   .modules-header { grid-template-columns: 1fr; gap: 24px; }
+}
+
+/* ========== CUSTOM CURSOR ========== */
+body { cursor: none; }
+a, button, .btn-tech, .btn-tech-sec, .nav-cta, .tab-tech,
+.flip-card, .story-card, .goal-pill, .nav-links a,
+input, textarea, select, [role="button"] { cursor: none; }
+
+.cursor-dot {
+  position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+}
+.cursor-ring {
+  position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  transform: translate(-50%, -50%);
+  transition: width 0.15s, height 0.15s, border-color 0.15s;
+}
+.cursor-dot.hover {
+  width: 10px; height: 10px; background: rgba(255,255,255,1);
+}
+.cursor-ring.hover {
+  width: 44px; height: 44px;
+  border-color: rgba(255,255,255,0.5);
 }
