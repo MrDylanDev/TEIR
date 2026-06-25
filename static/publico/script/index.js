@@ -8,12 +8,13 @@ document.addEventListener('DOMContentLoaded', function () {
      ============================ */
   const marqueeTrack = document.getElementById('marqueeTrack');
   if (marqueeTrack) {
-    marqueeTrack.innerHTML = marqueeTrack.innerHTML + marqueeTrack.innerHTML;
+    marqueeTrack.insertAdjacentHTML('beforeend', marqueeTrack.innerHTML);
   }
 
   /* ============================
      HERO REEL — frame cycler
      ============================ */
+  var heroVisible = true;
   const frames = document.querySelectorAll('.reel-frame');
   const chapterNum = document.getElementById('chapterNum');
   const reelProgress = document.getElementById('reelProgress');
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }, frameDuration);
 
     function tickZoom() {
+      if (!heroVisible) { requestAnimationFrame(tickZoom); return; }
       const elapsed = performance.now() - frameStartTime;
       const progress = Math.min(elapsed / frameDuration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
@@ -118,7 +120,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const stickyObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.target === heroSection) heroPassed = !entry.isIntersecting;
+        if (entry.target === heroSection) {
+          heroPassed = !entry.isIntersecting;
+          heroVisible = entry.isIntersecting;
+        }
         if (entry.target === bookingAnchor) atBooking = entry.isIntersecting;
         updateSticky();
       });
@@ -311,5 +316,160 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   new StoriesCarousel(document.getElementById('storyTrack'), { interval: 4500 });
+
+  /* ============================
+     SYS TOGGLE (mute/sound wave bars)
+     ============================ */
+  (function() {
+    const btn = document.getElementById('sysToggle');
+    const bars = document.getElementById('waveBars');
+    const label = document.getElementById('sysLabel');
+    const icon = document.getElementById('sysIcon');
+    let active = false;
+    if (btn) btn.addEventListener('click', function() {
+      active = !active;
+      bars.classList.toggle('unmuted', active);
+      label.textContent = active ? 'Sound On' : 'Muted';
+      icon.className = active ? 'fa fa-volume-high' : 'fa fa-volume-xmark';
+      icon.style.color = active ? 'var(--accent)' : 'var(--fg-dim)';
+      btn.style.borderColor = active ? 'var(--accent)' : '';
+    });
+  })();
+
+  /* ============================
+     HEADLINE CHAR REVEAL (triggers after 400ms)
+     ============================ */
+  setTimeout(function() {
+    var heroContent = document.querySelector('.hero-content');
+    if (heroContent) heroContent.classList.add('in-view');
+  }, 400);
+
+  /* ============================
+     ROLE SELECTOR
+     ============================ */
+  document.querySelectorAll('.tab-tech').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-tech').forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      var rol = document.getElementById('rol_seleccionado');
+      if (rol) rol.value = this.dataset.role;
+    });
+  });
+
+  /* ============================
+     MOBILE MENU
+     ============================ */
+  var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  var navLinksEl = document.getElementById('navLinks');
+  if (mobileMenuBtn && navLinksEl) {
+    mobileMenuBtn.addEventListener('click', function() { navLinksEl.classList.toggle('active'); });
+    navLinksEl.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() { navLinksEl.classList.remove('active'); });
+    });
+  }
+
+  /* ============================
+     TOGGLE PASSWORD
+     ============================ */
+  var togglePassBtn = document.getElementById('togglePassTech');
+  if (togglePassBtn) {
+    togglePassBtn.addEventListener('click', function() {
+      var input = document.getElementById('password');
+      var ico = this.querySelector('i');
+      if (input.type === 'password') { input.type = 'text'; ico.classList.replace('fa-eye', 'fa-eye-slash'); }
+      else { input.type = 'password'; ico.classList.replace('fa-eye-slash', 'fa-eye'); }
+    });
+  }
+
+  /* ============================
+     DJANGO MESSAGES MODAL
+     ============================ */
+  var djangoMsgs = document.getElementById('django-messages');
+  if (djangoMsgs) {
+    var spans = djangoMsgs.querySelectorAll('span');
+    var err = '';
+    spans.forEach(function(s) { err += '<div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.15);padding:10px 14px;margin-bottom:14px;font-size:13px;color:#fca5a5;display:flex;align-items:center;gap:8px;"><i class="fa fa-circle-exclamation" style="color:#ef4444;"></i>' + s.textContent.trim() + '</div>'; });
+    if (err) {
+      var form = document.querySelector('#loginModal form');
+      if (form) { var c = document.createElement('div'); c.innerHTML = err; form.insertBefore(c, form.firstChild); }
+      new bootstrap.Modal(document.getElementById('loginModal')).show();
+    }
+  }
+
+  /* ============================
+     URL PARAM MODAL
+     ============================ */
+  if (new URLSearchParams(window.location.search).get('login') === '1') {
+    new bootstrap.Modal(document.getElementById('loginModal')).show();
+  }
+
+  /* ============================
+     GOAL PILLS
+     ============================ */
+  document.querySelectorAll('.goal-pills .goal-pill').forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      var parent = this.parentElement;
+      parent.querySelectorAll('.goal-pill').forEach(function(p) { p.classList.remove('active'); });
+      this.classList.add('active');
+    });
+  });
+
+  /* ============================
+     FLIP CARDS TOUCH
+     ============================ */
+  var isTouchDevice = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  document.querySelectorAll('.flip-card').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      if (isTouchDevice && !e.target.closest('a')) {
+        card.classList.toggle('flipped');
+      }
+    });
+  });
+
+  /* ============================
+     CUSTOM CURSOR
+     ============================ */
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var dot = document.getElementById('cursorDot');
+    var ring = document.getElementById('cursorRing');
+    if (dot && ring) {
+      var mx = 0, my = 0, rx = 0, ry = 0;
+      document.addEventListener('mousemove', function(e) {
+        mx = e.clientX; my = e.clientY;
+        dot.style.left = mx + 'px';
+        dot.style.top = my + 'px';
+      });
+      var hoverTargets = document.querySelectorAll('a, button, .btn-tech, .btn-tech-sec, .nav-cta, .tab-tech, .flip-card, .story-card, .goal-pill, input, textarea, select, [role="button"]');
+      hoverTargets.forEach(function(el) {
+        el.addEventListener('mouseenter', function() { dot.classList.add('hover'); ring.classList.add('hover'); });
+        el.addEventListener('mouseleave', function() { dot.classList.remove('hover'); ring.classList.remove('hover'); });
+      });
+      function animateRing() {
+        rx += (mx - rx) * 0.12;
+        ry += (my - ry) * 0.12;
+        ring.style.left = rx + 'px';
+        ring.style.top = ry + 'px';
+        requestAnimationFrame(animateRing);
+      }
+      animateRing();
+    }
+  }
+
+  /* ============================
+     PROJECT FORM
+     ============================ */
+  var projectForm = document.getElementById('projectForm');
+  var toast = document.getElementById('toast');
+  if (projectForm && toast) {
+    projectForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      document.getElementById('toastTitle').textContent = 'Solicitud recibida';
+      document.getElementById('toastMsg').textContent = 'Un squad sera asignado a tu proyecto en 24-48h.';
+      toast.classList.add('visible');
+      setTimeout(function() { toast.classList.remove('visible'); }, 4500);
+      projectForm.reset();
+      document.querySelectorAll('#projectTypeSelector .goal-pill').forEach(function(p, i) { p.classList.toggle('active', i === 0); });
+    });
+  }
 
 });

@@ -107,16 +107,16 @@
     <!-- Bottom strip: tech stack + reel progress -->
     <div class="hero-bottom-strip">
       <div style="display:flex;align-items:center;gap:16px;">
-        <div style="display:flex;">
-          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--border-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--fg);">JD</div>
-          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--border-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--fg);margin-left:-12px;">ML</div>
-          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--border-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--fg);margin-left:-12px;">AR</div>
-          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--border-mid);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.7rem;font-weight:700;color:var(--fg);margin-left:-12px;">CP</div>
-          <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--bg);background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.8rem;font-weight:700;margin-left:-12px;">+50</div>
+        <div class="avatar-stack">
+          <div class="avatar-chip">JD</div>
+          <div class="avatar-chip">ML</div>
+          <div class="avatar-chip">AR</div>
+          <div class="avatar-chip">CP</div>
+          <div class="avatar-chip avatar-chip--accent">+50</div>
         </div>
         <div>
-          <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;">Talento SENA verificado</div>
-          <div style="font-family:var(--font-main);font-size:0.82rem;font-weight:600;">Perfiles activos</div>
+          <div class="talent-label">Talento SENA verificado</div>
+          <div class="talent-value">Perfiles activos</div>
         </div>
       </div>
 
@@ -128,12 +128,12 @@
             <div class="hero-progress-fill" id="reelProgress"></div>
           </div>
         </div>
-        <button id="sysToggle" style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);border:1px solid var(--border-mid);padding:8px 14px;cursor:pointer;transition:border-color 0.3s;">
+        <button id="sysToggle" class="sys-toggle">
           <div class="wave-bars" id="waveBars">
             <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
           </div>
-          <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--fg-dim);letter-spacing:0.15em;text-transform:uppercase;" id="sysLabel">Muted</span>
-          <i class="fa fa-volume-xmark" style="font-size:0.6rem;color:var(--fg-dim);" id="sysIcon"></i>
+          <span class="sys-toggle-label" id="sysLabel">Muted</span>
+          <i class="fa fa-volume-xmark sys-toggle-icon" id="sysIcon"></i>
         </button>
       </div>
     </div>
@@ -196,7 +196,7 @@
 
     <div class="reveal-stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
 
-      <article class="module-card notch-corner group">
+      <article class="module-card notch-corner">
         <div class="module-img-box">
           <img src="{% static 'IMG/website.png' %}" class="module-img" alt="Gestión de proyectos" loading="lazy">
           <div class="module-img-overlay"></div>
@@ -218,7 +218,7 @@
         </div>
       </article>
 
-      <article class="module-card notch-corner group">
+      <article class="module-card notch-corner">
         <div class="module-img-box">
           <img src="{% static 'IMG/automatizacion.png' %}" class="module-img" alt="Seguridad" loading="lazy">
           <div class="module-img-overlay"></div>
@@ -240,7 +240,7 @@
         </div>
       </article>
 
-      <article class="module-card notch-corner group">
+      <article class="module-card notch-corner">
         <div class="module-img-box">
           <img src="{% static 'IMG/ia.png' %}" class="module-img" alt="Trazabilidad" loading="lazy">
           <div class="module-img-overlay"></div>
@@ -282,7 +282,7 @@
       <!-- System 1: Project Manager -->
       <div class="flip-card">
         <div class="flip-card-inner">
-          <div class="flip-face flip-front flip-front">
+          <div class="flip-face flip-front">
             <div class="flip-img-box">
               <img src="{% static 'IMG/website.png' %}" alt="Project Manager" loading="lazy">
               <div class="flip-label">/ 01</div>
@@ -321,7 +321,7 @@
       <!-- System 2: User Core -->
       <div class="flip-card">
         <div class="flip-card-inner">
-          <div class="flip-face flip-front flip-front">
+          <div class="flip-face flip-front">
             <div class="flip-img-box">
               <img src="{% static 'IMG/Personalizado.png' %}" alt="User Core" loading="lazy">
               <div class="flip-label">/ 02</div>
@@ -360,7 +360,7 @@
       <!-- System 3: Match Engine -->
       <div class="flip-card">
         <div class="flip-card-inner">
-          <div class="flip-face flip-front flip-front">
+          <div class="flip-face flip-front">
             <div class="flip-img-box">
               <img src="{% static 'IMG/automatizacion.png' %}" alt="Match Engine" loading="lazy">
               <div class="flip-label">/ 03</div>
@@ -399,7 +399,7 @@
       <!-- System 4: Comms Hub -->
       <div class="flip-card">
         <div class="flip-card-inner">
-          <div class="flip-face flip-front flip-front">
+          <div class="flip-face flip-front">
             <div class="flip-img-box">
               <img src="{% static 'IMG/ia.png' %}" alt="Comms Hub" loading="lazy">
               <div class="flip-label">/ 04</div>
@@ -676,13 +676,13 @@
         <h3 class="booking-title">REGISTRAR PROYECTO</h3>
         <p class="booking-desc">Describí tu requerimiento técnico. Un squad de talento SENA será asignado en menos de 48 horas. Sin costo. Sin compromiso.</p>
 
-        <form id="projectForm" style="display:flex;flex-direction:column;gap:20px;">
+        <form id="projectForm" class="form-stack">
           <div class="form-row">
-            <div style="flex:1;">
+            <div>
               <label class="form-label">Nombre de empresa</label>
               <input type="text" class="form-input" placeholder="Nombre corporativo" required>
             </div>
-            <div style="flex:1;">
+            <div>
               <label class="form-label">Email de contacto</label>
               <input type="email" class="form-input" placeholder="cto@empresa.com" required>
             </div>
@@ -736,7 +736,7 @@
             <i class="fa fa-arrow-right"></i>
           </button>
 
-          <p style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);text-align:center;letter-spacing:0.1em;text-transform:uppercase;">
+          <p class="form-disclaimer">
             Sin costo · Sin compromiso · Respuesta en 24-48h
           </p>
         </form>
@@ -883,7 +883,7 @@
 
           <div style="margin-bottom: 24px;">
             <label class="label-tech">USER_ID</label>
-            <input required type="text" class="input-tech" id="username" name="username" placeholder="user@domain.com" value="{{ request.POST.username }}">
+            <input required type="text" class="input-tech" id="username" name="username" placeholder="user@domain.com">
           </div>
 
           <div style="position: relative; margin-bottom: 16px;">
@@ -922,135 +922,7 @@
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
-<script>
-  // === SYS TOGGLE (mute/sound wave bars) ===
-  (function() {
-    const btn = document.getElementById('sysToggle');
-    const bars = document.getElementById('waveBars');
-    const label = document.getElementById('sysLabel');
-    const icon = document.getElementById('sysIcon');
-    let active = false;
-    if (btn) btn.addEventListener('click', function() {
-      active = !active;
-      bars.classList.toggle('unmuted', active);
-      label.textContent = active ? 'Sound On' : 'Muted';
-      icon.className = active ? 'fa fa-volume-high' : 'fa fa-volume-xmark';
-      icon.style.color = active ? 'var(--accent)' : 'var(--fg-dim)';
-      btn.style.borderColor = active ? 'var(--accent)' : '';
-    });
-  })();
 
-  // === HEADLINE CHAR REVEAL (triggers after 400ms) ===
-  setTimeout(function() {
-    document.querySelector('.hero-content').classList.add('in-view');
-  }, 400);
-
-  // === Role Selector ===
-  document.querySelectorAll('.tab-tech').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.tab-tech').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      document.getElementById('rol_seleccionado').value = this.dataset.role;
-    });
-  });
-
-  // === Mobile Menu ===
-  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-  const navLinksEl = document.getElementById('navLinks');
-  if (mobileMenuBtn && navLinksEl) {
-    mobileMenuBtn.addEventListener('click', () => navLinksEl.classList.toggle('active'));
-    navLinksEl.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => navLinksEl.classList.remove('active'));
-    });
-  }
-
-  // === Toggle Password ===
-  const togglePassBtn = document.getElementById('togglePassTech');
-  if (togglePassBtn) {
-    togglePassBtn.addEventListener('click', function() {
-      const input = document.getElementById('password');
-      const ico = this.querySelector('i');
-      if (input.type === 'password') { input.type = 'text'; ico.classList.replace('fa-eye', 'fa-eye-slash'); }
-      else { input.type = 'password'; ico.classList.replace('fa-eye-slash', 'fa-eye'); }
-    });
-  }
-
-  // === Django Messages Modal ===
-  const djangoMsgs = document.getElementById('django-messages');
-  if (djangoMsgs) {
-    const spans = djangoMsgs.querySelectorAll('span');
-    let err = '';
-    spans.forEach(s => { err += '<div style="background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.15);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--fg-dim);display:flex;align-items:center;gap:8px;"><i class="fa fa-circle-exclamation" style="color:var(--accent);"></i>' + s.textContent.trim() + '</div>'; });
-    if (err) {
-      const form = document.querySelector('#loginModal form');
-      if (form) { const c = document.createElement('div'); c.innerHTML = err; form.insertBefore(c, form.firstChild); }
-      new bootstrap.Modal(document.getElementById('loginModal')).show();
-    }
-  }
-
-  // === URL param modal ===
-  if (new URLSearchParams(window.location.search).get('login') === '1') {
-    new bootstrap.Modal(document.getElementById('loginModal')).show();
-  }
-
-  // === Goal Pills ===
-  document.querySelectorAll('.goal-pills .goal-pill').forEach(pill => {
-    pill.addEventListener('click', function() {
-      const parent = this.parentElement;
-      parent.querySelectorAll('.goal-pill').forEach(p => p.classList.remove('active'));
-      this.classList.add('active');
-    });
-  });
-
-  // === Flip Cards Touch ===
-  document.querySelectorAll('.flip-card').forEach(card => {
-    card.addEventListener('click', function(e) {
-      if (window.matchMedia('(hover: none)').matches && !e.target.closest('a')) {
-        card.classList.toggle('flipped');
-      }
-    });
-  });
-
-  // === Custom Cursor ===
-  const dot = document.getElementById('cursorDot');
-  const ring = document.getElementById('cursorRing');
-  if (dot && ring) {
-    let mx = 0, my = 0, rx = 0, ry = 0;
-    document.addEventListener('mousemove', function(e) {
-      mx = e.clientX; my = e.clientY;
-      dot.style.left = mx + 'px';
-      dot.style.top = my + 'px';
-    });
-    const hoverTargets = document.querySelectorAll('a, button, .btn-tech, .btn-tech-sec, .nav-cta, .tab-tech, .flip-card, .story-card, .goal-pill, input, textarea, select, [role="button"]');
-    hoverTargets.forEach(el => {
-      el.addEventListener('mouseenter', () => { dot.classList.add('hover'); ring.classList.add('hover'); });
-      el.addEventListener('mouseleave', () => { dot.classList.remove('hover'); ring.classList.remove('hover'); });
-    });
-    function animateRing() {
-      rx += (mx - rx) * 0.12;
-      ry += (my - ry) * 0.12;
-      ring.style.left = rx + 'px';
-      ring.style.top = ry + 'px';
-      requestAnimationFrame(animateRing);
-    }
-    animateRing();
-  }
-
-  // === Project Form ===
-  const projectForm = document.getElementById('projectForm');
-  const toast = document.getElementById('toast');
-  if (projectForm && toast) {
-    projectForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      document.getElementById('toastTitle').textContent = 'Solicitud recibida';
-      document.getElementById('toastMsg').textContent = 'Un squad será asignado a tu proyecto en 24-48h.';
-      toast.classList.add('visible');
-      setTimeout(() => toast.classList.remove('visible'), 4500);
-      projectForm.reset();
-      document.querySelectorAll('#projectTypeSelector .goal-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
-    });
-  }
-</script>
 
 </body>
 </html>
