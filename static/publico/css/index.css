@@ -86,6 +86,63 @@ body {
 /* ========== UTILS ========== */
 .text-muted { color: var(--muted); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+.hidden { display: none; }
+
+/* grid helpers */
+.stats-wrapper { max-width: 1400px; margin: 0 auto; }
+.module-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.flip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.carousel-wrapper { max-width: 1200px; margin: 32px auto 0; padding: 0 5%; }
+
+/* section backgrounds */
+.bg-darker { background: var(--bg-darker); }
+.bg-dim { background: rgba(0,0,0,0.4); }
+
+/* desc mono paragraph */
+.desc-mono {
+  font-family: var(--font-mono); font-size: 0.85rem;
+  color: var(--fg-dim); line-height: 1.6;
+}
+.desc-mono--lg { font-size: 0.82rem; max-width: 600px; }
+
+/* toast */
+.toast-row { display: flex; align-items: flex-start; gap: 12px; }
+.toast-icon-circle {
+  width: 28px; height: 28px; background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+}
+.toast-title { font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; }
+.toast-msg { font-size: 0.8rem; color: var(--fg-dim); margin-top: 4px; }
+
+/* drag hint */
+.drag-hint {
+  font-family: var(--font-mono); font-size: 0.62rem; color: var(--muted);
+  letter-spacing: 0.15em; text-transform: uppercase; margin-top: 8px;
+}
+
+/* login */
+.login-link {
+  color: var(--muted); font-size: 0.72rem; text-decoration: none;
+  font-family: var(--font-mono); text-transform: uppercase;
+}
+
+/* pass toggle */
+.pass-toggle {
+  position: absolute; right: 15px; bottom: 12px;
+  background: none; border: none; color: var(--fg-dim); cursor: pointer;
+}
+
+/* hero strip helpers */
+.hero-strip-side { display: flex; align-items: center; gap: 16px; }
+
+/* reel live badge */
+.reel-live {
+  margin-left: 12px; display: inline-flex; align-items: center; gap: 8px;
+}
+.reel-live-text {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  color: var(--fg-dim); letter-spacing: 0.15em;
+}
 
 /* ========== TEXT STROKE ========== */
 .text-stroke {
@@ -622,6 +679,10 @@ body {
 .story-card:hover { border-color: var(--accent-dim); }
 
 .story-img-box { position: relative; height: 200px; overflow: hidden; }
+.story-placeholder {
+  width: 100%; height: 100%;
+  background: radial-gradient(circle at 40% 30%, #0a201a, #000);
+}
 .story-img {
   width: 100%; height: 100%; object-fit: cover;
   filter: grayscale(100%) contrast(1.35) brightness(0.6);
