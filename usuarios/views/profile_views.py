@@ -1,0 +1,25 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
+from ..forms import PerfilEmpresaForm, PerfilDesarrolladorForm
+from ..models import PerfilEmpresa, PerfilDesarrollador
+
+
+@login_required
+def editar_perfil(request):
+    if request.user.rol == 'empresa':
+        perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=request.user)
+        form = PerfilEmpresaForm(request.POST or None, request.FILES or None, instance=perfil)
+        redirect_to = 'dashboard_empresa'
+    elif request.user.rol == 'desarrollador':
+        perfil, _ = PerfilDesarrollador.objects.get_or_create(usuario=request.user)
+        form = PerfilDesarrolladorForm(request.POST or None, request.FILES or None, instance=perfil)
+        redirect_to = 'dashboard_desarrollador'
+    else: return redirect('inicio')
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, "Perfil actualizado")
+        return redirect(redirect_to)
+    return render(request, 'usuarios/editar_perfil.html', {'form': form})
