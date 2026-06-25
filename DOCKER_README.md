@@ -193,6 +193,15 @@ docker compose down -v  # ⚠️ Esto borra la base de datos
 docker compose up --build -d
 ```
 
+### Faltan Vistas SQL o Procedimientos (Warning W001/W002)
+
+Si al iniciar el contenedor de Django o ejecutar comandos observas advertencias como `Falta la vista SQL requerida` o `Falta el procedimiento almacenado`, significa que `Tem_bd.sql` no se ejecutó o se borró.
+
+```bash
+# Para solucionarlo, puedes recargar la estructura inicial manualmente:
+docker compose exec -T db mysql -u root -proot_secure_pass_2026 tem_dbv2 < Tem_bd.sql
+```
+
 ### Puerto 80 ya está en uso
 
 ```bash
