@@ -17,7 +17,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-teir_secure_pass_2026}
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./Tem_bd.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     ports:
       - "3307:3306"  # Puerto 3307 en host para no conflictar con MySQL local
     healthcheck:
