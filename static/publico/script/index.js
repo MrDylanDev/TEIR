@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
      HERO REEL — frame cycler
      ============================ */
   var heroVisible = true;
+  var tickZoomId = null;
+  var tickZoom = null;
   const frames = document.querySelectorAll('.reel-frame');
   const chapterNum = document.getElementById('chapterNum');
   const reelProgress = document.getElementById('reelProgress');
@@ -40,8 +42,11 @@ document.addEventListener('DOMContentLoaded', function () {
       showFrame(currentFrame);
     }, frameDuration);
 
-    function tickZoom() {
-      if (!heroVisible) { requestAnimationFrame(tickZoom); return; }
+    tickZoom = function() {
+      if (!heroVisible) {
+        tickZoomId = requestAnimationFrame(tickZoom);
+        return;
+      }
       const elapsed = performance.now() - frameStartTime;
       const progress = Math.min(elapsed / frameDuration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
@@ -50,9 +55,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (activeImg) activeImg.style.transform = 'scale(' + scale + ')';
       const pct = Math.min(progress * 100, 100);
       reelProgress.style.width = pct + '%';
-      requestAnimationFrame(tickZoom);
+      tickZoomId = requestAnimationFrame(tickZoom);
     }
-    requestAnimationFrame(tickZoom);
+    tickZoomId = requestAnimationFrame(tickZoom);
   }
 
   /* ============================
@@ -123,6 +128,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (entry.target === heroSection) {
           heroPassed = !entry.isIntersecting;
           heroVisible = entry.isIntersecting;
+          if (heroVisible && tickZoomId) {
+            cancelAnimationFrame(tickZoomId);
+            tickZoomId = requestAnimationFrame(tickZoom);
+          }
         }
         if (entry.target === bookingAnchor) atBooking = entry.isIntersecting;
         updateSticky();
@@ -417,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ============================
      FLIP CARDS TOUCH
      ============================ */
-  var isTouchDevice = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var isTouchDevice = !window.matchMedia('(hover: hover)').matches;
   document.querySelectorAll('.flip-card').forEach(function(card) {
     card.addEventListener('click', function(e) {
       if (isTouchDevice && !e.target.closest('a')) {
@@ -429,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ============================
      CUSTOM CURSOR
      ============================ */
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  if (window.matchMedia('(hover: hover)').matches) {
     var dot = document.getElementById('cursorDot');
     var ring = document.getElementById('cursorRing');
     if (dot && ring) {
