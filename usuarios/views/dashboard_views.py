@@ -18,6 +18,7 @@ from contrataciones.models import Contratacion
 from notificaciones.models import Notificacion
 from favoritos.models import Favorito
 from mensajes.models import Mensaje
+from logs.models import LogAuditoria
 
 from ._helpers import get_notificaciones_context
 
@@ -463,6 +464,12 @@ def admin_toggle_usuario(request, usuario_id):
         user.is_active = True
         
     user.save()
+    LogAuditoria.objects.create(
+        usuario=request.user,
+        accion=f"Cambió estado del usuario {user.username} a {user.estado}",
+        tabla_afectada='usuarios',
+        registro_id=user.id,
+    )
     messages.info(request, f"Estado del usuario {user.username} actualizado a {user.estado}.")
     return redirect(reverse('dashboard_admin') + '?section=usersSection')
 
@@ -598,6 +605,14 @@ def api_actualizar_usuario(request, usuario_id):
             user.is_active = (user.estado == 'activo')
         
         user.save()
+
+        campos_modificados = [k for k in data if k in ('email', 'nombre', 'rol', 'estado')]
+        LogAuditoria.objects.create(
+            usuario=request.user,
+            accion=f"Actualizó usuario {user.username}: {', '.join(campos_modificados)}",
+            tabla_afectada='usuarios',
+            registro_id=user.id,
+        )
 
         # Invalidad caché si el rol cambió a/desde administrador
         if rol_anterior == 'administrador' or user.rol == 'administrador':

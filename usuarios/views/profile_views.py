@@ -4,6 +4,7 @@ from django.contrib import messages
 
 from ..forms import PerfilEmpresaForm, PerfilDesarrolladorForm
 from ..models import PerfilEmpresa, PerfilDesarrollador
+from logs.models import LogAuditoria
 
 
 @login_required
@@ -20,6 +21,12 @@ def editar_perfil(request):
 
     if request.method == 'POST' and form.is_valid():
         form.save()
+        LogAuditoria.objects.create(
+            usuario=request.user,
+            accion=f"Actualizó su perfil de {request.user.rol}",
+            tabla_afectada=f"perfil_{request.user.rol}",
+            registro_id=request.user.id,
+        )
         messages.success(request, "Perfil actualizado")
         return redirect(redirect_to)
     return render(request, 'usuarios/editar_perfil.html', {'form': form})
