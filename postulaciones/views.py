@@ -6,6 +6,7 @@ from .models import Postulacion
 from proyectos.models import Proyecto
 from contrataciones.models import Contratacion
 from notificaciones.models import Notificacion
+from logs.models import LogAuditoria
 
 @login_required
 def ver_postulaciones_empresa(request, proyecto_id):
@@ -92,20 +93,43 @@ def aceptar_postulacion(request, postulacion_id):
         messages.error(request, "Acceso denegado.")
         return redirect('inicio')
 
-    # VALIDACIÓN DE PROPIEDAD: Aseguramos que la postulación pertenece a un proyecto de esta empresa
     postulacion = get_object_or_404(Postulacion, id=postulacion_id, proyecto__empresa=request.user)
     proyecto_id = postulacion.proyecto.id
 
     if request.method == 'POST':
         try:
-            with connection.cursor() as cursor:
-                # Delegamos la lógica pesada al procedimiento almacenado
-                cursor.callproc('sp_aceptar_postulacion', [postulacion_id, request.user.id])
-                
+            with transaction.atomic():
+                postulacion = Postulacion.objects.select_for_update().get(
+                    id=postulacion_id, proyecto__empresa=request.user, estado='pendiente')
+                proyecto = postulacion.proyecto
+
+                Contratacion.objects.create(
+                    proyecto=proyecto,
+                    desarrollador=postulacion.desarrollador,
+                    empresa=request.user,
+                    estado='activa',
+                )
+
+                postulacion.estado = 'aceptada'
+                postulacion.save()
+
+                if proyecto.estado == 'publicado':
+                    proyecto.estado = 'en_desarrollo'
+                    proyecto.save()
+                    proyecto.registrar_cambio_estado('en_desarrollo', request.user)
+
+                LogAuditoria.objects.create(
+                    usuario=request.user,
+                    accion=f"Aceptó postulación de {postulacion.desarrollador.nombre} en {proyecto.titulo}",
+                    tabla_afectada='postulaciones',
+                    registro_id=postulacion.id,
+                )
+
             messages.success(request, "¡Contratación exitosa! El desarrollador ha sido vinculado al proyecto.")
+        except Postulacion.DoesNotExist:
+            messages.error(request, "La postulación ya fue procesada o no existe.")
         except Exception as e:
-            error_msg = str(e).split(",")[1].replace("'", "").strip() if "," in str(e) else str(e)
-            messages.error(request, f"Error al procesar: {error_msg}")
+            messages.error(request, f"Error al procesar: {str(e)}")
     else:
         messages.warning(request, "Acción no permitida.")
 

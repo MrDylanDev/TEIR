@@ -4,16 +4,18 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db import transaction, connection, IntegrityError
-from django.db.models import Avg, Q, Count, Prefetch, OuterRef, Subquery, Value, FloatField, F
+from django.db.models import Avg, Q, Count, Prefetch, OuterRef, Subquery, Value, FloatField, F, Max
 from django.db.models.functions import Coalesce
 from django.core.cache import cache
 from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
 import json
 
 from ..models import Usuario, PerfilEmpresa, PerfilDesarrollador
 from ..decorators import requiere_usuario_activo
 from ..utils import get_admin_id, get_admin_ids
-from proyectos.models import Proyecto, Valoracion, Entregable
+from proyectos.models import Proyecto, Valoracion, Entregable, Equipo
 from postulaciones.models import Postulacion
 from contrataciones.models import Contratacion
 from notificaciones.models import Notificacion
@@ -25,24 +27,28 @@ from ._helpers import get_notificaciones_context
 
 
 def inicio(request):
-    # --- DESPERTANDO v_portafolio_publico ---
+    proyectos_qs = Proyecto.objects.filter(estado='finalizada').select_related(
+        'empresa__perfil_empresa'
+    ).prefetch_related(
+        Prefetch('contrataciones',
+            queryset=Contratacion.objects.filter(estado='finalizada').select_related('desarrollador'),
+            to_attr='contratos_finalizados')
+    ).annotate(
+        calificacion=Coalesce(Avg('valoraciones__puntuacion',
+            filter=Q(valoraciones__rol_evaluador='empresa')),
+            Value(0.0), output_field=FloatField())
+    ).order_by('-fecha_publicacion')[:4]
+
     casos_exito = []
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT titulo, tipo_solucion, empresa_nombre, desarrollador_nombre, calificacion_proyecto 
-            FROM v_portafolio_publico 
-            ORDER BY fecha_finalizacion DESC 
-            LIMIT 4
-        """)
-        rows = cursor.fetchall()
-        for row in rows:
-            casos_exito.append({
-                'titulo': row[0],
-                'tipo_solucion': row[1],
-                'empresa_nombre': row[2],
-                'desarrollador_nombre': row[3],
-                'calificacion': row[4]
-            })
+    for p in proyectos_qs:
+        dev_nombre = p.contratos_finalizados[0].desarrollador.nombre if p.contratos_finalizados else ''
+        casos_exito.append({
+            'titulo': p.titulo,
+            'tipo_solucion': p.tipo_solucion,
+            'empresa_nombre': p.empresa.nombre,
+            'desarrollador_nombre': dev_nombre,
+            'calificacion': round(p.calificacion, 1),
+        })
 
     return render(request, 'publico/index.html', {'casos_exito': casos_exito})
 
@@ -56,30 +62,33 @@ def dashboard_empresa(request):
     post_pen = Postulacion.objects.filter(proyecto__empresa=request.user, estado='pendiente', proyecto__estado='publicado').count()
     dev_con = Contratacion.objects.filter(empresa=request.user, estado='activa').count()
 
-    # --- DESPERTANDO v_proyectos_en_desarrollo (para Empresa) ---
+    en_desarrollo_qs = Proyecto.objects.filter(
+        empresa=request.user, estado='en_desarrollo'
+    ).annotate(
+        hitos_completados=Count('entregables', filter=Q(entregables__estado='completado')),
+        hitos_totales=Count('entregables'),
+    ).prefetch_related(
+        Prefetch('contrataciones',
+            queryset=Contratacion.objects.filter(estado='activa').select_related('desarrollador'),
+            to_attr='contratos_activos')
+    )
     en_desarrollo_v = []
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT proyecto_id, titulo, desarrolladores_nombres, hitos_completados, hitos_totales, ultimo_avance, fecha_limite, estado, desarrolladores_ids
-            FROM v_proyectos_en_desarrollo
-            WHERE empresa_id = %s
-        """, [request.user.id])
-        rows = cursor.fetchall()
-        for row in rows:
-            dev_ids = row[8].split(',') if row[8] else []
-            en_desarrollo_v.append({
-                'proyecto_id': row[0],
-                'titulo': row[1],
-                'desarrolladores': row[2],
-                'hitos_completados': row[3],
-                'hitos_totales': row[4],
-                'ultimo_avance': row[5],
-                'fecha_fin': row[6],
-                'estado': row[7],
-                'ids': row[8],
-                'primer_dev_id': dev_ids[0] if dev_ids else None,
-                'num_desarrolladores': len(dev_ids)
-            })
+    for p in en_desarrollo_qs:
+        dev_ids = [c.desarrollador_id for c in p.contratos_activos]
+        dev_nombres = ', '.join([c.desarrollador.nombre for c in p.contratos_activos])
+        en_desarrollo_v.append({
+            'proyecto_id': p.id,
+            'titulo': p.titulo,
+            'desarrolladores': dev_nombres,
+            'hitos_completados': p.hitos_completados,
+            'hitos_totales': p.hitos_totales,
+            'ultimo_avance': None,
+            'fecha_fin': p.fecha_limite,
+            'estado': p.estado,
+            'ids': ','.join(map(str, dev_ids)),
+            'primer_dev_id': dev_ids[0] if dev_ids else None,
+            'num_desarrolladores': len(dev_ids),
+        })
     perfil, _ = PerfilEmpresa.objects.get_or_create(usuario=request.user)
     mis_ofertas = Proyecto.objects.filter(empresa=request.user, estado='publicado').order_by('-fecha_publicacion')
     
@@ -182,25 +191,26 @@ def dashboard_desarrollador(request):
         # Asignar la valoración pre-cargada
         contrato.valoracion = contrato.proyecto.valoracion_empresa[0] if contrato.proyecto.valoracion_empresa else None
 
-    # --- DESPERTANDO v_proyectos_en_desarrollo (Vista de Avances) ---
-    mis_proyectos_v = []
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT proyecto_id, titulo, empresa_nombre, hitos_completados, hitos_totales, ultimo_avance, fecha_limite, estado, empresa_id, desarrolladores_ids
-            FROM v_proyectos_en_desarrollo
-            WHERE FIND_IN_SET(%s, desarrolladores_ids) > 0
-        """, [str(request.user.id)])
-        rows = cursor.fetchall()
+    mis_proyectos_qs = Proyecto.objects.filter(
+        equipos__miembros=request.user, estado='en_desarrollo'
+    ).select_related('empresa').annotate(
+        hitos_completados=Count('entregables', filter=Q(entregables__estado='completado')),
+        hitos_totales=Count('entregables'),
+    ).prefetch_related(
+        Prefetch('contrataciones',
+            queryset=Contratacion.objects.filter(estado='activa').select_related('desarrollador'),
+            to_attr='contratos_activos'),
+    ).distinct()
 
-    if rows:
-        # OPTIMIZACIÓN: Pre-cargar todos los hitos en una sola query (Evita N+1)
-        proyectos_ids = [row[0] for row in rows]
+    mis_proyectos_v = []
+    proyectos_ids = list(mis_proyectos_qs.values_list('id', flat=True))
+
+    if proyectos_ids:
         hitos_todos = Entregable.objects.filter(
             Q(proyecto_id__in=proyectos_ids) & 
             (Q(equipo__miembros=request.user) | Q(equipo__isnull=True))
         ).distinct().values('proyecto_id', 'titulo', 'estado', 'descripcion')
 
-        # Agrupar hitos por proyecto en un diccionario
         hitos_por_proyecto = {}
         for h in hitos_todos:
             p_id = h['proyecto_id']
@@ -208,20 +218,20 @@ def dashboard_desarrollador(request):
                 hitos_por_proyecto[p_id] = []
             hitos_por_proyecto[p_id].append(h)
 
-        for row in rows:
-            dev_ids = row[9].split(',') if row[9] else []
+        for p in mis_proyectos_qs:
+            dev_ids = [c.desarrollador_id for c in p.contratos_activos]
             mis_proyectos_v.append({
-                'proyecto_id': row[0],
-                'titulo': row[1],
-                'empresa_nombre': row[2],
-                'hitos_completados': row[3],
-                'hitos_totales': row[4],
-                'ultimo_avance': row[5],
-                'fecha_fin': row[6],
-                'estado': row[7],
-                'empresa_id': row[8],
+                'proyecto_id': p.id,
+                'titulo': p.titulo,
+                'empresa_nombre': p.empresa.nombre,
+                'hitos_completados': p.hitos_completados,
+                'hitos_totales': p.hitos_totales,
+                'ultimo_avance': None,
+                'fecha_fin': p.fecha_limite,
+                'estado': p.estado,
+                'empresa_id': p.empresa_id,
                 'num_desarrolladores': len(dev_ids),
-                'hitos': hitos_por_proyecto.get(row[0], []) # Usamos los hitos pre-cargados
+                'hitos': hitos_por_proyecto.get(p.id, []),
             })
     # Soporte Admin Dinámico (None si no existe ningún administrador)
     admin_id = get_admin_id()
@@ -252,28 +262,30 @@ def dashboard_desarrollador(request):
 def dashboard_admin(request):
     if request.user.rol != 'administrador': return redirect('inicio')
     
-    # --- UNIFICACIÓN: v_estadisticas_sistema (Motor de Salud Global) ---
-    stats_globales = None
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT 
-                total_empresas_activas, total_desarrolladores_activos, 
-                proyectos_publicados, proyectos_en_desarrollo, proyectos_finalizados,
-                proyectos_pendientes_aprobacion, postulaciones_pendientes, 
-                calificacion_promedio_global, proyectos_con_retraso
-            FROM v_estadisticas_sistema
-        """)
-        stats_globales = cursor.fetchone()
+    user_stats = Usuario.objects.aggregate(
+        total_empresas=Count('id', filter=Q(rol='empresa', is_active=True)),
+        total_devs=Count('id', filter=Q(rol='desarrollador', is_active=True)),
+    )
+    proy_stats = Proyecto.objects.aggregate(
+        p_pub=Count('id', filter=Q(estado='publicado')),
+        p_des=Count('id', filter=Q(estado='en_desarrollo')),
+        p_fin=Count('id', filter=Q(estado='finalizado')),
+        p_pen=Count('id', filter=Q(estado='pendiente_aprobacion')),
+    )
+    post_pen = Postulacion.objects.filter(estado='pendiente').count()
+    promedio_global = Valoracion.objects.aggregate(avg=Avg('puntuacion'))['avg'] or 0
+    p_ret = Proyecto.objects.filter(
+        estado='en_desarrollo', fecha_limite__lt=timezone.now()
+    ).count()
 
-    # Mapeo de variables (Si la vista no devuelve nada, usamos ceros)
-    if stats_globales:
-        total_empresas, total_devs, p_pub, p_des, p_fin, p_pen, post_pen, promedio_global, p_ret = stats_globales
-        total_proyectos = p_pub + p_des + p_fin + p_pen
-        total_usuarios = total_empresas + total_devs
-    else:
-        total_empresas, total_devs, p_pub, p_des, p_fin, p_pen, post_pen, promedio_global, p_ret = (0, 0, 0, 0, 0, 0, 0, 0, 0)
-        total_proyectos = 0
-        total_usuarios = 0
+    total_empresas = user_stats['total_empresas']
+    total_devs = user_stats['total_devs']
+    p_pub = proy_stats['p_pub']
+    p_des = proy_stats['p_des']
+    p_fin = proy_stats['p_fin']
+    p_pen = proy_stats['p_pen']
+    total_proyectos = p_pub + p_des + p_fin + p_pen
+    total_usuarios = total_empresas + total_devs
     
     usuarios_lista = Usuario.objects.all().order_by('-date_joined')[:50]
     # Traemos proyectos con sus empresas y pre-cargamos sus contrataciones activas con los desarrolladores
@@ -348,10 +360,28 @@ def dashboard_admin(request):
     salud_global = (promedio_global, p_ret)
 
     # 7. Obtener Lista Detallada de Alertas (v_proyectos_alerta_inactividad)
+    siete_dias_atras = timezone.now() - timedelta(days=7)
+    proyectos_alerta = Proyecto.objects.filter(
+        estado='en_desarrollo'
+    ).annotate(
+        ultimo_avance=Max('entregables__fecha_creacion'),
+    ).filter(
+        Q(ultimo_avance__lt=siete_dias_atras) | Q(ultimo_avance__isnull=True)
+    ).select_related('empresa').prefetch_related(
+        Prefetch('contrataciones',
+            queryset=Contratacion.objects.filter(estado='activa').select_related('desarrollador'),
+            to_attr='contratos_activos')
+    ).distinct()
+
     alertas_retraso = []
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT titulo, empresa_nombre, desarrollador_nombre, dias_sin_avance FROM v_proyectos_alerta_inactividad")
-        alertas_retraso = cursor.fetchall()
+    for p in proyectos_alerta:
+        dev_nombre = p.contratos_activos[0].desarrollador.nombre if p.contratos_activos else ''
+        dias = 0
+        if p.ultimo_avance:
+            dias = (timezone.now() - p.ultimo_avance).days
+        elif p.contratos_activos:
+            dias = (timezone.now().date() - p.contratos_activos[0].fecha_inicio).days
+        alertas_retraso.append((p.titulo, p.empresa.nombre, dev_nombre, dias))
 
     # 8. Ranking de Empresas (Top >= 4.0 y Alerta < 4.0)
     empresas_qs = Usuario.objects.filter(rol='empresa').annotate(
