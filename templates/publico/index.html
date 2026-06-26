@@ -865,11 +865,10 @@
       <div class="modal-body">
         <form method="POST" action="{% url 'login' %}">
           {% csrf_token %}
-          <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="administrador">
+          <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="desarrollador">
 
           <div class="tabs-tech">
-            <button type="button" class="tab-tech" data-role="desarrollador">DEV</button>
-            <button type="button" class="tab-tech active" data-role="administrador">ROOT</button>
+            <button type="button" class="tab-tech active" data-role="desarrollador">DEV</button>
             <button type="button" class="tab-tech" data-role="empresa">CORP</button>
           </div>
 
