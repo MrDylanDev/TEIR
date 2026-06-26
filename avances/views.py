@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db import connection, transaction
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import Q, Count
 from .models import Avance
 from proyectos.models import Proyecto, Entregable
 from contrataciones.models import Contratacion
@@ -196,15 +196,13 @@ def ver_avances(request, proyecto_id):
     # Consulta de avances optimizada con select_related
     avances = Avance.objects.filter(proyecto=proyecto).select_related('desarrollador__perfil_desarrollador', 'entregable').order_by('-fecha_hora')
     
-    # Obtener el progreso total desde la vista SQL
-    hitos_completados = 0
-    hitos_totales = 0
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT hitos_completados, hitos_totales FROM v_proyectos_en_desarrollo WHERE proyecto_id = %s", [proyecto.id])
-        row = cursor.fetchone()
-        if row:
-            hitos_completados = row[0]
-            hitos_totales = row[1]
+    # Obtener el progreso total desde ORM
+    progreso = Entregable.objects.filter(proyecto=proyecto).aggregate(
+        hitos_completados=Count('id', filter=Q(estado='completado')),
+        hitos_totales=Count('id'),
+    )
+    hitos_completados = progreso['hitos_completados'] or 0
+    hitos_totales = progreso['hitos_totales'] or 0
 
     return render(request, 'avances/ver_lista.html', {
         'proyecto': proyecto, 

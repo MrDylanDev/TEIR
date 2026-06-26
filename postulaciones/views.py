@@ -11,28 +11,26 @@ from notificaciones.models import Notificacion
 def ver_postulaciones_empresa(request, proyecto_id):
     proyecto = get_object_or_404(Proyecto, id=proyecto_id, empresa=request.user)
     
-    # --- DESPERTANDO v_postulaciones_activas ---
+    postulaciones_orm = Postulacion.objects.filter(
+        proyecto_id=proyecto_id,
+        estado='pendiente'
+    ).select_related('desarrollador__perfil_desarrollador').order_by('-fecha')
+    
     postulaciones = []
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT v.id, v.desarrollador_nombre, v.calificacion_promedio, v.num_proyectos_completados, 
-                   v.habilidades, v.mensaje, v.fecha, pd.foto_perfil
-            FROM v_postulaciones_activas v
-            LEFT JOIN perfil_desarrollador pd ON pd.usuario_id = (SELECT id FROM usuarios WHERE nombre = v.desarrollador_nombre LIMIT 1)
-            WHERE v.proyecto_id = %s AND v.estado = 'pendiente'
-            ORDER BY v.fecha DESC
-        """, [proyecto_id])
-        rows = cursor.fetchall()
-        for row in rows:
-            postulaciones.append({
-                'id': row[0],
-                'desarrollador': {'nombre': row[1], 'foto_perfil': row[7]},
-                'calificacion_promedio': row[2],
-                'proyectos_completados': row[3],
-                'habilidades': row[4],
-                'mensaje': row[5],
-                'fecha': row[6]
-            })
+    for p in postulaciones_orm:
+        perfil = getattr(p.desarrollador, 'perfil_desarrollador', None)
+        postulaciones.append({
+            'id': p.id,
+            'desarrollador': {
+                'nombre': p.desarrollador.nombre,
+                'foto_perfil': perfil.foto_perfil.url if perfil and perfil.foto_perfil else None,
+            },
+            'calificacion_promedio': perfil.calificacion_promedio if perfil else 0,
+            'proyectos_completados': perfil.num_proyectos_completados if perfil else 0,
+            'habilidades': perfil.habilidades if perfil else '',
+            'mensaje': p.mensaje,
+            'fecha': p.fecha,
+        })
             
     return render(request, 'postulaciones/lista_recibidas.html', {'proyecto': proyecto, 'postulaciones': postulaciones})
 
@@ -59,21 +57,31 @@ def postularse_a_proyecto(request, proyecto_id):
         mensaje = f"CARTA DE PRESENTACIÓN:\n{carta}\n\nEXPERIENCIA:\n{experiencia}\n\nPORTAFOLIO/ENLACE:\n{link}"
         
         try:
-            with connection.cursor() as cursor:
-                cursor.callproc('sp_postularse', [proyecto.id, request.user.id, mensaje])
-                
+            # Validar duplicado
+            if Postulacion.objects.filter(proyecto=proyecto, desarrollador=request.user).exists():
+                messages.warning(request, "Ya te habías postulado a este proyecto anteriormente.")
+                return redirect('dashboard_desarrollador')
+            
+            # Validar límite de 3 postulaciones/proyectos activos
+            active_count = (
+                Postulacion.objects.filter(desarrollador=request.user, estado='pendiente').count() +
+                Contratacion.objects.filter(desarrollador=request.user, estado='activa').count()
+            )
+            if active_count >= 3:
+                messages.error(request, "Límite alcanzado: No puedes tener más de 3 postulaciones o proyectos activos.")
+                return redirect('dashboard_desarrollador')
+            
+            Postulacion.objects.create(
+                proyecto=proyecto,
+                desarrollador=request.user,
+                mensaje=mensaje,
+                estado='pendiente'
+            )
+            
             messages.success(request, f"¡Te has postulado al proyecto '{proyecto.titulo}'!")
             return redirect('dashboard_desarrollador')
         except Exception as e:
-            error_msg = e.args[1] if hasattr(e, 'args') and len(e.args) > 1 else str(e)
-            
-            if 'Límite alcanzado' in error_msg:
-                messages.error(request, "Límite alcanzado: No puedes tener más de 3 postulaciones o proyectos activos.")
-            elif 'Ya te has postulado' in error_msg:
-                messages.warning(request, "Ya te habías postulado a este proyecto anteriormente.")
-            else:
-                messages.error(request, f"Error del sistema: {error_msg}")
-            
+            messages.error(request, f"Error del sistema: {str(e)}")
             return redirect('dashboard_desarrollador')
                 
     return render(request, 'postulaciones/postularse.html', {'proyecto': proyecto})

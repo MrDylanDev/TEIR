@@ -181,18 +181,22 @@ def finalizar_proyecto(request, proyecto_id):
                 messages.error(request, "Debes seleccionar una puntuación.")
                 return redirect('finalizar_proyecto', proyecto_id=proyecto.id)
 
-            with connection.cursor() as cursor:
-                cursor.callproc('sp_calificar_proyecto', [
-                    proyecto.id,
-                    request.user.id,
-                    desarrollador.id,
-                    int(puntuacion),
-                    comentario,
-                    'empresa'
-                ])
+            if not 1 <= int(puntuacion) <= 5:
+                messages.error(request, "La puntuación debe estar entre 1 y 5.")
+                return redirect('finalizar_proyecto', proyecto_id=proyecto.id)
 
-            # Actualización de estadísticas: Eliminada lógica redundante.
-            # El promedio se calcula en tiempo real vía Vistas SQL.
+            if Valoracion.objects.filter(proyecto=proyecto, desarrollador=desarrollador, rol_evaluador='empresa').exists():
+                messages.error(request, "Ya has calificado a este desarrollador para este proyecto.")
+                return redirect('finalizar_proyecto', proyecto_id=proyecto.id)
+
+            Valoracion.objects.create(
+                proyecto=proyecto,
+                empresa=request.user,
+                desarrollador=desarrollador,
+                puntuacion=int(puntuacion),
+                comentario=comentario,
+                rol_evaluador='empresa'
+            )
 
             messages.success(request, f"Calificación registrada para {desarrollador.username}. " + 
                              (f"Quedan {restantes} por calificar." if restantes > 0 else "Era el último colaborador."))
@@ -224,22 +228,27 @@ def calificar_empresa(request, proyecto_id):
             puntuacion = int(request.POST.get('puntuacion'))
             comentario = request.POST.get('comentario')
             
-            with connection.cursor() as cursor:
-                # Usamos el SP universal: sp_calificar_proyecto
-                cursor.callproc('sp_calificar_proyecto', [
-                    proyecto.id,
-                    request.user.id,        # Evaluador (Desarrollador)
-                    proyecto.empresa.id,    # Evaluado (Empresa)
-                    puntuacion,
-                    comentario,
-                    'desarrollador'         # Rol del evaluador
-                ])
+            if not 1 <= int(puntuacion) <= 5:
+                messages.error(request, "La puntuación debe estar entre 1 y 5.")
+                return redirect('calificar_empresa', proyecto_id=proyecto.id)
+
+            if Valoracion.objects.filter(proyecto=proyecto, empresa=proyecto.empresa, desarrollador=request.user, rol_evaluador='desarrollador').exists():
+                messages.error(request, "Ya has calificado a esta empresa para este proyecto.")
+                return redirect('dashboard_desarrollador')
+
+            Valoracion.objects.create(
+                proyecto=proyecto,
+                empresa=proyecto.empresa,
+                desarrollador=request.user,
+                puntuacion=int(puntuacion),
+                comentario=comentario,
+                rol_evaluador='desarrollador'
+            )
                 
             messages.success(request, "¡Gracias! Tu calificación ha sido registrada.")
             return redirect('dashboard_desarrollador')
         except Exception as e:
-            error_msg = str(e).split(",")[1].replace("'", "").strip() if "," in str(e) else str(e)
-            messages.error(request, f"Error: {error_msg}")
+            messages.error(request, f"Error: {str(e)}")
             
     return render(request, 'proyectos/calificar_empresa.html', {'proyecto': proyecto})
 

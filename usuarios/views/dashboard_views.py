@@ -301,10 +301,9 @@ def dashboard_admin(request):
         )
     ).order_by('-fecha_publicacion')[:50]
     
-    logs = []
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT l.id, u.username, l.accion, l.tabla_afectada, l.fecha_hora FROM logs_auditoria l JOIN usuarios u ON l.usuario_id = u.id ORDER BY l.fecha_hora DESC LIMIT 20")
-        logs = cursor.fetchall()
+    logs = list(LogAuditoria.objects.select_related('usuario').order_by('-fecha_hora').values_list(
+        'id', 'usuario__username', 'accion', 'tabla_afectada', 'fecha_hora'
+    )[:20])
 
     admin_ids = get_admin_ids()
     
@@ -398,16 +397,14 @@ def dashboard_admin(request):
 
     # 9. Obtener Reseñas Recientes para Auditoría (valoraciones directas)
     resenas_auditoria = []
-    with connection.cursor() as cursor:
-        # Simplificando la lógica de la consulta para evitar confusiones de JOIN
-        cursor.execute("""
-            SELECT 
-                (SELECT nombre FROM usuarios WHERE id = (CASE WHEN rol_evaluador = 'empresa' THEN empresa_id ELSE desarrollador_id END)) as de,
-                (SELECT nombre FROM usuarios WHERE id = (CASE WHEN rol_evaluador = 'empresa' THEN desarrollador_id ELSE empresa_id END)) as para,
-                puntuacion, comentario, rol_evaluador
-            FROM valoraciones ORDER BY fecha DESC LIMIT 10
-        """)
-        resenas_auditoria = cursor.fetchall()
+    for v in Valoracion.objects.select_related('empresa', 'desarrollador').order_by('-fecha')[:10]:
+        if v.rol_evaluador == 'empresa':
+            de = v.empresa.nombre
+            para = v.desarrollador.nombre
+        else:
+            de = v.desarrollador.nombre
+            para = v.empresa.nombre
+        resenas_auditoria.append((de, para, v.puntuacion, v.comentario, v.rol_evaluador))
 
     # 10. Notificaciones para el Admin (Centralizado con Utility)
     notificaciones_admin, notificaciones_pendientes_count = get_notificaciones_context(request.user.id)
@@ -437,9 +434,7 @@ def dashboard_admin(request):
 @login_required
 @require_POST
 def marcar_notificaciones_leidas(request):
-    # Usamos el Procedimiento Almacenado de MySQL para mantener la lógica centralizada
-    with connection.cursor() as cursor:
-        cursor.callproc('sp_marcar_notificaciones_leidas', [request.user.id])
+    Notificacion.objects.filter(usuario_id=request.user.id, leida=False).update(leida=True)
     
     # Redirección inteligente según el rol
     if request.user.rol == 'administrador':
