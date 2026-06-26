@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction, connection
-from django.db.models import Avg, Q, Count, Prefetch
+from django.db.models import Avg, Q, Count, Prefetch, Value, FloatField, F
+from django.db.models.functions import Coalesce
 from .models import Proyecto, Valoracion, Entregable, Equipo
 from usuarios.models import Usuario, PerfilDesarrollador
 from contrataciones.models import Contratacion
@@ -12,46 +13,40 @@ from notificaciones.models import Notificacion
 
 @login_required
 def listar_proyectos(request):
-    # --- DESPERTANDO v_proyectos_disponibles ---
-    proyectos = []
-    
     tipo = request.GET.get('tipo')
     prioridad = request.GET.get('prioridad')
     
-    sql = """
-        SELECT v.id, v.titulo, v.descripcion, v.tipo_solucion, v.prioridad, v.fecha_publicacion, 
-               v.nombre_empresa, v.num_postulaciones, v.empresa_reputacion, pe.logo
-        FROM v_proyectos_disponibles v
-        LEFT JOIN perfil_empresa pe ON pe.nombre_empresa = v.nombre_empresa
-        WHERE 1=1
-    """
-    params = []
+    proyectos_qs = Proyecto.objects.filter(estado='publicado').select_related(
+        'empresa__perfil_empresa'
+    ).annotate(
+        num_postulaciones=Count('postulacion_set'),
+        empresa_reputacion=Coalesce(Avg('empresa__valoraciones_como_empresa__puntuacion',
+            filter=Q(empresa__valoraciones_como_empresa__rol_evaluador='desarrollador')),
+            Value(0.0), output_field=FloatField()),
+    )
     
     if tipo:
-        sql += " AND v.tipo_solucion = %s"
-        params.append(tipo)
+        proyectos_qs = proyectos_qs.filter(tipo_solucion=tipo)
     if prioridad:
-        sql += " AND v.prioridad = %s"
-        params.append(prioridad)
-        
-    sql += " ORDER BY v.fecha_publicacion DESC"
+        proyectos_qs = proyectos_qs.filter(prioridad=prioridad)
     
-    with connection.cursor() as cursor:
-        cursor.execute(sql, params)
-        rows = cursor.fetchall()
-        for row in rows:
-            proyectos.append({
-                'id': row[0],
-                'titulo': row[1],
-                'descripcion': row[2],
-                'tipo_solucion': row[3],
-                'prioridad': row[4],
-                'fecha_publicacion': row[5],
-                'empresa_nombre': row[6],
-                'num_postulaciones': row[7],
-                'empresa_reputacion': row[8],
-                'empresa_logo': row[9]
-            })
+    proyectos = []
+    for p in proyectos_qs.order_by('-fecha_publicacion'):
+        logo = p.empresa.perfil_empresa.logo.url if (
+            hasattr(p.empresa, 'perfil_empresa') and p.empresa.perfil_empresa.logo
+        ) else None
+        proyectos.append({
+            'id': p.id,
+            'titulo': p.titulo,
+            'descripcion': p.descripcion,
+            'tipo_solucion': p.tipo_solucion,
+            'prioridad': p.prioridad,
+            'fecha_publicacion': p.fecha_publicacion,
+            'empresa_nombre': p.empresa.nombre,
+            'num_postulaciones': p.num_postulaciones,
+            'empresa_reputacion': p.empresa_reputacion,
+            'empresa_logo': logo,
+        })
     
     favoritos_ids = []
     

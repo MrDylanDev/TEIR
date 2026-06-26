@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db import connection
+from django.db import transaction
 from .models import Contratacion
 from proyectos.models import Proyecto
+from logs.models import LogAuditoria
 
 @login_required
 def listar_contrataciones_empresa(request):
@@ -27,25 +28,36 @@ def ver_detalle_contrato(request, contratacion_id):
 
 @login_required
 def cancelar_contratacion(request, contratacion_id):
-    """Permitir a la empresa cancelar un contrato activo mediante un Procedimiento Almacenado"""
+    """Permitir a la empresa cancelar un contrato activo"""
     if request.user.rol != 'empresa':
         return redirect('inicio')
         
     contrato = get_object_or_404(Contratacion, id=contratacion_id, empresa=request.user)
     
     try:
-        with connection.cursor() as cursor:
-            # Invocar la lógica atómica de la base de datos mediante CALL
-            # sp_cancelar_contratacion devuelve un ResultSet con (success, mensaje)
-            cursor.execute("CALL sp_cancelar_contratacion(%s, %s)", [contrato.id, request.user.id])
-            
-            # Capturar el resultado del SP
-            row = cursor.fetchone()
-            if row:
-                messages.warning(request, row[1]) # Mensaje dinámico desde la DB (segunda columna)
-            else:
-                messages.warning(request, "Contrato cancelado exitosamente.")
-                
+        with transaction.atomic():
+            contrato = Contratacion.objects.select_for_update().get(
+                id=contratacion_id, empresa=request.user, estado='activa')
+            contrato.estado = 'cancelada'
+            contrato.save()
+
+            if Contratacion.objects.filter(
+                proyecto=contrato.proyecto, estado='activa'
+            ).count() == 0 and contrato.proyecto.estado == 'en_desarrollo':
+                proy = contrato.proyecto
+                estado_anterior = proy.estado
+                proy.estado = 'publicado'
+                proy.save()
+                proy.registrar_cambio_estado('publicado', request.user, estado_anterior=estado_anterior)
+
+            LogAuditoria.objects.create(
+                usuario=request.user,
+                accion=f"Canceló contratación en {contrato.proyecto.titulo}",
+                tabla_afectada='contrataciones',
+                registro_id=contrato.id,
+            )
+
+        messages.warning(request, "Contrato cancelado exitosamente.")
     except Exception as e:
         messages.error(request, f"Error al cancelar contrato: {str(e)}")
         

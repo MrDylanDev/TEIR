@@ -4,7 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db import transaction, connection, IntegrityError
-from django.db.models import Avg, Q, Count, Prefetch, OuterRef, Subquery
+from django.db.models import Avg, Q, Count, Prefetch, OuterRef, Subquery, Value, FloatField, F
+from django.db.models.functions import Coalesce
 from django.core.cache import cache
 from django.http import JsonResponse
 import json
@@ -50,17 +51,10 @@ def inicio(request):
 def dashboard_empresa(request):
     if request.user.rol != 'empresa': return redirect('inicio')
     
-    # --- DESPERTANDO v_dashboard_empresa ---
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT proyectos_publicados, proyectos_activos, postulaciones_pendientes, desarrolladores_contratados 
-            FROM v_dashboard_empresa 
-            WHERE empresa_id = %s
-        """, [request.user.id])
-        stats = cursor.fetchone()
-
-    # Si no hay datos, inicializamos en cero
-    p_pub, p_act, post_pen, dev_con = stats if stats else (0, 0, 0, 0)
+    p_pub = Proyecto.objects.filter(empresa=request.user, estado='publicado').count()
+    p_act = Proyecto.objects.filter(empresa=request.user, estado='en_desarrollo').count()
+    post_pen = Postulacion.objects.filter(proyecto__empresa=request.user, estado='pendiente', proyecto__estado='publicado').count()
+    dev_con = Contratacion.objects.filter(empresa=request.user, estado='activa').count()
 
     # --- DESPERTANDO v_proyectos_en_desarrollo (para Empresa) ---
     en_desarrollo_v = []
@@ -146,17 +140,10 @@ def dashboard_empresa(request):
 def dashboard_desarrollador(request):
     if request.user.rol != 'desarrollador': return redirect('inicio')
 
-    # --- DESPERTANDO v_dashboard_desarrollador ---
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT calificacion_promedio, num_proyectos_completados, proyectos_activos, proyectos_favoritos 
-            FROM v_dashboard_desarrollador 
-            WHERE desarrollador_id = %s
-        """, [request.user.id])
-        stats = cursor.fetchone()
-
-    # Si no tiene datos, inicializamos
-    promedio, p_comp, p_act, p_fav = stats if stats else (0, 0, 0, 0)
+    promedio = Valoracion.objects.filter(desarrollador=request.user, rol_evaluador='empresa').aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+    p_comp = Contratacion.objects.filter(desarrollador=request.user, estado='finalizada').count()
+    p_act = Contratacion.objects.filter(desarrollador=request.user, estado='activa').count()
+    p_fav = Favorito.objects.filter(desarrollador=request.user).count()
 
     # --- CONSULTAS DJANGO OPTIMIZADAS ---
     mis_postulaciones = Postulacion.objects.filter(desarrollador=request.user).select_related('proyecto')
@@ -343,26 +330,19 @@ def dashboard_admin(request):
     conversaciones.sort(key=lambda x: x['ultimo_mensaje'].fecha_envio, reverse=True)
 
     # 5. Ranking de Desarrolladores (Top >= 4.0 y Bajo Desempeño < 4.0)
-    ranking_top = []
-    ranking_bajo = []
-    with connection.cursor() as cursor:
-        # Mejores Calificados (Top Talento)
-        cursor.execute("""
-            SELECT nombre, num_proyectos_completados, calificacion_promedio, id 
-            FROM v_top_desarrolladores 
-            WHERE calificacion_promedio >= 4.0
-            ORDER BY calificacion_promedio DESC, num_proyectos_completados DESC LIMIT 5
-        """)
-        ranking_top = cursor.fetchall()
-        
-        # Peores Calificados (Talento en Alerta)
-        cursor.execute("""
-            SELECT nombre, num_proyectos_completados, calificacion_promedio, id 
-            FROM v_top_desarrolladores 
-            WHERE calificacion_promedio < 4.0
-            ORDER BY calificacion_promedio ASC, num_proyectos_completados ASC LIMIT 5
-        """)
-        ranking_bajo = cursor.fetchall()
+    desarrolladores_qs = Usuario.objects.filter(rol='desarrollador').annotate(
+        promedio=Coalesce(Avg('valoraciones_como_dev__puntuacion',
+            filter=Q(valoraciones_como_dev__rol_evaluador='empresa')),
+            Value(0.0), output_field=FloatField()),
+        proyectos_comp=Count('contrataciones_dev',
+            filter=Q(contrataciones_dev__estado='finalizada')),
+    )
+    ranking_top = list(desarrolladores_qs.filter(promedio__gte=4.0)
+        .order_by('-promedio', '-proyectos_comp')[:5]
+        .values_list('nombre', 'proyectos_comp', 'promedio', 'id'))
+    ranking_bajo = list(desarrolladores_qs.filter(promedio__lt=4.0)
+        .order_by('promedio', 'proyectos_comp')[:5]
+        .values_list('nombre', 'proyectos_comp', 'promedio', 'id'))
 
     # 6. Obtener Indicadores de Salud Global (Ya extraídos de stats_globales)
     salud_global = (promedio_global, p_ret)
@@ -374,26 +354,20 @@ def dashboard_admin(request):
         alertas_retraso = cursor.fetchall()
 
     # 8. Ranking de Empresas (Top >= 4.0 y Alerta < 4.0)
-    ranking_empresas_top = []
-    ranking_empresas_bajo = []
-    with connection.cursor() as cursor:
-        # Mejores Empresas (Socio SENA)
-        cursor.execute("""
-            SELECT nombre_usuario, nombre_empresa, promedio_reputacion, total_evaluaciones, usuario_id 
-            FROM v_reputacion_empresas 
-            WHERE promedio_reputacion >= 4.0
-            ORDER BY promedio_reputacion DESC, total_evaluaciones DESC LIMIT 5
-        """)
-        ranking_empresas_top = cursor.fetchall()
-        
-        # Empresas en Alerta (Bajo Desempeño)
-        cursor.execute("""
-            SELECT nombre_usuario, nombre_empresa, promedio_reputacion, total_evaluaciones, usuario_id 
-            FROM v_reputacion_empresas 
-            WHERE promedio_reputacion < 4.0
-            ORDER BY promedio_reputacion ASC, total_evaluaciones ASC LIMIT 5
-        """)
-        ranking_empresas_bajo = cursor.fetchall()
+    empresas_qs = Usuario.objects.filter(rol='empresa').annotate(
+        promedio=Coalesce(Avg('valoraciones_como_empresa__puntuacion',
+            filter=Q(valoraciones_como_empresa__rol_evaluador='desarrollador')),
+            Value(0.0), output_field=FloatField()),
+        total_eval=Count('valoraciones_como_empresa',
+            filter=Q(valoraciones_como_empresa__rol_evaluador='desarrollador')),
+        nombre_empresa=Coalesce(F('perfil_empresa__nombre_empresa'), Value('')),
+    )
+    ranking_empresas_top = list(empresas_qs.filter(promedio__gte=4.0)
+        .order_by('-promedio', '-total_eval')[:5]
+        .values_list('nombre', 'nombre_empresa', 'promedio', 'total_eval', 'id'))
+    ranking_empresas_bajo = list(empresas_qs.filter(promedio__lt=4.0)
+        .order_by('promedio', 'total_eval')[:5]
+        .values_list('nombre', 'nombre_empresa', 'promedio', 'total_eval', 'id'))
 
     # 9. Obtener Reseñas Recientes para Auditoría (valoraciones directas)
     resenas_auditoria = []
