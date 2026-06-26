@@ -413,17 +413,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ============================
-     GOAL PILLS
-     ============================ */
-  document.querySelectorAll('.goal-pills .goal-pill').forEach(function(pill) {
-    pill.addEventListener('click', function() {
-      var parent = this.parentElement;
-      parent.querySelectorAll('.goal-pill').forEach(function(p) { p.classList.remove('active'); });
-      this.classList.add('active');
-    });
-  });
-
-  /* ============================
      FLIP CARDS TOUCH
      ============================ */
   var isTouchDevice = !window.matchMedia('(hover: hover)').matches;
