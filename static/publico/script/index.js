@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
     projectForm.addEventListener('submit', function(e) {
       e.preventDefault();
       document.getElementById('toastTitle').textContent = 'Solicitud recibida';
-      document.getElementById('toastMsg').textContent = 'Un squad sera asignado a tu proyecto en 24-48h.';
+      document.getElementById('toastMsg').textContent = 'Recibimos tu solicitud. Te contactaremos pronto.';
       toast.classList.add('visible');
       setTimeout(function() { toast.classList.remove('visible'); }, 4500);
       projectForm.reset();

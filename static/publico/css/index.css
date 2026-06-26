@@ -897,6 +897,25 @@ body {
 }
 .newsletter-form button:hover { background: var(--accent-bright); }
 
+.faq-list { display: flex; flex-direction: column; gap: 4px; }
+.faq-item { border: 1px solid var(--border-dim); background: rgba(255,255,255,0.02); }
+.faq-item[open] { border-color: var(--accent-dim); background: rgba(255,255,255,0.04); }
+.faq-q {
+  cursor: pointer; list-style: none; padding: 10px 14px;
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--fg);
+  display: flex; justify-content: space-between; align-items: center;
+  user-select: none; transition: color 0.3s;
+}
+.faq-q::-webkit-details-marker { display: none; }
+.faq-q::after { content: '+'; font-size: 1rem; color: var(--accent); transition: transform 0.2s; }
+details[open] .faq-q::after { content: '−'; }
+.faq-q:hover { color: var(--accent); }
+.faq-a {
+  padding: 0 14px 12px; margin: 0;
+  font-family: var(--font-mono); font-size: 0.78rem; color: var(--fg-dim);
+  line-height: 1.5;
+}
+
 .foot-bot {
   max-width: 1200px; margin: 60px auto 0; padding-top: 20px;
   border-top: 1px solid var(--border-dim); display: flex; justify-content: space-between;
