@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TEM | Login</title>
+  <title>TEIR | Login</title>
   <link rel="stylesheet" href="{% static 'publico/css/stylesform.css' %}">
   <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
 </head>
@@ -14,7 +14,7 @@
     <div class="content-left">
       <h1>Plataforma de gestión y desarrollo<br>empresarial</h1>
       <p>Selecciona tu rol para continuar</p>
-      <div class="logo">TEM</div>
+      <div class="logo">TEIR</div>
     </div>
   </div>
 
@@ -27,18 +27,15 @@
         <div class="role-selector">
           <p class="role-label">Selecciona tu rol:</p>
           <div class="role-buttons">
-            <button type="button" class="role-btn" data-role="desarrollador">
+            <button type="button" class="role-btn active" data-role="desarrollador">
               <span class="role-icon">&#128187;</span> Desarrollador
-            </button>
-            <button type="button" class="role-btn active" data-role="administrador">
-              <span class="role-icon">&#128737;</span> Administrador
             </button>
             <button type="button" class="role-btn" data-role="empresa">
               <span class="role-icon">&#127970;</span> Empresa
             </button>
           </div>
           <div class="role-active-indicator">
-            Ingresando como: <strong id="rol-display">Administrador</strong>
+            Ingresando como: <strong id="rol-display">Desarrollador</strong>
           </div>
         </div>
 
@@ -50,7 +47,7 @@
 
         <form method="post" action="{% url 'login' %}">
           {% csrf_token %}
-          <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="administrador">
+          <input type="hidden" name="rol_seleccionado" id="rol_seleccionado" value="desarrollador">
 
           <div class="user-box">
             <input required type="text" id="username" name="username" value="{{ request.POST.username }}">
@@ -67,7 +64,7 @@
         </form>
 
         <div class="links">
-          ¿No te has registrado? <a href="{% url 'registro' %}">Registrarse</a><br>
+          ¿Primera vez? <a href="{% url 'registro' %}">Regístrate</a><br>
           ¿Olvidaste tu contraseña? <a href="{% url 'recuperar' %}">Recuperar</a>
         </div>
       </div>

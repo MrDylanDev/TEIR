@@ -85,7 +85,7 @@ def recuperar_view(request):
             mensaje = f"""
 Hola {usuario.nombre},
 
-Recibimos una solicitud para restablecer tu contraseña en TEM.
+Recibimos una solicitud para restablecer tu contraseña en TEIR.
 Para elegir una nueva contraseña, haz clic en el siguiente enlace:
 
 {enlace}
@@ -93,10 +93,10 @@ Para elegir una nueva contraseña, haz clic en el siguiente enlace:
 Este enlace expirará en 1 hora. Si no solicitaste este cambio, puedes ignorar este correo.
 
 Saludos,
-El equipo de TEM
+El equipo de TEIR
 """
             send_mail(
-                'Restablecer tu contraseña en TEM',
+                'Restablecer tu contraseña en TEIR',
                 mensaje,
                 settings.DEFAULT_FROM_EMAIL,
                 [email],
@@ -106,9 +106,9 @@ El equipo de TEM
             pass # No revelamos si el email existe o no por seguridad
             
         messages.success(request, "Si el correo electrónico existe en nuestra base de datos, recibirás instrucciones para restablecer tu contraseña.")
-        return redirect('login')
+        return redirect('/?login=1')
             
-    return render(request, 'publico/recuperarcon.html')
+    return redirect('/?login=1')
 
 def restablecer_view(request, token):
     try:
@@ -117,7 +117,7 @@ def restablecer_view(request, token):
         # Verificar expiración
         if usuario.token_expiracion and usuario.token_expiracion < timezone.now():
             messages.error(request, "El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.")
-            return redirect('recuperar')
+            return redirect('/?login=1')
             
         if request.method == 'POST':
             password = request.POST.get('password')

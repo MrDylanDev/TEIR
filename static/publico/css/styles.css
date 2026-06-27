@@ -30,7 +30,7 @@ overflow-x:hidden;
     animation: fadeOut 1s ease forwards;
     animation-delay: 1s; /* Tiempo que dura la intro */
 }
-/* Texto TEM animado */
+/* Texto TEIR animado */
 .intro-text {
     color: #fff;
     font-size: 5rem;

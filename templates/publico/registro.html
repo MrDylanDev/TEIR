@@ -4,116 +4,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro | TEM</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Registro | TEIR</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
   <link rel="stylesheet" href="{% static 'publico/css/styleregistro.css' %}">
 </head>
 <body>
-  <div class="register-container">
-    <div class="logo">TEM</div>
-    <h2>Crear Cuenta</h2>
-    <div class="subtitle">Únete al ecosistema profesional de talento SENA y empresas en Colombia.</div>
+  <div class="register-wrapper theme-dev">
+    <div class="register-image">
+      <img src="{% static 'IMG/reel/reel-4.jpg' %}" alt="" class="register-image-bg">
+      <div class="register-image-content">
+        <div class="logo">TEIR</div>
+        <h2>CREAR CUENTA</h2>
+        <p>Únete al ecosistema profesional de talento SENA y empresas en Colombia.</p>
+      </div>
+    </div>
 
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-          <i class="fa {% if message.tags == 'success' %}fa-check-circle{% else %}fa-circle-exclamation{% endif %}"></i> {{ message }}
+    <div class="register-form">
+      <div class="role-cards">
+        <div class="role-card active" data-role="desarrollador">
+          <i class="fa fa-terminal"></i>
+          <span>DESARROLLADOR</span>
         </div>
-      {% endfor %}
-    {% endif %}
-
-    <form method="post" action="{% url 'registro' %}">
-      {% csrf_token %}
-
-      <div class="form-group full-width {% if form.nombre.errors %}error{% endif %}">
-        <label>Nombre Completo</label>
-        <input type="text" name="nombre" value="{{ form.nombre.value|default:'' }}" placeholder="Ej: Alejandro Pérez" required autocomplete="off">
-        {% if form.nombre.errors %}
-          <ul class="errorlist">{% for error in form.nombre.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
+        <div class="role-card" data-role="empresa">
+          <i class="fa fa-building"></i>
+          <span>EMPRESA</span>
+        </div>
       </div>
 
-      <div class="form-group {% if form.username.errors %}error{% endif %}">
-        <label>Nombre de usuario</label>
-        <input type="text" name="username" value="{{ form.username.value|default:'' }}" placeholder="Ej: alejandro123" required autocomplete="off">
-        {% if form.username.errors %}
-          <ul class="errorlist">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% else %}
-          <small>Solo letras, números y (@/./+/-/_).</small>
-        {% endif %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">
+            <i class="fa {% if message.tags == 'success' %}fa-check-circle{% else %}fa-circle-exclamation{% endif %}"></i> {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% if form.rol.errors %}
+        <div class="alert alert-error">
+          <i class="fa fa-circle-exclamation"></i>
+          {% for error in form.rol.errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'registro' %}">
+        {% csrf_token %}
+
+        <div style="display: none;">
+          <select name="rol" id="id_rol">
+            <option value="desarrollador" selected>Desarrollador</option>
+            <option value="empresa">Empresa</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width {% if form.nombre.errors %}error{% endif %}">
+          <label>NOMBRE COMPLETO</label>
+          <input type="text" name="nombre" value="{{ form.nombre.value|default:'' }}" placeholder="Ej: Alejandro Pérez" required autocomplete="off">
+          {% if form.nombre.errors %}
+            <ul class="errorlist">{% for error in form.nombre.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if form.username.errors %}error{% endif %}">
+          <label>NOMBRE DE USUARIO</label>
+          <input type="text" name="username" value="{{ form.username.value|default:'' }}" placeholder="Ej: alejandro123" required autocomplete="off">
+          {% if form.username.errors %}
+            <ul class="errorlist">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+          {% else %}
+            <small>Solo letras, números y (@/./+/-/_).</small>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if form.email.errors %}error{% endif %}">
+          <label>CORREO ELECTRÓNICO</label>
+          <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="ejemplo@correo.com" required autocomplete="off">
+          {% if form.email.errors %}
+            <ul class="errorlist">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group" id="container_tipo_documento" style="display: none;">
+          <label>TIPO DE DOCUMENTO</label>
+          {{ form.tipo_documento }}
+          {% if form.tipo_documento.errors %}
+            <ul class="errorlist">{% for error in form.tipo_documento.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group full-width {% if form.identificacion.errors %}error{% endif %}">
+          <label id="label_cedula">NÚMERO DE IDENTIFICACIÓN</label>
+          <input type="text" name="identificacion" value="{{ form.identificacion.value|default:'' }}" placeholder="Ej: 1002345678" required autocomplete="off">
+          {% if form.identificacion.errors %}
+            <ul class="errorlist">{% for error in form.identificacion.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <div class="form-group full-width {% if form.fecha_nacimiento.errors %}error{% endif %}">
+          <label>FECHA DE NACIMIENTO</label>
+          <input type="date" name="fecha_nacimiento" value="{{ form.fecha_nacimiento.value|default:'' }}" required>
+          {% if form.fecha_nacimiento.errors %}
+            <ul class="errorlist">{% for error in form.fecha_nacimiento.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+          {% else %}
+            <small>Recuerda que debes ser mayor de edad.</small>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if form.password1.errors %}error{% endif %}">
+          <label>CONTRASEÑA</label>
+          <input type="password" name="password1" placeholder="••••••••" required>
+          {% if form.password1.errors %}
+            <ul class="errorlist">{% for error in form.password1.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+          {% else %}
+            <small>Mín. 8 caracteres alfanuméricos.</small>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if form.password2.errors %}error{% endif %}">
+          <label>CONFIRMAR CONTRASEÑA</label>
+          <input type="password" name="password2" placeholder="••••••••" required>
+          {% if form.password2.errors %}
+            <ul class="errorlist">{% for error in form.password2.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+
+        <button type="submit">[ COMPLETAR REGISTRO ]</button>
+      </form>
+
+      <div class="login-link">
+        ¿Ya tienes una cuenta? <a href="{% url 'inicio' %}?login=1">INICIA SESIÓN</a>
       </div>
-
-      <div class="form-group {% if form.email.errors %}error{% endif %}">
-        <label>Correo electrónico</label>
-        <input type="email" name="email" value="{{ form.email.value|default:'' }}" placeholder="ejemplo@correo.com" required autocomplete="off">
-        {% if form.email.errors %}
-          <ul class="errorlist">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-      </div>
-
-      <div class="form-group full-width {% if form.rol.errors %}error{% endif %}">
-        <label>Selecciona tu rol</label>
-        <select name="rol" id="id_rol" required>
-          <option value="" disabled {% if not form.rol.value %}selected{% endif %}>-- Elige cómo usarás TEM --</option>
-          <option value="empresa" {% if form.rol.value == 'empresa' %}selected{% endif %}>Soy Empresa (Busco talento)</option>
-          <option value="desarrollador" {% if form.rol.value == 'desarrollador' %}selected{% endif %}>Soy Desarrollador (SENA)</option>
-        </select>
-        {% if form.rol.errors %}
-          <ul class="errorlist">{% for error in form.rol.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-      </div>
-
-      <div class="form-group" id="container_tipo_documento" style="display: none;">
-        <label>Tipo de Documento</label>
-        {{ form.tipo_documento }}
-        {% if form.tipo_documento.errors %}
-          <ul class="errorlist">{% for error in form.tipo_documento.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-      </div>
-
-      <div class="form-group {% if form.identificacion.errors %}error{% endif %}">
-        <label id="label_cedula">Número de Identificación</label>
-        <input type="text" name="identificacion" value="{{ form.identificacion.value|default:'' }}" placeholder="Ej: 1002345678" required autocomplete="off">
-        {% if form.identificacion.errors %}
-          <ul class="errorlist">{% for error in form.identificacion.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-      </div>
-
-      <div class="form-group full-width {% if form.fecha_nacimiento.errors %}error{% endif %}">
-        <label>Fecha de Nacimiento</label>
-        <input type="date" name="fecha_nacimiento" value="{{ form.fecha_nacimiento.value|default:'' }}" required>
-        {% if form.fecha_nacimiento.errors %}
-          <ul class="errorlist">{% for error in form.fecha_nacimiento.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% else %}
-          <small>Recuerda que debes ser mayor de edad.</small>
-        {% endif %}
-      </div>
-
-      <div class="form-group {% if form.password1.errors %}error{% endif %}">
-        <label>Contraseña</label>
-        <input type="password" name="password1" placeholder="••••••••" required>
-        {% if form.password1.errors %}
-          <ul class="errorlist">{% for error in form.password1.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% else %}
-          <small>Mín. 8 caracteres alfanuméricos.</small>
-        {% endif %}
-      </div>
-
-      <div class="form-group {% if form.password2.errors %}error{% endif %}">
-        <label>Confirmar contraseña</label>
-        <input type="password" name="password2" placeholder="••••••••" required>
-        {% if form.password2.errors %}
-          <ul class="errorlist">{% for error in form.password2.errors %}<li>{{ error }}</li>{% endfor %}</ul>
-        {% endif %}
-      </div>
-
-      <button type="submit" class="full-width">Completar registro</button>
-    </form>
-
-    <div class="login-link">
-      ¿Ya tienes una cuenta? <a href="{% url 'inicio' %}?login=1">Inicia sesión aquí</a>
     </div>
   </div>
 

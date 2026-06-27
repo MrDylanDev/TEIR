@@ -1,5 +1,5 @@
 /* =========================================
-   TEM // SYSTEM.ROOT — Landing Interactions
+   TEIR // SYSTEM.ROOT — Landing Interactions
    ========================================= */
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', function () {
      HERO REEL — frame cycler
      ============================ */
   var heroVisible = true;
+  var tickZoomId = null;
+  var tickZoom = null;
   const frames = document.querySelectorAll('.reel-frame');
-  const chapterNum = document.getElementById('chapterNum');
-  const reelProgress = document.getElementById('reelProgress');
-  if (frames.length && chapterNum && reelProgress) {
+  if (frames.length) {
     let currentFrame = 0;
     const frameDuration = 8000;
     let frameStartTime = performance.now();
@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       const newImg = frames[idx].querySelector('img');
       if (newImg) newImg.style.transform = 'scale(1.0)';
-      chapterNum.textContent = String(idx + 1).padStart(2, '0');
       frameStartTime = performance.now();
     }
 
@@ -40,19 +39,20 @@ document.addEventListener('DOMContentLoaded', function () {
       showFrame(currentFrame);
     }, frameDuration);
 
-    function tickZoom() {
-      if (!heroVisible) { requestAnimationFrame(tickZoom); return; }
+    tickZoom = function() {
+      if (!heroVisible) {
+        tickZoomId = requestAnimationFrame(tickZoom);
+        return;
+      }
       const elapsed = performance.now() - frameStartTime;
       const progress = Math.min(elapsed / frameDuration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       const scale = 1.0 + eased * 0.15;
       const activeImg = document.querySelector('.reel-frame.active img');
       if (activeImg) activeImg.style.transform = 'scale(' + scale + ')';
-      const pct = Math.min(progress * 100, 100);
-      reelProgress.style.width = pct + '%';
-      requestAnimationFrame(tickZoom);
+      tickZoomId = requestAnimationFrame(tickZoom);
     }
-    requestAnimationFrame(tickZoom);
+    tickZoomId = requestAnimationFrame(tickZoom);
   }
 
   /* ============================
@@ -123,6 +123,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (entry.target === heroSection) {
           heroPassed = !entry.isIntersecting;
           heroVisible = entry.isIntersecting;
+          if (heroVisible && tickZoomId) {
+            cancelAnimationFrame(tickZoomId);
+            tickZoomId = requestAnimationFrame(tickZoom);
+          }
         }
         if (entry.target === bookingAnchor) atBooking = entry.isIntersecting;
         updateSticky();
@@ -318,25 +322,6 @@ document.addEventListener('DOMContentLoaded', function () {
   new StoriesCarousel(document.getElementById('storyTrack'), { interval: 4500 });
 
   /* ============================
-     SYS TOGGLE (mute/sound wave bars)
-     ============================ */
-  (function() {
-    const btn = document.getElementById('sysToggle');
-    const bars = document.getElementById('waveBars');
-    const label = document.getElementById('sysLabel');
-    const icon = document.getElementById('sysIcon');
-    let active = false;
-    if (btn) btn.addEventListener('click', function() {
-      active = !active;
-      bars.classList.toggle('unmuted', active);
-      label.textContent = active ? 'Sound On' : 'Muted';
-      icon.className = active ? 'fa fa-volume-high' : 'fa fa-volume-xmark';
-      icon.style.color = active ? 'var(--accent)' : 'var(--fg-dim)';
-      btn.style.borderColor = active ? 'var(--accent)' : '';
-    });
-  })();
-
-  /* ============================
      HEADLINE CHAR REVEAL (triggers after 400ms)
      ============================ */
   setTimeout(function() {
@@ -353,6 +338,8 @@ document.addEventListener('DOMContentLoaded', function () {
       this.classList.add('active');
       var rol = document.getElementById('rol_seleccionado');
       if (rol) rol.value = this.dataset.role;
+      var modal = document.getElementById('loginModal');
+      if (modal) modal.classList.toggle('theme-dev', this.dataset.role === 'desarrollador');
     });
   });
 
@@ -404,20 +391,65 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ============================
-     GOAL PILLS
+     RECOVERY FORM TOGGLE (inside modal)
      ============================ */
-  document.querySelectorAll('.goal-pills .goal-pill').forEach(function(pill) {
-    pill.addEventListener('click', function() {
-      var parent = this.parentElement;
-      parent.querySelectorAll('.goal-pill').forEach(function(p) { p.classList.remove('active'); });
-      this.classList.add('active');
-    });
-  });
+  var recoveryLink = document.getElementById('recoveryLink');
+  var loginFormDiv = document.getElementById('loginForm');
+  var recoveryFormDiv = document.getElementById('recoveryForm');
+  var recoveryInner;
+  var modalTitle = document.querySelector('#loginModal .modal-title');
+  var recoveryOriginalHTML = recoveryFormDiv ? recoveryFormDiv.innerHTML : '';
+
+  function showLogin() {
+    if (loginFormDiv) loginFormDiv.style.display = 'block';
+    if (recoveryFormDiv) recoveryFormDiv.style.display = 'none';
+    if (modalTitle) modalTitle.textContent = 'AUTENTICACIÓN SEGURA';
+  }
+
+  function showRecovery() {
+    if (loginFormDiv) loginFormDiv.style.display = 'none';
+    if (recoveryFormDiv) { recoveryFormDiv.style.display = 'block'; recoveryFormDiv.innerHTML = recoveryOriginalHTML; reattachRecovery(); }
+    if (modalTitle) modalTitle.textContent = 'RECUPERAR CONTRASEÑA';
+  }
+
+  function reattachRecovery() {
+    recoveryInner = document.getElementById('recoveryFormInner');
+    if (recoveryInner) {
+      recoveryInner.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = this.querySelector('button');
+        var orig = btn.textContent;
+        btn.textContent = '[ ENVIANDO... ]';
+        btn.disabled = true;
+        fetch(this.action, { method: 'POST', body: new FormData(this) })
+          .then(function() {
+            recoveryFormDiv.innerHTML = '<div class="alert alert-success" style="background: rgba(var(--accent-rgb), 0.08); border-left: 3px solid var(--accent); color: var(--accent-bright); padding: 12px 16px; font-family: var(--font-mono); font-size: 0.75rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;"><i class="fa fa-check-circle"></i> Si el correo existe, recibirás instrucciones para restablecer tu contraseña.</div><div style="text-align: center; margin-top: 20px;"><a href="#" id="backToLoginLink2" class="login-link" style="color: var(--accent);">&larr; VOLVER AL INICIO DE SESIÓN</a></div>';
+            document.getElementById('backToLoginLink2').addEventListener('click', function(e) { e.preventDefault(); showLogin(); });
+          })
+          .catch(function() {
+            btn.textContent = orig;
+            btn.disabled = false;
+            alert('Error de conexión. Intenta de nuevo.');
+          });
+      });
+    }
+    var bl = document.getElementById('backToLoginLink');
+    if (bl) bl.addEventListener('click', function(e) { e.preventDefault(); showLogin(); });
+  }
+
+  if (recoveryLink) {
+    recoveryLink.addEventListener('click', function(e) { e.preventDefault(); showRecovery(); });
+  }
+
+  var loginModalEl = document.getElementById('loginModal');
+  if (loginModalEl) {
+    loginModalEl.addEventListener('hidden.bs.modal', function() { showLogin(); });
+  }
 
   /* ============================
      FLIP CARDS TOUCH
      ============================ */
-  var isTouchDevice = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var isTouchDevice = !window.matchMedia('(hover: hover)').matches;
   document.querySelectorAll('.flip-card').forEach(function(card) {
     card.addEventListener('click', function(e) {
       if (isTouchDevice && !e.target.closest('a')) {
@@ -429,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ============================
      CUSTOM CURSOR
      ============================ */
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  if (window.matchMedia('(hover: hover)').matches) {
     var dot = document.getElementById('cursorDot');
     var ring = document.getElementById('cursorRing');
     if (dot && ring) {
@@ -464,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function () {
     projectForm.addEventListener('submit', function(e) {
       e.preventDefault();
       document.getElementById('toastTitle').textContent = 'Solicitud recibida';
-      document.getElementById('toastMsg').textContent = 'Un squad sera asignado a tu proyecto en 24-48h.';
+      document.getElementById('toastMsg').textContent = 'Recibimos tu solicitud. Te contactaremos pronto.';
       toast.classList.add('visible');
       setTimeout(function() { toast.classList.remove('visible'); }, 4500);
       projectForm.reset();
