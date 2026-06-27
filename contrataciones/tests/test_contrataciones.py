@@ -61,9 +61,8 @@ class TestContratacionModel:
 class TestListarContrataciones:
     """Tests for listar_contrataciones_empresa view."""
 
-    @pytest.mark.xfail(reason='BUG: template contrataciones/lista_empresa.html missing')
     def test_empresa_accede(self, auth_client, empresa_user):
-        """Empresa can list their contrataciones (template missing)."""
+        """Empresa can list their contrataciones."""
         response = auth_client.get(reverse('listar_contrataciones_empresa'))
         assert response.status_code == 200
 
