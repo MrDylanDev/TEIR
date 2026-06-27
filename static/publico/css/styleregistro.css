@@ -1,173 +1,283 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #000000;
+  --bg-darker: #050505;
+  --bg-card: #0a0a0a;
+  --bg-card-hover: #111111;
+  --fg: #ffffff;
+  --fg-dim: #a0a0a0;
+  --muted: #555555;
+  --border-dim: #1a1a1a;
+  --border-mid: #333333;
+  --accent: #00e676;
+  --accent-rgb: 0, 230, 118;
+  --accent-bright: #69f0ae;
+  --accent-dim: #00c853;
+  --font-main: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
 body {
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--fg);
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Grain overlay ── */
+body::before {
+  content: '';
+  position: fixed; inset: -10%; pointer-events: none; z-index: 200;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+}
+
+/* ── Wrapper split ── */
+.register-wrapper {
   display: flex;
-  justify-content: center;
+  min-height: 100vh;
+}
+
+/* ── Lado izquierdo: imagen ── */
+.register-image {
+  flex: 1 1 45%;
+  min-width: 280px;
+  position: relative;
+  display: flex;
   align-items: center;
-  background: #0b0b0d;
-  color: #eaeaea;
-  padding: 40px 16px;
+  justify-content: center;
+  overflow: hidden;
 }
 
-/* ── Logo ── */
-.logo {
-  position: absolute;
-  top: 40px;
-  left: 60px;
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: 4px;
-  opacity: .6;
+.register-image-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.6) brightness(0.35);
 }
 
-/* ── Card principal ── */
-.register-container {
-  width: 100%;
-  max-width: 520px;
-  background: #111114;
-  padding: 50px 45px;
-  border-radius: 16px;
-  border: 1px solid #1c1c20;
+.register-image::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, transparent 50%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+}
+
+.register-image-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 40px;
+  max-width: 420px;
+}
+
+.register-image-content .logo {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  letter-spacing: 6px;
+  opacity: 0.5;
+  margin-bottom: 16px;
+}
+
+.register-image-content h2 {
+  font-family: var(--font-main);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.register-image-content p {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--fg-dim);
+  line-height: 1.7;
+}
+
+/* ── Lado derecho: formulario ── */
+.register-form {
+  flex: 1 0 360px;
+  max-width: 540px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  padding: 40px 36px;
+  overflow-y: auto;
+}
+
+/* ── Role cards ── */
+.role-cards {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.role-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--border-dim);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s;
   position: relative;
 }
 
-/* ── Título ── */
-.register-container h2 {
-  font-size: 22px;
-  font-weight: 600;
-  color: #ffffff;
-  margin-bottom: -8px;
+.role-card i {
+  font-size: 1.4rem;
+  color: var(--fg-dim);
+  transition: color 0.25s;
+  width: 28px;
+  text-align: center;
 }
 
-/* ── Subtítulo ── */
-.subtitle {
-  font-size: 13px;
-  color: #9a9a9a;
-  line-height: 1.6;
-  margin-bottom: 4px;
+.role-card span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.25s;
 }
 
-/* ── Alertas (mensajes Django) ── */
+.role-card:hover {
+  border-color: var(--border-mid);
+  background: var(--bg-card-hover);
+}
+
+.role-card.active {
+  border-color: var(--fg);
+  background: var(--fg);
+}
+
+.role-card.active::before,
+.role-card.active::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+.role-card.active::before {
+  top: -1px; left: -1px;
+  border-top: 1px solid var(--fg);
+  border-left: 1px solid var(--fg);
+}
+.role-card.active::after {
+  bottom: -1px; right: -1px;
+  border-bottom: 1px solid var(--fg);
+  border-right: 1px solid var(--fg);
+}
+
+.role-card.active i,
+.role-card.active span {
+  color: var(--bg);
+}
+
+/* ── Alertas ── */
 .alert {
   padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 13px;
+  border-left: 3px solid;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .alert-success {
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #4ade80;
+  background: rgba(var(--accent-rgb), 0.08);
+  border-color: var(--accent);
+  color: var(--accent-bright);
 }
 
-.alert-error,
-.alert-warning {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
+.alert-error {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: #ef4444;
   color: #f87171;
 }
 
-/* ── Grid de campos ── */
+/* ── Form grid ── */
 form {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
 }
 
-/* ── Grupo de campo ── */
-.form-group {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.form-group.full-width { grid-column: 1 / -1; }
 
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-/* Botón full-width */
-button.full-width {
-  grid-column: 1 / -1;
-}
-
-/* ── Labels ── */
 .form-group label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #777;
-  letter-spacing: .4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+  margin-bottom: 6px;
+  display: block;
   text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-/* ── Inputs y Selects ── */
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 14px 14px;
-  background: #0f0f12;
-  border: 1px solid #222228;
-  border-radius: 8px;
-  color: #eaeaea;
-  font-size: 14px;
+  padding: 13px 16px;
+  background: transparent;
+  border: 1px solid var(--border-mid);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
   outline: none;
-  transition: border .25s ease, background .25s ease;
+  transition: border-color 0.25s;
   -webkit-appearance: none;
   appearance: none;
+  border-radius: 0;
 }
 
 .form-group input::placeholder {
-  color: #44444a;
+  color: var(--muted);
+  font-family: var(--font-mono);
 }
 
 .form-group input:focus,
 .form-group select:focus {
-  border-color: #ffffff;
-  background: #141418;
+  border-color: var(--fg);
 }
 
-/* Estado error en el campo */
 .form-group.error input,
 .form-group.error select {
   border-color: rgba(239, 68, 68, 0.6);
-  background: rgba(239, 68, 68, 0.04);
 }
 
-/* ── Select flecha custom ── */
 .form-group select {
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23777' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23555' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
 }
 
 select option {
-  background: #111114;
-  color: #eaeaea;
+  background: var(--bg-card);
+  color: var(--fg);
 }
 
-/* ── Texto de ayuda ── */
 .form-group small {
-  font-size: 11px;
-  color: #555;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--muted);
   line-height: 1.4;
+  display: block;
+  margin-top: 4px;
 }
 
-/* ── Errores de validación ── */
 .errorlist {
   list-style: none;
   margin: 0;
@@ -175,30 +285,33 @@ select option {
 }
 
 .errorlist li {
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   color: #f87171;
   margin-top: 2px;
 }
 
 /* ── Botón submit ── */
 button[type="submit"] {
+  grid-column: 1 / -1;
   width: 100%;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border-mid);
   padding: 16px;
-  border-radius: 8px;
-  border: 1px solid #2a2a2f;
-  background: #1a1a1f;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: all .25s ease;
-  letter-spacing: .3px;
+  transition: all 0.25s;
+  letter-spacing: 0.1em;
+  margin-top: 8px;
 }
 
 button[type="submit"]:hover {
-  background: #ffffff;
-  color: #0b0b0d;
-  border-color: #ffffff;
+  border-color: var(--fg);
+  background: rgba(255,255,255,0.05);
 }
 
 button[type="submit"]:active {
@@ -208,38 +321,82 @@ button[type="submit"]:active {
 /* ── Link de login ── */
 .login-link {
   text-align: center;
-  font-size: 13px;
-  color: #555;
-  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 24px;
 }
 
 .login-link a {
-  color: #9a9a9a;
+  color: var(--fg);
   text-decoration: none;
-  transition: color .2s ease;
+  transition: opacity 0.2s;
 }
 
 .login-link a:hover {
-  color: #ffffff;
+  opacity: 0.7;
+}
+
+/* ── DEV green theme ── */
+.register-wrapper.theme-dev .role-card.active {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.06);
+}
+.register-wrapper.theme-dev .role-card.active::before {
+  border-top-color: var(--accent);
+  border-left-color: var(--accent);
+}
+.register-wrapper.theme-dev .role-card.active::after {
+  border-bottom-color: var(--accent);
+  border-right-color: var(--accent);
+}
+.register-wrapper.theme-dev .role-card.active i,
+.register-wrapper.theme-dev .role-card.active span {
+  color: var(--accent);
+}
+
+.register-wrapper.theme-dev .form-group input:focus,
+.register-wrapper.theme-dev .form-group select:focus {
+  border-color: var(--accent);
+}
+
+.register-wrapper.theme-dev button[type="submit"] {
+  background: var(--accent);
+  color: #000;
+  border: none;
+}
+.register-wrapper.theme-dev button[type="submit"]:hover {
+  opacity: 0.85;
+  background: var(--accent);
+}
+
+.register-wrapper.theme-dev .login-link a {
+  color: var(--accent);
 }
 
 /* ── Responsive ── */
-@media (max-width: 540px) {
-  .register-container {
-    padding: 36px 24px;
+@media (max-width: 768px) {
+  .register-wrapper {
+    flex-direction: column;
+  }
+
+  .register-image {
+    min-height: 200px;
+    flex: none;
+  }
+
+  .register-image-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .register-form {
+    padding: 32px 24px;
+    max-width: 100%;
   }
 
   form {
     grid-template-columns: 1fr;
   }
 
-  .form-group.full-width,
-  button.full-width {
-    grid-column: 1;
-  }
-
-  .logo {
-    top: 20px;
-    left: 24px;
-  }
+  .form-group.full-width { grid-column: 1; }
 }

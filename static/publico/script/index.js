@@ -1,5 +1,5 @@
 /* =========================================
-   TEM // SYSTEM.ROOT — Landing Interactions
+   TEIR // SYSTEM.ROOT — Landing Interactions
    ========================================= */
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -18,9 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var tickZoomId = null;
   var tickZoom = null;
   const frames = document.querySelectorAll('.reel-frame');
-  const chapterNum = document.getElementById('chapterNum');
-  const reelProgress = document.getElementById('reelProgress');
-  if (frames.length && chapterNum && reelProgress) {
+  if (frames.length) {
     let currentFrame = 0;
     const frameDuration = 8000;
     let frameStartTime = performance.now();
@@ -33,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       const newImg = frames[idx].querySelector('img');
       if (newImg) newImg.style.transform = 'scale(1.0)';
-      chapterNum.textContent = String(idx + 1).padStart(2, '0');
       frameStartTime = performance.now();
     }
 
@@ -53,8 +50,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const scale = 1.0 + eased * 0.15;
       const activeImg = document.querySelector('.reel-frame.active img');
       if (activeImg) activeImg.style.transform = 'scale(' + scale + ')';
-      const pct = Math.min(progress * 100, 100);
-      reelProgress.style.width = pct + '%';
       tickZoomId = requestAnimationFrame(tickZoom);
     }
     tickZoomId = requestAnimationFrame(tickZoom);
@@ -327,25 +322,6 @@ document.addEventListener('DOMContentLoaded', function () {
   new StoriesCarousel(document.getElementById('storyTrack'), { interval: 4500 });
 
   /* ============================
-     SYS TOGGLE (mute/sound wave bars)
-     ============================ */
-  (function() {
-    const btn = document.getElementById('sysToggle');
-    const bars = document.getElementById('waveBars');
-    const label = document.getElementById('sysLabel');
-    const icon = document.getElementById('sysIcon');
-    let active = false;
-    if (btn) btn.addEventListener('click', function() {
-      active = !active;
-      bars.classList.toggle('unmuted', active);
-      label.textContent = active ? 'Sound On' : 'Muted';
-      icon.className = active ? 'fa fa-volume-high' : 'fa fa-volume-xmark';
-      icon.style.color = active ? 'var(--accent)' : 'var(--fg-dim)';
-      btn.style.borderColor = active ? 'var(--accent)' : '';
-    });
-  })();
-
-  /* ============================
      HEADLINE CHAR REVEAL (triggers after 400ms)
      ============================ */
   setTimeout(function() {
@@ -362,6 +338,8 @@ document.addEventListener('DOMContentLoaded', function () {
       this.classList.add('active');
       var rol = document.getElementById('rol_seleccionado');
       if (rol) rol.value = this.dataset.role;
+      var modal = document.getElementById('loginModal');
+      if (modal) modal.classList.toggle('theme-dev', this.dataset.role === 'desarrollador');
     });
   });
 
@@ -410,6 +388,62 @@ document.addEventListener('DOMContentLoaded', function () {
      ============================ */
   if (new URLSearchParams(window.location.search).get('login') === '1') {
     new bootstrap.Modal(document.getElementById('loginModal')).show();
+  }
+
+  /* ============================
+     RECOVERY FORM TOGGLE (inside modal)
+     ============================ */
+  var recoveryLink = document.getElementById('recoveryLink');
+  var loginFormDiv = document.getElementById('loginForm');
+  var recoveryFormDiv = document.getElementById('recoveryForm');
+  var recoveryInner;
+  var modalTitle = document.querySelector('#loginModal .modal-title');
+  var recoveryOriginalHTML = recoveryFormDiv ? recoveryFormDiv.innerHTML : '';
+
+  function showLogin() {
+    if (loginFormDiv) loginFormDiv.style.display = 'block';
+    if (recoveryFormDiv) recoveryFormDiv.style.display = 'none';
+    if (modalTitle) modalTitle.textContent = 'AUTENTICACIÓN SEGURA';
+  }
+
+  function showRecovery() {
+    if (loginFormDiv) loginFormDiv.style.display = 'none';
+    if (recoveryFormDiv) { recoveryFormDiv.style.display = 'block'; recoveryFormDiv.innerHTML = recoveryOriginalHTML; reattachRecovery(); }
+    if (modalTitle) modalTitle.textContent = 'RECUPERAR CONTRASEÑA';
+  }
+
+  function reattachRecovery() {
+    recoveryInner = document.getElementById('recoveryFormInner');
+    if (recoveryInner) {
+      recoveryInner.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = this.querySelector('button');
+        var orig = btn.textContent;
+        btn.textContent = '[ ENVIANDO... ]';
+        btn.disabled = true;
+        fetch(this.action, { method: 'POST', body: new FormData(this) })
+          .then(function() {
+            recoveryFormDiv.innerHTML = '<div class="alert alert-success" style="background: rgba(var(--accent-rgb), 0.08); border-left: 3px solid var(--accent); color: var(--accent-bright); padding: 12px 16px; font-family: var(--font-mono); font-size: 0.75rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;"><i class="fa fa-check-circle"></i> Si el correo existe, recibirás instrucciones para restablecer tu contraseña.</div><div style="text-align: center; margin-top: 20px;"><a href="#" id="backToLoginLink2" class="login-link" style="color: var(--accent);">&larr; VOLVER AL INICIO DE SESIÓN</a></div>';
+            document.getElementById('backToLoginLink2').addEventListener('click', function(e) { e.preventDefault(); showLogin(); });
+          })
+          .catch(function() {
+            btn.textContent = orig;
+            btn.disabled = false;
+            alert('Error de conexión. Intenta de nuevo.');
+          });
+      });
+    }
+    var bl = document.getElementById('backToLoginLink');
+    if (bl) bl.addEventListener('click', function(e) { e.preventDefault(); showLogin(); });
+  }
+
+  if (recoveryLink) {
+    recoveryLink.addEventListener('click', function(e) { e.preventDefault(); showRecovery(); });
+  }
+
+  var loginModalEl = document.getElementById('loginModal');
+  if (loginModalEl) {
+    loginModalEl.addEventListener('hidden.bs.modal', function() { showLogin(); });
   }
 
   /* ============================
