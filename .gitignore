@@ -41,6 +41,9 @@ scratch/
 .env.docker
 mysql_data/
 
+# User uploads
+media/
+
 # AI Tools
 .atl/
 .pi/
