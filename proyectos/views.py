@@ -19,7 +19,7 @@ def listar_proyectos(request):
     proyectos_qs = Proyecto.objects.filter(estado='publicado').select_related(
         'empresa__perfil_empresa'
     ).annotate(
-        num_postulaciones=Count('postulacion_set'),
+        num_postulaciones=Count('postulacion'),
         empresa_reputacion=Coalesce(Avg('empresa__valoraciones_como_empresa__puntuacion',
             filter=Q(empresa__valoraciones_como_empresa__rol_evaluador='desarrollador')),
             Value(0.0), output_field=FloatField()),
