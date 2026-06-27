@@ -325,6 +325,9 @@
                   </button>
                 {% endif %}
                 {% if proyecto.num_desarrolladores >= 2 %}
+                  <a href="{% url 'gestionar_equipos' proyecto.proyecto_id %}" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-users"></i> Gestionar Grupos
+                  </a>
                   <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" class="btn btn-secondary btn-sm">
                     <i class="fa fa-users"></i> Espacio de Trabajo
                   </a>

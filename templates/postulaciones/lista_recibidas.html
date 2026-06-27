@@ -96,6 +96,11 @@
                       <div>
                           <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">{{ post.desarrollador.nombre }}</h3>
                           <div style="font-size: 12px; color: var(--text-secondary);">
+                              {% if post.desarrollador.programa_formacion %}
+                                <i class="fa fa-graduation-cap" style="margin-right: 3px;"></i> {{ post.desarrollador.programa_formacion }}
+                                {% if post.desarrollador.ficha %} &nbsp;·&nbsp; Ficha {{ post.desarrollador.ficha }}{% endif %}
+                                <br>
+                              {% endif %}
                               <i class="fa fa-star" style="color: #f59e0b; margin-right: 4px;"></i> {{ post.calificacion_promedio|default:"0.0" }} reputación &nbsp;·&nbsp; 
                               <i class="fa fa-trophy" style="color: var(--text-muted); margin-left: 4px; margin-right: 4px;"></i> {{ post.proyectos_completados }} completados
                           </div>
@@ -106,6 +111,13 @@
                       <strong style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); display: block; margin-bottom: 6px;">Habilidades Destacadas</strong>
                       <p style="font-size: 13.5px; color: var(--text-secondary);">{{ post.habilidades|default:"No se registraron habilidades" }}</p>
                   </div>
+
+                  {% if post.portafolio_url %}
+                  <div style="margin-bottom: 16px;">
+                      <strong style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); display: block; margin-bottom: 6px;">Portafolio / URL</strong>
+                      <a href="{{ post.portafolio_url }}" target="_blank" rel="noopener" style="font-size: 13.5px; color: var(--accent); word-break: break-all;">{{ post.portafolio_url }}</a>
+                  </div>
+                  {% endif %}
                   
                   <div>
                       <strong style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); display: block; margin-bottom: 6px;">Carta de Presentación</strong>

@@ -63,7 +63,7 @@ def dashboard_empresa(request):
     dev_con = Contratacion.objects.filter(empresa=request.user, estado='activa').count()
 
     en_desarrollo_qs = Proyecto.objects.filter(
-        empresa=request.user, estado='en_desarrollo'
+        empresa=request.user, estado__in=['en_desarrollo', 'en_revision']
     ).annotate(
         hitos_completados=Count('entregables', filter=Q(entregables__estado='completado')),
         hitos_totales=Count('entregables'),

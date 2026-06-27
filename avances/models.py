@@ -12,7 +12,7 @@ class Avance(models.Model):
     desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, limit_choices_to={'rol': 'desarrollador'})
     entregable = models.ForeignKey('proyectos.Entregable', on_delete=models.CASCADE, db_column='entregable_id')
     descripcion = models.TextField()
-    archivo_url = models.CharField(max_length=500, blank=True, null=True)
+    archivo_url = models.CharField(max_length=500)
     fecha_hora = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     comentario_revision = models.TextField(blank=True, null=True)

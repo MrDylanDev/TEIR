@@ -42,6 +42,10 @@ def registrar_avance(request, proyecto_id):
             archivo_url = request.POST.get('archivo_url')
             entregable_id = request.POST.get('entregable_id')
             
+            if not archivo_url:
+                messages.error(request, "Debes proporcionar una URL de evidencia (enlace al código, captura, etc.).")
+                return redirect('registrar_avance', proyecto_id=proyecto.id)
+
             if not entregable_id:
                 messages.error(request, "Debes seleccionar un hito para registrar el avance.")
                 return redirect('registrar_avance', proyecto_id=proyecto.id)
@@ -126,6 +130,9 @@ def revisar_avance(request, avance_id):
         comentario = request.POST.get('comentario', '') 
         
         if accion in ['aceptar', 'rechazar']:
+            if accion == 'rechazar' and not comentario.strip():
+                messages.error(request, "Debes escribir un comentario explicando por qué rechazas el avance.")
+                return redirect('ver_avances', proyecto_id=avance.proyecto.id)
             try:
                 with transaction.atomic():
                     if accion == 'aceptar':

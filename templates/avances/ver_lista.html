@@ -134,7 +134,7 @@
                     <div>
                       <form method="post" action="{% url 'revisar_avance' avance.id %}" style="display:flex; flex-direction:column; gap:8px; min-width:240px;">
                         {% csrf_token %}
-                        <textarea name="comentario" placeholder="Escribe tus observaciones..." style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; resize:none; min-height:55px; font-family:inherit; color:var(--text-primary); background:var(--card-bg);"></textarea>
+                        <textarea name="comentario" required placeholder="Explica por qué rechazas este avance (obligatorio)..." style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; resize:none; min-height:55px; font-family:inherit; color:var(--text-primary); background:var(--card-bg);"></textarea>
                         <div style="display:flex; gap:6px;">
                           <button type="submit" name="accion" value="aceptar" class="btn btn-success btn-sm" style="flex:1; justify-content:center;"><i class="fa fa-check"></i> Aceptar</button>
                           <button type="submit" name="accion" value="rechazar" class="btn btn-danger btn-sm" style="flex:1; justify-content:center;"><i class="fa fa-xmark"></i> Rechazar</button>

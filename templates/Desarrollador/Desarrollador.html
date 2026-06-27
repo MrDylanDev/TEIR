@@ -363,6 +363,9 @@
                 <a href="{% url 'sala_chat' contratacion.proyecto.empresa.id contratacion.proyecto.id %}" class="btn btn-secondary btn-sm">
                   <i class="fa fa-comments"></i> Chat Privado
                 </a>
+                <a href="{% url 'ver_avances' contratacion.proyecto.id %}" class="btn btn-secondary btn-sm">
+                  <i class="fa fa-folder-open"></i> Evidencias
+                </a>
                 <a href="{% url 'calificar_empresa' contratacion.proyecto.id %}" class="btn btn-primary btn-sm">
                   <i class="fa fa-star"></i> Calificar Empresa
                 </a>
