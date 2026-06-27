@@ -1,5 +1,5 @@
 /**
- * Sistema Maestro de Pestañas TEM
+ * Sistema Maestro de Pestañas TEIR
  * Maneja la navegación y persistencia de secciones para todos los dashboards.
  */
 
