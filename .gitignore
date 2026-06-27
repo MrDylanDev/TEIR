@@ -38,6 +38,7 @@ scratch/
 
 # Docker
 .env
+.env.docker
 mysql_data/
 
 # AI Tools

@@ -43,7 +43,7 @@ services:
     container_name: teir_web
     restart: unless-stopped
     env_file:
-      - .env.docker
+      - .env.docker.example
     environment:
       - DB_HOST=db
       - DB_PORT=3306
