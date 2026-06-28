@@ -71,7 +71,7 @@ class TestAvanceWorkflowE2E:
                 pass
         page.fill('#username', username)
         page.fill('#password', password)
-        page.locator('button:has-text("INGRESAR")').click(force=True)
+        page.locator('.btn-submit-tech:has-text("INGRESAR")').click(force=True)
         page.wait_for_timeout(2000)
 
     def test_dev_submits_avance(self, page, live_server):

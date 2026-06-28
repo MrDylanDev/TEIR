@@ -2,59 +2,39 @@ from django.core.checks import Warning, register, Tags
 from django.db import connection
 from django.db.utils import OperationalError, ProgrammingError
 
-REQUIRED_VIEWS = [
-    'v_calificacion_desarrolladores',
-    'v_dashboard_desarrollador',
-    'v_dashboard_empresa',
-    'v_estadisticas_sistema',
-    'v_notificaciones_pendientes',
-    'v_portafolio_publico',
-    'v_proyectos_alerta_inactividad',
-    'v_proyectos_disponibles',
-    'v_proyectos_en_desarrollo',
-    'v_reputacion_empresas',
-    'v_top_desarrolladores'
+# Solo los triggers son necesarios — views y procedures ya están migrados al ORM
+REQUIRED_TRIGGERS = [
+    'trg_validar_vacantes_antes_de_contratar',
+    'trg_notificacion_mensaje',
+    'trg_nueva_postulacion',
+    'trg_actualizar_proyectos_completados',
+    'trg_log_nuevo_usuario',
+    'trg_registro_sesion',
+    'trg_log_usuario_modificado',
 ]
 
-REQUIRED_SPS = [
-    'sp_calificar_proyecto',
-    'sp_cancelar_contratacion'
-]
 
 @register(Tags.database)
 def check_sql_dependencies(app_configs, **kwargs):
     errors = []
     try:
         with connection.cursor() as cursor:
-            # Check for views
-            cursor.execute("SHOW FULL TABLES WHERE Table_type = 'VIEW'")
-            existing_views = {row[0].lower() for row in cursor.fetchall()}
-            
-            for view in REQUIRED_VIEWS:
-                if view.lower() not in existing_views:
+            cursor.execute("SHOW TRIGGERS")
+            existing_triggers = {row[0].lower() for row in cursor.fetchall()}
+
+            for trigger in REQUIRED_TRIGGERS:
+                if trigger.lower() not in existing_triggers:
                     errors.append(
                         Warning(
-                            f"Falta la vista SQL requerida: '{view}'.",
-                            hint="Verifica que el script 'Tem_bd.sql' se haya ejecutado en la base de datos.",
+                            f"Falta el trigger requerido: '{trigger}'.",
+                            hint=(
+                                "Ejecutá el script 'database/init.sql' en la base de datos "
+                                "para restaurar los triggers necesarios."
+                            ),
                             id='usuarios.W001',
                         )
                     )
-            
-            # Check for stored procedures
-            cursor.execute("SHOW PROCEDURE STATUS WHERE Db = DATABASE()")
-            existing_sps = {row[1].lower() for row in cursor.fetchall()}
-            
-            for sp in REQUIRED_SPS:
-                if sp.lower() not in existing_sps:
-                    errors.append(
-                        Warning(
-                            f"Falta el procedimiento almacenado requerido: '{sp}'.",
-                            hint="Verifica que el script 'Tem_bd.sql' se haya ejecutado en la base de datos.",
-                            id='usuarios.W002',
-                        )
-                    )
     except (OperationalError, ProgrammingError):
-        # Base de datos no disponible o aún no inicializada
         pass
 
     return errors

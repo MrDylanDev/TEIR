@@ -11,7 +11,7 @@ class TestLoginE2E:
         """Clicking [ AUTH ] opens the login modal."""
         page.goto(live_server.url)
         # Click the AUTH button by its text
-        page.click('text=[ AUTH ]')
+        page.locator('.nav-cta').click()
         page.wait_for_timeout(1000)
         # Verify modal is visible
         modal = page.locator('#loginModal')
@@ -21,7 +21,7 @@ class TestLoginE2E:
         """Login as desarrollador via modal and land on dev dashboard."""
         page.goto(live_server.url)
         # Open modal
-        page.click('text=[ AUTH ]')
+        page.locator('.nav-cta').click()
         page.wait_for_timeout(1000)
 
         # Fill credentials
@@ -30,7 +30,7 @@ class TestLoginE2E:
         # DEV tab is active by default (rol_seleccionado = desarrollador)
 
         # Submit
-        page.locator('button:has-text("INGRESAR")').click(force=True)
+        page.locator('.btn-submit-tech:has-text("INGRESAR")').click(force=True)
 
         # Should redirect to dev dashboard
         page.wait_for_url('**/desarrollador/dashboard/', timeout=5000)
@@ -39,7 +39,7 @@ class TestLoginE2E:
     def test_login_empresa_success(self, page, live_server, test_empresa):
         """Login as empresa via modal and land on empresa dashboard."""
         page.goto(live_server.url)
-        page.click('text=[ AUTH ]')
+        page.locator('.nav-cta').click()
         page.wait_for_timeout(1000)
 
         # Switch to CORP tab (force click, Bootstrap modal may intercept)
@@ -50,7 +50,7 @@ class TestLoginE2E:
         page.fill('#password', 'E2ETest123!')
 
         # Submit
-        page.locator('button:has-text("INGRESAR")').click(force=True)
+        page.locator('.btn-submit-tech:has-text("INGRESAR")').click(force=True)
 
         # Should redirect to empresa dashboard
         page.wait_for_url('**/empresa/dashboard/', timeout=5000)
@@ -59,12 +59,12 @@ class TestLoginE2E:
     def test_login_wrong_password(self, page, live_server, test_dev):
         """Wrong password shows error and stays on landing."""
         page.goto(live_server.url)
-        page.click('text=[ AUTH ]')
+        page.locator('.nav-cta').click()
         page.wait_for_timeout(1000)
 
         page.fill('#username', 'e2e_dev')
         page.fill('#password', 'WrongPassword!')
-        page.locator('button:has-text("INGRESAR")').click(force=True)
+        page.locator('.btn-submit-tech:has-text("INGRESAR")').click(force=True)
 
         # Should redirect back to landing (inicio)
         page.wait_for_url(live_server.url + '/', timeout=5000)
@@ -80,7 +80,7 @@ class TestRecoveryE2E:
     def test_recovery_form_opens(self, page, live_server):
         """Clicking RECUPERAR ACCESO shows the recovery form."""
         page.goto(live_server.url)
-        page.click('text=[ AUTH ]')
+        page.locator('.nav-cta').click()
         page.wait_for_timeout(1000)
 
         # Click recovery link
@@ -93,7 +93,7 @@ class TestRecoveryE2E:
     def test_recovery_submit_shows_success(self, page, live_server, test_empresa):
         """Recovery POST with valid email shows success via JS fetch."""
         page.goto(live_server.url)
-        page.click('text=[ AUTH ]')
+        page.locator('.nav-cta').click()
         page.wait_for_timeout(1000)
 
         # Switch to recovery
@@ -112,7 +112,7 @@ class TestRecoveryE2E:
     def test_back_to_login_from_recovery(self, page, live_server):
         """BACK TO LOGIN link returns to login form."""
         page.goto(live_server.url)
-        page.click('text=[ AUTH ]')
+        page.locator('.nav-cta').click()
         page.wait_for_timeout(1000)
 
         # Go to recovery

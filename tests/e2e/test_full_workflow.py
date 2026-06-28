@@ -32,6 +32,13 @@ class TestFullWorkflowE2E:
             nombre='Full Empresa', rol='empresa', estado='activo',
             password='FullPass123!',
         )
+        # Ensure admin exists for dashboard templates
+        if not User.objects.filter(rol='administrador').exists():
+            User.objects.create_user(
+                username='full_admin', email='full_admin@t.teir',
+                nombre='Full Admin', rol='administrador', estado='activo',
+                password='FullPass123!',
+            )
         dev1 = User.objects.create_user(
             username='full_dev1', email='full_dev1@t.teir',
             nombre='Full Dev 1', rol='desarrollador', estado='activo',
@@ -99,7 +106,7 @@ class TestFullWorkflowE2E:
         page.locator('#username').wait_for(state='visible', timeout=5000)
         page.fill('#username', 'full_dev1')
         page.fill('#password', 'FullPass123!')
-        page.locator('button:has-text("INGRESAR")').click(force=True)
+        page.locator('.btn-submit-tech:has-text("INGRESAR")').click(force=True)
         page.wait_for_timeout(2000)
 
         page.goto(live_server.url + reverse('registrar_avance', args=[proyecto.id]))
@@ -121,7 +128,7 @@ class TestFullWorkflowE2E:
         page.locator('#username').wait_for(state='visible', timeout=5000)
         page.fill('#username', 'full_dev2')
         page.fill('#password', 'FullPass123!')
-        page.locator('button:has-text("INGRESAR")').click(force=True)
+        page.locator('.btn-submit-tech:has-text("INGRESAR")').click(force=True)
         page.wait_for_timeout(2000)
 
         page.goto(live_server.url + reverse('registrar_avance', args=[proyecto.id]))
@@ -187,7 +194,7 @@ class TestFullWorkflowE2E:
         page.locator('button[data-role="empresa"]').click()
         page.fill('#username', 'full_emp')
         page.fill('#password', 'FullPass123!')
-        page.locator('button:has-text("INGRESAR")').click(force=True)
+        page.locator('.btn-submit-tech:has-text("INGRESAR")').click(force=True)
         page.wait_for_timeout(2000)
 
         page.goto(live_server.url + reverse('sala_chat_grupal', args=[proyecto.id]))
