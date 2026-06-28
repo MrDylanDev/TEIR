@@ -1,5 +1,7 @@
-from django.shortcuts import render, redirect, get_object_or_404, reverse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q, Count
@@ -118,6 +120,7 @@ def registrar_avance(request, proyecto_id):
     })
 
 @login_required
+@require_POST
 def revisar_avance(request, avance_id):
     if request.user.rol != 'empresa':
         messages.error(request, "Solo las empresas pueden revisar avances.")

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db import transaction, connection
+from django.db import transaction
 from .models import Postulacion
 from proyectos.models import Proyecto
 from contrataciones.models import Contratacion
@@ -92,6 +93,7 @@ def postularse_a_proyecto(request, proyecto_id):
     return render(request, 'postulaciones/postularse.html', {'proyecto': proyecto})
 
 @login_required
+@require_POST
 def aceptar_postulacion(request, postulacion_id):
     if request.user.rol != 'empresa':
         messages.error(request, "Acceso denegado.")

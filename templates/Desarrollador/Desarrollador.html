@@ -211,9 +211,11 @@
                 <div class="project-card-sub">Asistencia técnica y administrativa</div>
               </div>
             </div>
+            {% if admin_id %}
             <a href="{% url 'sala_chat_general' admin_id %}" class="btn btn-primary btn-full">
               <i class="fa fa-comments"></i> Chatear con Admin
             </a>
+            {% endif %}
           </div>
           {% for contrato in mis_proyectos_activos_v %}
             <div class="project-card">

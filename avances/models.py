@@ -8,8 +8,8 @@ class Avance(models.Model):
         ('aceptado', 'Aceptado'),
         ('rechazado', 'Rechazado'),
     ]
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
-    desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, limit_choices_to={'rol': 'desarrollador'})
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='avances')
+    desarrollador = models.ForeignKey(Usuario, on_delete=models.CASCADE, limit_choices_to={'rol': 'desarrollador'}, related_name='avances_realizados')
     entregable = models.ForeignKey('proyectos.Entregable', on_delete=models.CASCADE, db_column='entregable_id')
     descripcion = models.TextField()
     archivo_url = models.CharField(max_length=500)
