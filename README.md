@@ -104,20 +104,32 @@ TEIR/
 ├── avances/           # Registro y revisión de avances
 ├── config/            # Configuración de Django (settings, urls, wsgi)
 ├── contrataciones/    # Gestión de contratos
-├── database/          # Dump SQL y migraciones
+├── database/          # Dump SQL (triggers)
+├── docker/            # Configuración de contenedores
+│   ├── entrypoint.sh
+│   ├── .env.docker.example
+│   └── nginx/
+├── docs/              # Documentación
+│   ├── API.md
+│   └── DOCKER_README.md
 ├── favoritos/         # Proyectos guardados por el desarrollador
 ├── logs/              # Auditoría y reportes
 ├── mensajes/          # Chat y mensajería
 ├── notificaciones/    # Sistema de notificaciones
 ├── postulaciones/     # Postulaciones a proyectos
 ├── proyectos/         # Proyectos, hitos, equipos, valoraciones
-├── usuarios/          # Autenticación, perfiles, dashboard admin
 ├── static/            # CSS, JS, imágenes
 ├── templates/         # Templates Django por módulo
 ├── tests/             # Tests E2E con Playwright
+├── usuarios/          # Autenticación, perfiles, dashboard admin
 ├── docker-compose.yml
+├── Dockerfile
+├── manage.py
 ├── requirements.txt
-└── manage.py
+├── conftest.py        # Fixtures de pytest
+├── pytest.ini         # Configuración de tests
+├── README.md
+└── LICENSE
 ```
 
 ---
