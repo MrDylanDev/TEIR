@@ -504,4 +504,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  /* ============================
+     Auto-open login modal via ?login=1
+     ============================ */
+  if (window.location.search.includes('login=1')) {
+    var loginModal = document.getElementById('loginModal');
+    if (loginModal && typeof bootstrap !== 'undefined') {
+      var modal = new bootstrap.Modal(loginModal);
+      modal.show();
+    }
+  }
+
 });

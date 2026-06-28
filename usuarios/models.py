@@ -67,6 +67,11 @@ class Usuario(AbstractUser):
         """Django Admin requiere is_staff=True. Lo mapeamos al is_superuser existente."""
         return self.is_superuser
 
+    @is_staff.setter
+    def is_staff(self, value):
+        """Permite que create_user() y el ORM seteen is_staff."""
+        self.is_superuser = value
+
     REQUIRED_FIELDS = ['email', 'nombre', 'rol']
 
     def __str__(self):

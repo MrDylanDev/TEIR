@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db import transaction
 from .models import Contratacion
@@ -27,6 +28,7 @@ def ver_detalle_contrato(request, contratacion_id):
     return render(request, 'contrataciones/detalle.html', {'contrato': contrato})
 
 @login_required
+@require_POST
 def cancelar_contratacion(request, contratacion_id):
     """Permitir a la empresa cancelar un contrato activo"""
     if request.user.rol != 'empresa':

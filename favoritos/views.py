@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from .models import Favorito
 from proyectos.models import Proyecto
 
 @login_required
+@require_POST
 def toggle_favorito(request, proyecto_id):
     """Añadir o quitar un proyecto de favoritos"""
     if request.user.rol != 'desarrollador':

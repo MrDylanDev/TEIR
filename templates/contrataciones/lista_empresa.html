@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEIR | Mis Contratados</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEIR">
+      <div>
+        <div class="sidebar-brand-text">TEIR</div>
+        <div class="sidebar-brand-sub">Empresa</div>
+      </div>
+    </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item" href="{% url 'dashboard_empresa' %}">
+        <i class="fa fa-arrow-left"></i>
+        <span>Volver al Panel</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">
+        Mis Contratados
+        <span>/ TEIR Platform</span>
+      </div>
+      <div class="user-chip">
+        <div class="user-avatar">{{ request.user.nombre|default:request.user.username|slice:":1"|upper }}</div>
+        <div>
+          <div class="user-name">{{ request.user.nombre|default:request.user.username }}</div>
+          <div class="user-role">Empresa</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="{% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
+            <i class="fa {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Desarrolladores Contratados</div>
+          <div class="page-subtitle">Gestiona los contratos activos con tu talento</div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        {% for c in contrataciones %}
+          <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <div class="user-avatar" style="width: 44px; height: 44px; font-size: 16px; background: var(--accent);">
+                  {{ c.desarrollador.nombre|slice:":1"|upper }}
+                </div>
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">
+                    {{ c.desarrollador.nombre }}
+                  </h3>
+                  <div style="font-size: 12px; color: var(--text-secondary);">
+                    <i class="fa fa-folder"></i> {{ c.proyecto.titulo }}
+                    &nbsp;·&nbsp;
+                    <i class="fa fa-calendar"></i> {{ c.fecha_inicio|date:"d M Y" }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span class="badge {% if c.estado == 'activa' %}badge-success{% else %}badge-gray{% endif %}">
+                {{ c.get_estado_display }}
+              </span>
+              <a href="{% url 'ver_detalle_contrato' c.id %}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">
+                <i class="fa fa-eye"></i> Ver
+              </a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-state" style="padding: 80px 20px; background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border);">
+            <i class="fa fa-handshake" style="font-size: 40px; color: var(--border); margin-bottom: 15px;"></i>
+            <p style="color: var(--text-secondary); font-size: 15px;">Aún no tienes desarrolladores contratados.</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 5px;">Cuando aceptes una postulación, aparecerá aquí.</p>
+          </div>
+        {% endfor %}
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

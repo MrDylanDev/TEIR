@@ -211,9 +211,11 @@
                 <div class="project-card-sub">Asistencia técnica y administrativa</div>
               </div>
             </div>
+            {% if admin_id %}
             <a href="{% url 'sala_chat_general' admin_id %}" class="btn btn-primary btn-full">
               <i class="fa fa-comments"></i> Chatear con Admin
             </a>
+            {% endif %}
           </div>
           {% for contrato in mis_proyectos_activos_v %}
             <div class="project-card">
@@ -362,6 +364,9 @@
               <div style="display:flex;gap:8px;margin-top:14px;">
                 <a href="{% url 'sala_chat' contratacion.proyecto.empresa.id contratacion.proyecto.id %}" class="btn btn-secondary btn-sm">
                   <i class="fa fa-comments"></i> Chat Privado
+                </a>
+                <a href="{% url 'ver_avances' contratacion.proyecto.id %}" class="btn btn-secondary btn-sm">
+                  <i class="fa fa-folder-open"></i> Evidencias
                 </a>
                 <a href="{% url 'calificar_empresa' contratacion.proyecto.id %}" class="btn btn-primary btn-sm">
                   <i class="fa fa-star"></i> Calificar Empresa

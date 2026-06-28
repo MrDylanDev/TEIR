@@ -265,7 +265,7 @@ body {
   position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
   display: flex; justify-content: space-between; align-items: center;
   padding: 0 40px; height: 60px;
-  background: rgba(0,0,0,0.88); border-bottom: 1px solid var(--border-dim);
+  background: rgba(0,0,0,0.60); border-bottom: 1px solid var(--border-dim);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
 }
 .nav-brand {

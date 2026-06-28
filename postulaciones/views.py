@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db import transaction, connection
+from django.db import transaction
 from .models import Postulacion
 from proyectos.models import Proyecto
 from contrataciones.models import Contratacion
 from notificaciones.models import Notificacion
 from logs.models import LogAuditoria
+from proyectos.models import Equipo
 
 @login_required
 def ver_postulaciones_empresa(request, proyecto_id):
@@ -25,10 +27,13 @@ def ver_postulaciones_empresa(request, proyecto_id):
             'desarrollador': {
                 'nombre': p.desarrollador.nombre,
                 'foto_perfil': perfil.foto_perfil.url if perfil and perfil.foto_perfil else None,
+                'programa_formacion': perfil.programa_formacion if perfil else '',
+                'ficha': perfil.ficha if perfil else '',
             },
             'calificacion_promedio': perfil.calificacion_promedio if perfil else 0,
             'proyectos_completados': perfil.num_proyectos_completados if perfil else 0,
             'habilidades': perfil.habilidades if perfil else '',
+            'portafolio_url': perfil.portafolio_url if perfil else '',
             'mensaje': p.mensaje,
             'fecha': p.fecha,
         })
@@ -88,6 +93,7 @@ def postularse_a_proyecto(request, proyecto_id):
     return render(request, 'postulaciones/postularse.html', {'proyecto': proyecto})
 
 @login_required
+@require_POST
 def aceptar_postulacion(request, postulacion_id):
     if request.user.rol != 'empresa':
         messages.error(request, "Acceso denegado.")
@@ -109,6 +115,14 @@ def aceptar_postulacion(request, postulacion_id):
                     empresa=request.user,
                     estado='activa',
                 )
+
+                # Agregar al desarrollador al equipo del proyecto
+                equipo, _ = Equipo.objects.get_or_create(
+                    proyecto=proyecto,
+                    nombre=f'Equipo {proyecto.titulo}',
+                    defaults={'nombre': f'Equipo {proyecto.titulo}'},
+                )
+                equipo.miembros.add(postulacion.desarrollador)
 
                 postulacion.estado = 'aceptada'
                 postulacion.save()

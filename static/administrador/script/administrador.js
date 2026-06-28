@@ -92,3 +92,72 @@ function showSection(id, btn) {
     const s = new URLSearchParams(window.location.search).get('section');
     if (s) showSection(s);
   };
+
+// ═══════════════════════════════════════════════
+// SEARCH & FILTER: Users
+// ═══════════════════════════════════════════════
+function filterUsers() {
+  const search = (document.getElementById('userSearch').value || '').toLowerCase();
+  const role = document.getElementById('userRoleFilter').value;
+  const status = document.getElementById('userStatusFilter').value;
+
+  document.querySelectorAll('#usersTable tbody tr').forEach(row => {
+    const text = (row.dataset.username + ' ' + row.dataset.nombre + ' ' + row.dataset.email).toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchRole = !role || row.dataset.rol === role;
+    const matchStatus = !status || row.dataset.active === status;
+    row.style.display = (matchSearch && matchRole && matchStatus) ? '' : 'none';
+  });
+  updateBulkActions();
+}
+
+// ═══════════════════════════════════════════════
+// SEARCH & FILTER: Projects
+// ═══════════════════════════════════════════════
+function filterProjects() {
+  const search = (document.getElementById('projectSearch').value || '').toLowerCase();
+  const estado = document.getElementById('projectEstadoFilter').value;
+
+  document.querySelectorAll('#projectsSection .data-table tbody tr').forEach(row => {
+    const text = (row.dataset.titulo + ' ' + row.dataset.empresa).toLowerCase();
+    const matchSearch = !search || text.includes(search);
+    const matchEstado = !estado || row.dataset.estado === estado;
+    row.style.display = (matchSearch && matchEstado) ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════
+// BULK ACTIONS: Users
+// ═══════════════════════════════════════════════
+function toggleAllUsers(checkbox) {
+  document.querySelectorAll('.user-checkbox').forEach(cb => {
+    const row = cb.closest('tr');
+    if (row.style.display !== 'none') cb.checked = checkbox.checked;
+  });
+  updateBulkActions();
+}
+
+function updateBulkActions() {
+  const checked = document.querySelectorAll('.user-checkbox:checked');
+  const bar = document.getElementById('bulkActions');
+  const count = document.getElementById('bulkCount');
+  bar.style.display = checked.length > 0 ? 'flex' : 'none';
+  count.textContent = checked.length + ' seleccionado' + (checked.length !== 1 ? 's' : '');
+}
+
+async function bulkToggleUsers(action) {
+  const ids = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => cb.value);
+  if (!ids.length) return;
+  const verb = action === 'activate' ? 'activar' : 'suspender';
+  if (!confirm(`¿${verb.charAt(0).toUpperCase() + verb.slice(1)} ${ids.length} usuario(s)?`)) return;
+
+  try {
+    const response = await fetch('/api/bulk-toggle/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+      body: JSON.stringify({ ids: ids, action: action })
+    });
+    if (response.ok) { window.location.reload(); }
+    else { const r = await response.json(); alert(r.error || 'Error'); }
+  } catch (e) { alert('Error de red'); }
+}

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.db import transaction, connection
+from django.db import transaction
 from django.db.models import Avg, Q, Count, Prefetch, Value, FloatField, F
 from django.db.models.functions import Coalesce
 from .models import Proyecto, Valoracion, Entregable, Equipo
@@ -19,7 +20,7 @@ def listar_proyectos(request):
     proyectos_qs = Proyecto.objects.filter(estado='publicado').select_related(
         'empresa__perfil_empresa'
     ).annotate(
-        num_postulaciones=Count('postulacion_set'),
+        num_postulaciones=Count('postulaciones'),
         empresa_reputacion=Coalesce(Avg('empresa__valoraciones_como_empresa__puntuacion',
             filter=Q(empresa__valoraciones_como_empresa__rol_evaluador='desarrollador')),
             Value(0.0), output_field=FloatField()),
@@ -288,6 +289,7 @@ def gestionar_equipos(request, proyecto_id):
     })
 
 @login_required
+@require_POST
 def eliminar_equipo(request, equipo_id):
     equipo = get_object_or_404(Equipo, id=equipo_id, proyecto__empresa=request.user)
     proyecto_id = equipo.proyecto.id
@@ -354,6 +356,7 @@ def gestionar_hitos(request, proyecto_id):
     })
 
 @login_required
+@require_POST
 def eliminar_hito(request, hito_id):
     hito = get_object_or_404(Entregable, id=hito_id, proyecto__empresa=request.user)
     proyecto_id = hito.proyecto.id
@@ -365,6 +368,7 @@ def eliminar_hito(request, hito_id):
     return redirect('gestionar_hitos', proyecto_id=proyecto_id)
 
 @login_required
+@require_POST
 def desactivar_proyecto(request, proyecto_id):
     if request.user.rol != 'empresa':
         return redirect('inicio')

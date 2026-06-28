@@ -1,0 +1,123 @@
+import pytest
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+from proyectos.models import Proyecto
+from favoritos.models import Favorito
+
+User = get_user_model()
+
+
+class TestFavoritoModel:
+    """Tests for Favorito model."""
+
+    def test_crear_favorito(self, db):
+        """Favorito links dev to proyecto."""
+        empresa = User.objects.create_user(
+            username='fe', email='fe@test.teir',
+            nombre='FE', rol='empresa', estado='activo',
+            password='TestPass123!',
+        )
+        dev = User.objects.create_user(
+            username='fd', email='fd@test.teir',
+            nombre='FD', rol='desarrollador', estado='activo',
+            password='TestPass123!',
+        )
+        proyecto = Proyecto.objects.create(
+            empresa=empresa, titulo='Fav Proy',
+            descripcion='D', tipo_solucion='sitio_web',
+            estado='publicado',
+        )
+        fav = Favorito.objects.create(desarrollador=dev, proyecto=proyecto)
+        assert fav.id is not None
+        assert fav.desarrollador == dev
+        assert fav.proyecto == proyecto
+
+    def test_favorito_unique(self, db):
+        """Same dev can't favorite the same proyecto twice."""
+        empresa = User.objects.create_user(
+            username='fe2', email='fe2@test.teir',
+            nombre='FE2', rol='empresa', estado='activo',
+            password='TestPass123!',
+        )
+        dev = User.objects.create_user(
+            username='fd2', email='fd2@test.teir',
+            nombre='FD2', rol='desarrollador', estado='activo',
+            password='TestPass123!',
+        )
+        proyecto = Proyecto.objects.create(
+            empresa=empresa, titulo='Fav Proy 2',
+            descripcion='D', tipo_solucion='sitio_web',
+            estado='publicado',
+        )
+        Favorito.objects.create(desarrollador=dev, proyecto=proyecto)
+        with pytest.raises(Exception):
+            Favorito.objects.create(desarrollador=dev, proyecto=proyecto)
+
+    def test_favorito_str(self, db):
+        """__str__ shows dev and proyecto."""
+        empresa = User.objects.create_user(
+            username='fe3', email='fe3@test.teir',
+            nombre='FE3', rol='empresa', estado='activo',
+            password='TestPass123!',
+        )
+        dev = User.objects.create_user(
+            username='fd3', email='fd3@test.teir',
+            nombre='FD3', rol='desarrollador', estado='activo',
+            password='TestPass123!',
+        )
+        proyecto = Proyecto.objects.create(
+            empresa=empresa, titulo='Str Test',
+            descripcion='D', tipo_solucion='sitio_web',
+            estado='publicado',
+        )
+        fav = Favorito.objects.create(desarrollador=dev, proyecto=proyecto)
+        assert 'fd3' in str(fav)
+        assert 'Str Test' in str(fav)
+
+
+class TestToggleFavorito:
+    """Tests for toggle_favorito view."""
+
+    def test_toggle_add_favorito(self, dev_client, desarrollador_user, empresa_user):
+        """Dev can add a project to favorites."""
+        proyecto = Proyecto.objects.create(
+            empresa=empresa_user, titulo='Toggle Proy',
+            descripcion='D', tipo_solucion='sitio_web',
+            estado='publicado',
+        )
+        response = dev_client.post(
+            reverse('toggle_favorito', args=[proyecto.id])
+        )
+        assert response.status_code == 302
+        assert Favorito.objects.filter(
+            desarrollador=desarrollador_user, proyecto=proyecto
+        ).exists()
+
+    def test_toggle_remove_favorito(self, dev_client, desarrollador_user, empresa_user):
+        """Toggle removes favorite if already favorited."""
+        proyecto = Proyecto.objects.create(
+            empresa=empresa_user, titulo='Toggle Off',
+            descripcion='D', tipo_solucion='sitio_web',
+            estado='publicado',
+        )
+        Favorito.objects.create(desarrollador=desarrollador_user, proyecto=proyecto)
+        response = dev_client.post(
+            reverse('toggle_favorito', args=[proyecto.id])
+        )
+        assert response.status_code == 302
+        assert not Favorito.objects.filter(
+            desarrollador=desarrollador_user, proyecto=proyecto
+        ).exists()
+
+    def test_empresa_no_puede_favoritear(self, auth_client, empresa_user):
+        """Empresa cannot favorite projects."""
+        proyecto = Proyecto.objects.create(
+            empresa=empresa_user, titulo='Emp Fav',
+            descripcion='D', tipo_solucion='sitio_web',
+            estado='publicado',
+        )
+        response = auth_client.post(
+            reverse('toggle_favorito', args=[proyecto.id])
+        )
+        assert response.status_code == 302
+        assert not Favorito.objects.filter(proyecto=proyecto).exists()

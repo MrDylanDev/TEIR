@@ -1,0 +1,109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEIR | Detalle Contrato</title>
+  <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="{% static 'IMG/Logo.jpg' %}" alt="TEIR">
+      <div>
+        <div class="sidebar-brand-text">TEIR</div>
+        <div class="sidebar-brand-sub">Empresa</div>
+      </div>
+    </div>
+    <div class="sidebar-group" style="padding-top:20px;">
+      <a class="nav-item" href="{% url 'listar_contrataciones_empresa' %}">
+        <i class="fa fa-arrow-left"></i>
+        <span>Mis Contratados</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="top-header-title">
+        Detalle del Contrato
+        <span>/ TEIR Platform</span>
+      </div>
+      <div class="user-chip">
+        <div class="user-avatar">{{ request.user.nombre|default:request.user.username|slice:":1"|upper }}</div>
+        <div>
+          <div class="user-name">{{ request.user.nombre|default:request.user.username }}</div>
+          <div class="user-role">Empresa</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="{% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
+            <i class="fa {% if message.tags == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Contrato #{{ contrato.id }}</div>
+          <div class="page-subtitle">Información del contrato y desarrollador</div>
+        </div>
+        <span class="badge {% if contrato.estado == 'activa' %}badge-success{% elif contrato.estado == 'cancelada' %}badge-danger{% else %}badge-gray{% endif %}">
+          {{ contrato.get_estado_display }}
+        </span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+        <div class="card">
+          <div class="card-subtitle" style="text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">Desarrollador</div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div class="user-avatar" style="width: 56px; height: 56px; font-size: 20px; background: var(--accent);">
+              {{ contrato.desarrollador.nombre|slice:":1"|upper }}
+            </div>
+            <div>
+              <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">{{ contrato.desarrollador.nombre }}</h3>
+              <div style="font-size: 13px; color: var(--text-secondary);">{{ contrato.desarrollador.email }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-subtitle" style="text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">Proyecto</div>
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">{{ contrato.proyecto.titulo }}</h3>
+          <div style="font-size: 13px; color: var(--text-secondary);">{{ contrato.proyecto.descripcion|truncatechars:150 }}</div>
+          <div style="margin-top: 12px;">
+            <span class="badge badge-gray">{{ contrato.proyecto.get_estado_display }}</span>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <div class="card-subtitle" style="text-transform:uppercase; letter-spacing:1px; margin-bottom:16px;">Fechas</div>
+          <div style="display: flex; gap: 32px;">
+            <div>
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Inicio</div>
+              <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">{{ contrato.fecha_inicio|date:"d M Y" }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

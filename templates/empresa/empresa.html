@@ -8,7 +8,6 @@
   <link rel="shortcut icon" href="{% static 'IMG/Logo.jpg' %}" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}?v=2">
-  <link rel="stylesheet" href="{% static 'publico/script/tabs.js' %}" onerror="void(0)">
 </head>
 <body>
 <div class="app-layout">
@@ -207,7 +206,9 @@
                 <div class="project-card-sub">Soporte técnico, pagos y dudas administrativas</div>
               </div>
             </div>
+          {% if admin_id %}
             <a href="{% url 'sala_chat_general' admin_id %}" class="btn btn-primary btn-sm">Chatear</a>
+          {% endif %}
           </div>
         </div>
 
@@ -325,6 +326,9 @@
                   </button>
                 {% endif %}
                 {% if proyecto.num_desarrolladores >= 2 %}
+                  <a href="{% url 'gestionar_equipos' proyecto.proyecto_id %}" class="btn btn-secondary btn-sm">
+                    <i class="fa fa-users"></i> Gestionar Grupos
+                  </a>
                   <a href="{% url 'sala_chat_grupal' proyecto.proyecto_id %}" class="btn btn-secondary btn-sm">
                     <i class="fa fa-users"></i> Espacio de Trabajo
                   </a>
