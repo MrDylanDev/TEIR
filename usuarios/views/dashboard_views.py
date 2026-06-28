@@ -638,3 +638,28 @@ def api_eliminar_usuario(request, usuario_id):
         
     user.delete()
     return JsonResponse({'status': 'deleted'})
+
+
+@login_required
+def api_bulk_toggle(request):
+    if request.user.rol != 'administrador':
+        return JsonResponse({'error': 'Acceso denegado.'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        ids = data.get('ids', [])
+        action = data.get('action')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'JSON inválido.'}, status=400)
+
+    if not ids or action not in ('activate', 'suspend'):
+        return JsonResponse({'error': 'Parámetros inválidos.'}, status=400)
+
+    if action == 'activate':
+        Usuario.objects.filter(id__in=ids).update(estado='activo', is_active=True)
+    else:
+        Usuario.objects.filter(id__in=ids).exclude(id=request.user.id).update(estado='suspendido', is_active=False)
+
+    return JsonResponse({'status': 'ok', 'count': len(ids)})

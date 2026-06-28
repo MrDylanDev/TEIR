@@ -1,3 +1,3 @@
 from django.contrib import admin
 
-# Register your models here.
+# La auditoría ya está cubierta en el dashboard custom (auditSection)

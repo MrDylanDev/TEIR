@@ -13,9 +13,10 @@ class TestLoginView:
     """Tests for login_view at /login/"""
 
     def test_login_page_loads(self, client):
-        """GET /login/ returns 200 and login form."""
+        """GET /login/ redirects to landing with login modal."""
         response = client.get(reverse('login'))
-        assert response.status_code == 200
+        assert response.status_code == 302
+        assert response.url == '/?login=1'
 
     def test_login_success_empresa(self, client, empresa_user):
         """Valid empresa credentials redirect to dashboard_empresa."""

@@ -43,6 +43,11 @@ def login_view(request):
 
             login(request, user)
 
+            # Si hay next y es admin, redirigir ahí
+            next_url = request.POST.get('next', '')
+            if next_url and user.rol == 'administrador':
+                return redirect(next_url)
+
             if user.rol == 'administrador': return redirect('dashboard_admin')
             if user.rol == 'empresa': return redirect('dashboard_empresa')
             return redirect('dashboard_desarrollador')            
@@ -64,7 +69,13 @@ def login_view(request):
             
         return redirect('inicio')
             
-    return render(request, 'publico/inicio_sesion.html')
+    # Si viene del admin, mostrar login estilo admin
+    next_url = request.GET.get('next', '')
+    if '/admin/' in next_url:
+        from django.contrib.auth.forms import AuthenticationForm
+        form = AuthenticationForm()
+        return render(request, 'admin/login.html', {'form': form, 'next': next_url})
+    return redirect('/?login=1')
 
 def logout_view(request):
     logout(request)

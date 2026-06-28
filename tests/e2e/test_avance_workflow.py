@@ -50,13 +50,28 @@ class TestAvanceWorkflowE2E:
         return empresa, dev, proyecto
 
     def _login_as(self, page, live_server, username, password, rol):
-        """Login helper."""
+        """Login helper - handles redirect to landing with modal."""
         page.goto(live_server.url + reverse('login'))
+        page.wait_for_timeout(2000)
+        # May have redirected to landing with ?login=1
+        # Wait for modal if visible, or open it manually
+        modal = page.locator('#loginModal')
+        if not modal.is_visible():
+            # Click AUTH button to open
+            page.locator('[data-bs-target="#loginModal"]').click()
+            page.wait_for_timeout(1000)
+        if not modal.is_visible():
+            # Force via JS
+            page.evaluate('() => new bootstrap.Modal(document.getElementById("loginModal")).show()')
+            page.wait_for_timeout(1000)
         if rol == 'empresa':
-            page.locator('button[data-role="empresa"]').click()
+            try:
+                page.locator('button[data-role="empresa"]').click()
+            except:
+                pass
         page.fill('#username', username)
         page.fill('#password', password)
-        page.locator('button[type="submit"]').click(force=True)
+        page.locator('button:has-text("INGRESAR")').click(force=True)
         page.wait_for_timeout(2000)
 
     def test_dev_submits_avance(self, page, live_server):

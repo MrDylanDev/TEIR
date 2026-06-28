@@ -110,9 +110,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
-SESSION_COOKIE_AGE = 3600
+SESSION_COOKIE_AGE = 3600  # 1 hora
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expira al cerrar navegador
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://localhost',

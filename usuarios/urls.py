@@ -29,4 +29,5 @@ urlpatterns = [
     path('api/crear/', views.api_crear_usuario, name='api_crear_usuario'),
     path('api/<int:usuario_id>/actualizar/', views.api_actualizar_usuario, name='api_actualizar_usuario'),
     path('api/<int:usuario_id>/eliminar/', views.api_eliminar_usuario, name='api_eliminar_usuario'),
+    path('api/bulk-toggle/', views.api_bulk_toggle, name='api_bulk_toggle'),
 ]

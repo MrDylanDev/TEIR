@@ -30,4 +30,5 @@ from .dashboard_views import (
     api_crear_usuario,
     api_actualizar_usuario,
     api_eliminar_usuario,
+    api_bulk_toggle,
 )
