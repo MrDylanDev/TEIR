@@ -25,16 +25,13 @@ venv/
 ENV/
 .env
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-
 # Database
 db.sqlite3
 *.mysql
-# Tem_bd.sql está incluido intencionalmente para la clonación rápida
 scratch/
+
+# Cache
+.pytest_cache/
 
 # Docker
 .env
