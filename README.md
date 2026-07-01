@@ -20,7 +20,7 @@ TEIR conecta empresas con aprendices y egresados del SENA para desarrollar proye
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend | Django 6.0, Python 3.14 |
+| Backend | Django 5.0, Python 3.14 |
 | Base de datos | MySQL 8.0 (triggers de integridad y auditoría) |
 | Frontend | Django Templates, Bootstrap 5, Vanilla JS |
 | Testing | pytest, pytest-django, Playwright |
@@ -85,7 +85,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Configurar base de datos
-cp .env.docker.example .env
+cp docker/.env.docker.example .env
 # Editar .env con tus credenciales de MySQL
 
 python manage.py migrate
@@ -112,12 +112,14 @@ TEIR/
 ├── avances/           # Registro y revisión de avances
 ├── config/            # Configuración de Django (settings, urls, wsgi)
 ├── contrataciones/    # Gestión de contratos
-├── database/          # Dump SQL (triggers)
+├── database/          # Schema DDL y triggers MySQL
 ├── docker/            # Configuración de contenedores
 │   ├── entrypoint.sh
 │   ├── .env.docker.example
 │   └── nginx/
 ├── docs/              # Documentación
+│   ├── GUIA_USUARIO.md
+│   ├── MANUAL_TECNICO.md
 │   ├── API.md
 │   └── DOCKER_README.md
 ├── favoritos/         # Proyectos guardados por el desarrollador
