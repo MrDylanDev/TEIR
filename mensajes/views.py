@@ -7,6 +7,7 @@ from usuarios.models import Usuario
 from usuarios.utils import get_admin_ids
 from proyectos.models import Proyecto
 from contrataciones.models import Contratacion
+from notificaciones.models import Notificacion
 
 @login_required
 def sala_chat_grupal(request, proyecto_id):
@@ -40,6 +41,27 @@ def sala_chat_grupal(request, proyecto_id):
                     contenido=contenido,
                     proyecto=proyecto
                 )
+
+                # Notificar a todos los participantes del proyecto excepto el remitente
+                destinatarios_ids = set(
+                    Contratacion.objects.filter(
+                        proyecto=proyecto
+                    ).values_list('desarrollador_id', flat=True)
+                )
+                destinatarios_ids.add(proyecto.empresa_id)
+                destinatarios_ids.discard(request.user.id)
+
+                notificaciones = [
+                    Notificacion(
+                        usuario_id=dest_id,
+                        proyecto=proyecto,
+                        tipo='mensaje',
+                        mensaje=f"{request.user.nombre or request.user.username} envió un mensaje en '{proyecto.titulo}'"
+                    ) for dest_id in destinatarios_ids
+                ]
+                if notificaciones:
+                    Notificacion.objects.bulk_create(notificaciones)
+
                 return redirect('sala_chat_grupal', proyecto_id=proyecto_id)
             except Exception as e:
                 messages.error(request, f"Error al enviar: {e}")
@@ -105,6 +127,14 @@ def sala_chat(request, receptor_id, proyecto_id=None):
                     contenido=contenido,
                     proyecto=proyecto
                 )
+
+                Notificacion.objects.create(
+                    usuario=receptor,
+                    proyecto=proyecto,
+                    tipo='mensaje',
+                    mensaje=f"{request.user.nombre or request.user.username} te envió un mensaje: {proyecto.titulo if proyecto else 'General'}"
+                )
+
                 return redirect('sala_chat', receptor_id=receptor_id, proyecto_id=proyecto_id if proyecto_id else 0)
             except Exception as e:
                 messages.error(request, f"Error al enviar: {e}")
@@ -195,6 +225,14 @@ def mensajeria_redactar(request):
                     contenido=contenido,
                     proyecto=proyecto
                 )
+
+                Notificacion.objects.create(
+                    usuario=receptor,
+                    proyecto=proyecto,
+                    tipo='mensaje',
+                    mensaje=f"{request.user.nombre or request.user.username} te envió un mensaje: {titulo or 'General'}"
+                )
+
                 messages.success(request, f'Mensaje enviado a {receptor.nombre or receptor.username}.')
                 return redirect('mensajeria_sent')
             except Exception as e:
