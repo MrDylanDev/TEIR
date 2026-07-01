@@ -167,7 +167,6 @@ pytest -v
 - [Manual Técnico](docs/MANUAL_TECNICO.md) — Arquitectura, modelos, API, testing, despliegue
 - [API Reference](docs/API.md) — Endpoints REST del panel de administración
 - [Docker Guide](docs/DOCKER_README.md) — Configuración detallada de contenedores
-- [Jira](https://teir.atlassian.net/jira/software/projects/SCRUM) — Gestión de proyectos y backlog
 
 ## Licencia
 
