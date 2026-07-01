@@ -14,6 +14,49 @@
 
 TEIR conecta empresas con aprendices y egresados del SENA para desarrollar proyectos reales. Las empresas publican requerimientos, los desarrolladores se postulan, y la plataforma gestiona todo el ciclo: contratación, hitos, avances, revisión, finalización y calificación mutua.
 
+|---
+
+## Arquitectura
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                      USUARIOS                           │
+│   Desarrollador           Empresa        Administrador  │
+│   (postula, avanza)    (publica, revisa)  (gestiona)    │
+└────────┬──────────────────────┬──────────────────┬──────┘
+         │                      │                  │
+         ▼                      ▼                  ▼
+┌─────────────────────────────────────────────────────────┐
+│                    DJANGO (MTV)                         │
+│                                                         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────┐  │
+│  │ usuarios │  │proyectos │  │ mensajes │  │  logs  │  │
+│  ├──────────┤  ├──────────┤  ├──────────┤  ├────────┤  │
+│  │avances   │  │postulac. │  │notificac.│  │favoritos│  │
+│  ├──────────┤  ├──────────┤  └──────────┘  └────────┘  │
+│  │contratac.│  │valoracion │                              │
+│  └──────────┘  └──────────┘  9 apps modulares           │
+└──────────────────┬──────────────────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────────────────┐
+│                  INFRAESTRUCTURA                         │
+│                                                         │
+│   Nginx :80  ──▶  Gunicorn :8000  ──▶  MySQL :3306     │
+│   (estáticos)     (3 workers)          (triggers SQL)    │
+│                                                         │
+│   Docker Compose  |  Health checks  |  Volúmenes        │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Flujo principal:**
+```
+Empresa publica proyecto → Dev se postula → Empresa acepta
+→ Se crea contrato → Dev sube avances por hitos
+→ Empresa revisa (acepta/rechaza) → Al completar todo
+→ Empresa finaliza y califica → Dev califica a la empresa
+```
+
 ---
 
 ## Stack
