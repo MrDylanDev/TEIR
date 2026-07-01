@@ -4,7 +4,7 @@
 
 [![Tests](https://img.shields.io/badge/tests-117%20passed-brightgreen)](https://github.com/MrDylanDev/TEIR)
 [![Python](https://img.shields.io/badge/python-3.14-blue)](https://python.org)
-[![Django](https://img.shields.io/badge/django-6.0-092e20)](https://djangoproject.com)
+[![Django](https://img.shields.io/badge/django-5.0-092e20)](https://djangoproject.com)
 [![MySQL](https://img.shields.io/badge/mysql-8.0-orange)](https://mysql.com)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ed)](https://docker.com)
 
@@ -38,8 +38,10 @@ TEIR conecta empresas con aprendices y egresados del SENA para desarrollar proye
 - **Flujo de revisión** — La empresa acepta o rechaza avances con comentario obligatorio
 - **Chat por proyecto** — Espacio de trabajo grupal y chat privado 1-a-1
 - **Calificación mutua** — Al finalizar, empresa califica al desarrollador y viceversa
-- **Dashboard administrativo** — Panel maestro con búsqueda, filtros, acciones en lote
-- **Auditoría completa** — Log de cambios de estado, triggers de integridad en MySQL
+- **Dashboard administrativo** — Panel maestro con búsqueda, filtros, acciones en lote, estadísticas y ranking de talento
+- **API REST administrativa** — Endpoints para gestión de usuarios (CRUD, activación/suspensión en lote)
+- **Recuperación de contraseña** — Token criptográfico por email con expiración de 1 hora
+- **Auditoría completa** — Log de cambios de estado, triggers de integridad en MySQL, historial de estados
 
 ---
 
@@ -48,6 +50,13 @@ TEIR conecta empresas con aprendices y egresados del SENA para desarrollar proye
 ```bash
 git clone https://github.com/MrDylanDev/TEIR.git
 cd TEIR
+
+# Configurar variables de entorno (obligatorio)
+cp docker/.env.docker.example .env
+# Editar .env con tus claves secretas
+
+# Importante: database/init.sql contiene el schema DDL.
+# Los datos de prueba se borran en el primer deploy productivo.
 docker compose up -d
 ```
 
@@ -67,7 +76,6 @@ docker exec teir_web python manage.py createsuperuser
 
 - Python 3.14+
 - MySQL 8.0+
-- Node.js (solo para desarrollo frontend)
 
 ### Instalación
 
@@ -151,6 +159,14 @@ pytest -v
 
 ---
 
+## Documentación
+
+- [Guía de Usuario](docs/GUIA_USUARIO.md) — Manual para los 3 roles (Desarrollador, Empresa, Administrador)
+- [Manual Técnico](docs/MANUAL_TECNICO.md) — Arquitectura, modelos, API, testing, despliegue
+- [API Reference](docs/API.md) — Endpoints REST del panel de administración
+- [Docker Guide](docs/DOCKER_README.md) — Configuración detallada de contenedores
+- [Jira](https://teir.atlassian.net/jira/software/projects/SCRUM) — Gestión de proyectos y backlog
+
 ## Licencia
 
-Este proyecto es privado. Todos los derechos reservados © TEIR.
+MIT License. Ver [LICENSE](LICENSE) para el texto completo.

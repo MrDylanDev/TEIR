@@ -6,7 +6,7 @@ from contrataciones.models import Contratacion
 
 
 def inicio(request):
-    proyectos_qs = Proyecto.objects.filter(estado='finalizada').select_related(
+    proyectos_qs = Proyecto.objects.filter(estado='finalizado').select_related(
         'empresa__perfil_empresa'
     ).prefetch_related(
         Prefetch('contrataciones',

@@ -20,9 +20,9 @@ Guía completa para ejecutar el proyecto TEIR usando Docker.
 ### 1. Configurar variables de entorno
 
 ```bash
-# El archivo .env.docker ya viene con valores por defecto para desarrollo
+# El archivo .env.docker.example ya viene con valores por defecto para desarrollo
 # Para producción, crea tu propio .env:
-cp .env.docker .env
+cp docker/.env.docker.example .env
 # Edita .env y cambia las contraseñas
 ```
 
@@ -57,8 +57,8 @@ TEIR/
 ├── Dockerfile              # Imagen multi-stage de Django
 ├── docker-compose.yml      # Orquestación de servicios
 ├── .dockerignore           # Archivos excluidos del build
-├── .env.docker             # Variables de entorno (plantilla)
-├── Tem_bd.sql              # Base de datos inicial (se importa automáticamente)
+├── docker/.env.docker.example # Variables de entorno (plantilla)
+├── database/init.sql       # Schema DDL y triggers (se importa automáticamente)
 └── docker/
     ├── entrypoint.sh       # Script de inicialización del contenedor web
     └── nginx/
@@ -199,7 +199,7 @@ Si al iniciar el contenedor de Django o ejecutar comandos observas advertencias 
 
 ```bash
 # Para solucionarlo, puedes recargar la estructura inicial manualmente:
-docker compose exec -T db mysql -u root -proot_secure_pass_2026 tem_dbv2 < Tem_bd.sql
+docker compose exec -T db mysql -u root -p tem_dbv2 < database/init.sql
 ```
 
 ### Puerto 80 ya está en uso
